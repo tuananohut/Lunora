@@ -3,12 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E955A3EF-CFF9-42B9-BC67-D6762775E295}|Physics Engine.vcxproj|C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\source\\renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{E955A3EF-CFF9-42B9-BC67-D6762775E295}|Physics Engine.vcxproj|solutionrelative:source\\renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{E955A3EF-CFF9-42B9-BC67-D6762775E295}|Physics Engine.vcxproj|C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\source\\engine.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{E955A3EF-CFF9-42B9-BC67-D6762775E295}|Physics Engine.vcxproj|solutionrelative:source\\engine.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E955A3EF-CFF9-42B9-BC67-D6762775E295}|Physics Engine.vcxproj|C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\source\\StateManager.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{E955A3EF-CFF9-42B9-BC67-D6762775E295}|Physics Engine.vcxproj|solutionrelative:source\\StateManager.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E955A3EF-CFF9-42B9-BC67-D6762775E295}|Physics Engine.vcxproj|C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\source\\renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{E955A3EF-CFF9-42B9-BC67-D6762775E295}|Physics Engine.vcxproj|solutionrelative:source\\renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -23,28 +27,40 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "StateManager.h",
+              "DocumentMoniker": "C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\source\\StateManager.h",
+              "RelativeDocumentMoniker": "source\\StateManager.h",
+              "ToolTip": "C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\source\\StateManager.h",
+              "RelativeToolTip": "source\\StateManager.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-01-28T20:02:25.556Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
               "Title": "engine.cpp",
               "DocumentMoniker": "C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\source\\engine.cpp",
               "RelativeDocumentMoniker": "source\\engine.cpp",
               "ToolTip": "C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\source\\engine.cpp",
               "RelativeToolTip": "source\\engine.cpp",
-              "ViewState": "AgIAABIAAAAAAAAAAAAAACsAAAAaAAAAAAAAAA==",
+              "ViewState": "AgIAAGcAAAAAAAAAAAAAAIAAAAAaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-01-26T08:40:55.707Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "renderer.h",
               "DocumentMoniker": "C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\source\\renderer.h",
               "RelativeDocumentMoniker": "source\\renderer.h",
-              "ToolTip": "C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\source\\renderer.h*",
-              "RelativeToolTip": "source\\renderer.h*",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAASAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\source\\renderer.h",
+              "RelativeToolTip": "source\\renderer.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAA0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-01-27T12:14:05.424Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-01-27T12:14:05.424Z"
             }
           ]
         },

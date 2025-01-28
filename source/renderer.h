@@ -5,8 +5,11 @@
 #include <WinUser.h>
 #include <wrl/client.h>
 
+HWND hwnd;
+
 class RenderManager
 {
+public: 
 	RenderManager()
 	{
 		D3D_FEATURE_LEVEL levels[2] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_11_1 };
@@ -36,11 +39,14 @@ class RenderManager
 
 		if (FAILED(hr))
 		{
-
+			MessageBox(hwnd, L"Error", L"Could not create device", MB_OK | MB_ICONERROR); 
 		}
 
+		MessageBox(hwnd, L"Well done!", L"Device created!", MB_OK | MB_ICONINFORMATION); 
 	
-	};
+	}
+
+	~RenderManager() {}
 };
 
 
