@@ -5,11 +5,13 @@
 #include <WinUser.h>
 #include <wrl/client.h>
 
-HWND hwnd;
+#include <windows.h>
+#include <d2d1.h>
 
-class RenderManager
-{
-public: 
+static HWND Window;
+
+struct RenderManager
+{ 
 	RenderManager()
 	{
 		D3D_FEATURE_LEVEL levels[2] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_11_1 };
@@ -39,15 +41,40 @@ public:
 
 		if (FAILED(hr))
 		{
-			MessageBox(hwnd, L"Error", L"Could not create device", MB_OK | MB_ICONERROR); 
+			MessageBox(Window, L"Error", L"Could not create device", MB_OK | MB_ICONERROR); 
 		}
 
-		MessageBox(hwnd, L"Well done!", L"Device created!", MB_OK | MB_ICONINFORMATION); 
+		MessageBox(Window, L"Well done!", L"Device created!", MB_OK | MB_ICONINFORMATION); 
 	
 	}
 
 	~RenderManager() {}
 };
+
+struct RenderManager2D
+{
+	ID2D1Factory* Factory; 
+	ID2D1HwndRenderTarget* RenderTarget; 
+	ID2D1SolidColorBrush* Brush;
+	D2D1_ELLIPSE ellipse; 
+
+	void    CalculateLayout();
+	HRESULT CreateGraphicsResources();
+	void    DiscardGraphicsResources();
+	void    OnPaint();
+	void    Resize();	
+
+
+    template <class T> void SafeRelease(T** ppT)
+    {
+        if (*ppT)
+        {
+            (*ppT)->Release();
+            *ppT = NULL;
+        }
+    }
+};
+
 
 
 #endif
