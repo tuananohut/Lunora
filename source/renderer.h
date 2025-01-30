@@ -65,15 +65,6 @@ struct RenderManager2D
 	void    Resize();
 	void    Shutdown(); 
 	void	GetHwnd(HWND hwnd);
-
-	template <class T> void SafeRelease(T** ppT)
-	{
-		if (*ppT)
-		{
-			(*ppT)->Release();
-			*ppT = NULL;
-		}
-	}
 };
 
 #endif

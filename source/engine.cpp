@@ -1,20 +1,18 @@
 #include <windows.h>
 #include "renderer.h"
 
-const wchar_t CLASS_NAME[] = L"Engine";
 RenderManager2D manager2D;
+static bool Running; 
 
 LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam);
 
 int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowCode)
 {
-    WNDCLASS wc = { };
+    WNDCLASS wc = {};
     RenderManager manager;
 
     HICON Icon = (HICON)LoadImage(NULL, L"source/lunora.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE); 
     DWORD wStyles = WS_EX_ACCEPTFILES | WS_EX_TOOLWINDOW | WS_OVERLAPPEDWINDOW;
-    WCHAR szExePath[MAX_PATH];
-    GetModuleFileName(NULL, szExePath, MAX_PATH);
 
     wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
     wc.lpfnWndProc = WindowProc;
@@ -25,7 +23,7 @@ int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
     wc.lpszMenuName = NULL; 
-    wc.lpszClassName = CLASS_NAME;
+    wc.lpszClassName = L"Lunora";
 
     if (!RegisterClass(&wc))
     {
@@ -40,7 +38,7 @@ int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine
     int y = CW_USEDEFAULT;
 
     HWND Window = CreateWindowEx(0,                   
-                                 CLASS_NAME,          
+                                 wc.lpszClassName,          
                                  L"Lunora",  
                                  wStyles,        
                                  x, y, x, y,
@@ -49,88 +47,79 @@ int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine
                                  Instance,  
                                  NULL);
 
-    if (Window == NULL)
+    if (Window)
     {
-        DWORD dwError = GetLastError();
-        return HRESULT_FROM_WIN32(dwError);
-    }
+        ShowWindow(Window, ShowCode);
+        manager2D.GetHwnd(Window);  
 
-    manager2D.GetHwnd(Window);
-
-    ShowWindow(Window, ShowCode);
-
-    bool bGotMsg; 
-    MSG msg = { };
-    msg.message = WM_NULL; 
-    PeekMessage(&msg, NULL, 0U, 0U, PM_NOREMOVE);
-
-    while (WM_QUIT != msg.message)
-    {
-        bGotMsg = (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE) != 0);
-
-        if (bGotMsg)
+        MSG Message;
+        Running = true; 
+        while(Running)
         {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-            manager.~RenderManager(); 
-        }
-
-        else
-        {
-            // renderer->Update(); 
-            // renderer->Render();
-            // deviceResources->Present();
+            BOOL MessageResult = GetMessageA(&Message, NULL, 0, 0);
+            if (MessageResult)
+            {
+                TranslateMessage(&Message);
+                DispatchMessageA(&Message);
+            }
+            else
+            {
+                // renderer->Update(); 
+                // renderer->Render();
+                // deviceResources->Present();
+                manager.~RenderManager();
+                break;
+            }
         }
     }
-
+   
     return 0;
 }
 
-LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
+LRESULT CALLBACK WindowProc(HWND Window, 
+                            UINT Message, 
+                            WPARAM WParam, 
+                            LPARAM LParam)
 {
+    LRESULT Result = 0;
+
     switch (Message)
     {
-
     case WM_CREATE:
+    {
         if (FAILED(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &manager2D.Factory)))
         {
             return -1;
         }
-        return 0;
+    } break;
 
     case WM_CLOSE: 
     {
-        HMENU hMenu;
-        hMenu = GetMenu(Window);
-        if (hMenu != NULL)
-        {
-            DestroyMenu(hMenu);
-        }
-
-        DestroyWindow(Window);
-        // UnregisterClass(CLASS_NAME, m_hInstance);
-        return 0;
-    }
+        // TODO: Handle this with a message to the user. 
+        Running = false;
+    } break;
 
     case WM_DESTROY:
     {
+        Running = false;
         manager2D.Shutdown();
-        PostQuitMessage(0);
-        break;
+    } break;
 
     case WM_PAINT:
+    {
         manager2D.OnPaint();
-        return 0;
-    }
+    } break;
 
     case WM_SIZE:
+    {
         manager2D.Resize();
-        return 0;
+    } break;
 
     default:
-        break;
-
+    {
+        Result = DefWindowProc(Window, Message, WParam, LParam);
+    } break;
     }
     
-    return DefWindowProc(Window, Message, WParam, LParam);
+    return Result;
 }

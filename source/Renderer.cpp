@@ -29,7 +29,7 @@ HRESULT RenderManager2D::CreateGraphicsResources()
 
         if (SUCCEEDED(hr))
         {
-            const D2D1_COLOR_F color = D2D1::ColorF(0.f, 1.f, 1.f);
+            const D2D1_COLOR_F color = D2D1::ColorF(D2D1::ColorF::DarkSalmon);
             hr = RenderTarget->CreateSolidColorBrush(color, &Brush);
 
             if (SUCCEEDED(hr))
@@ -77,7 +77,7 @@ void RenderManager2D::OnPaint()
 
         RenderTarget->BeginDraw();
 
-        RenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Purple));
+        RenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::SpringGreen));
         RenderTarget->FillEllipse(ellipse, Brush);
 
         hr = RenderTarget->EndDraw();

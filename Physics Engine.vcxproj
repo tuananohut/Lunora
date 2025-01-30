@@ -136,6 +136,7 @@
     <ClCompile Include="source\Renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\InputHandler.h" />
     <ClInclude Include="source\renderer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
