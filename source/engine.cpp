@@ -36,33 +36,26 @@ int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine
         }
     }
 
-    RECT m_rc; 
-
     int x = CW_USEDEFAULT;
     int y = CW_USEDEFAULT;
 
-    HMENU Menu = NULL; 
-
-    int nDefaultWidth = 640;
-    int nDefaultHeight = 480;
-    SetRect(&m_rc, 0, 0, nDefaultWidth, nDefaultHeight);
-    AdjustWindowRect(&m_rc, WS_OVERLAPPEDWINDOW, (Menu != NULL) ? true : false);
-
-    Window = CreateWindowEx(0,                   
-                            CLASS_NAME,          
-                            L"Lunora",  
-                            wStyles,        
-                            x, y, (m_rc.right - m_rc.left), (m_rc.bottom - m_rc.top),
-                            NULL,       
-                            Menu,       
-                            Instance,  
-                            NULL);
+    HWND Window = CreateWindowEx(0,                   
+                                 CLASS_NAME,          
+                                 L"Lunora",  
+                                 wStyles,        
+                                 x, y, x, y,
+                                 NULL,       
+                                 NULL,       
+                                 Instance,  
+                                 NULL);
 
     if (Window == NULL)
     {
         DWORD dwError = GetLastError();
         return HRESULT_FROM_WIN32(dwError);
     }
+
+    manager2D.GetHwnd(Window);
 
     ShowWindow(Window, ShowCode);
 
@@ -121,8 +114,7 @@ LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM WParam, LPARAM LPa
 
     case WM_DESTROY:
     {
-        manager2D.DiscardGraphicsResources();
-        manager2D.SafeRelease(&manager2D.Factory);
+        manager2D.Shutdown();
         PostQuitMessage(0);
         break;
 

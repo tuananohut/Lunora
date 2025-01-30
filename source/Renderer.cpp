@@ -41,12 +41,30 @@ HRESULT RenderManager2D::CreateGraphicsResources()
     return hr;
 }
 
-#include "renderer.h"
-
-void RenderManager2D::DiscardGraphicsResources()
+void RenderManager2D::GetHwnd(HWND hWnd)
 {
-    SafeRelease(&RenderTarget);
-    SafeRelease(&Brush);
+    Window = hWnd;
+}
+
+void RenderManager2D::Shutdown()
+{
+    if (!RenderTarget)
+    {
+        RenderTarget->Release();
+        RenderTarget = nullptr; 
+    }
+
+    if (!Brush)
+    {
+        Brush->Release();
+        Brush = nullptr;
+    }
+
+    if (!Factory)
+    {
+        Factory->Release();
+        Factory = nullptr;
+    }
 }
 
 void RenderManager2D::OnPaint()
@@ -59,13 +77,13 @@ void RenderManager2D::OnPaint()
 
         RenderTarget->BeginDraw();
 
-        RenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Cornsilk));
+        RenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Purple));
         RenderTarget->FillEllipse(ellipse, Brush);
 
         hr = RenderTarget->EndDraw();
         if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET)
         {
-            DiscardGraphicsResources();
+            Shutdown();
         }
         EndPaint(Window, &ps);
     }

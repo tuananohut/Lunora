@@ -21,8 +21,8 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "DockedWidth": 199,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
@@ -32,28 +32,9 @@
               "RelativeDocumentMoniker": "source\\engine.cpp",
               "ToolTip": "C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\source\\engine.cpp",
               "RelativeToolTip": "source\\engine.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAGIAAAAAAAAAAAAAAHUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-01-26T08:40:55.707Z",
-              "EditorCaption": ""
-            }
-          ]
-        },
-        {
-          "DockedWidth": 200,
-          "SelectedChildIndex": 1,
-          "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Renderer.cpp",
-              "DocumentMoniker": "C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\source\\Renderer.cpp",
-              "RelativeDocumentMoniker": "source\\Renderer.cpp",
-              "ToolTip": "C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\source\\Renderer.cpp",
-              "RelativeToolTip": "source\\Renderer.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-01-29T14:39:37.815Z",
+              "WhenOpened": "2025-01-30T10:35:07.72Z",
               "EditorCaption": ""
             },
             {
@@ -64,9 +45,28 @@
               "RelativeDocumentMoniker": "source\\renderer.h",
               "ToolTip": "C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\source\\renderer.h",
               "RelativeToolTip": "source\\renderer.h",
-              "ViewState": "AgIAACsAAAAAAAAAAAAAAEQAAAAFAAAAAAAAAA==",
+              "ViewState": "AgIAACwAAAAAAAAAAAAAAEIAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-01-27T12:14:05.424Z",
+              "EditorCaption": ""
+            }
+          ]
+        },
+        {
+          "DockedWidth": 201,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Renderer.cpp",
+              "DocumentMoniker": "C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\source\\Renderer.cpp",
+              "RelativeDocumentMoniker": "source\\Renderer.cpp",
+              "ToolTip": "C:\\Users\\tuana\\Masa\u00FCst\u00FC\\PROJELER\\C\u002B\u002B PROJELER\\Lunora\\source\\Renderer.cpp",
+              "RelativeToolTip": "source\\Renderer.cpp",
+              "ViewState": "AgIAAD8AAAAAAAAAAAAhwE4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-01-29T14:39:37.815Z",
               "EditorCaption": ""
             }
           ]

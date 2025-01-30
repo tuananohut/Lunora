@@ -8,8 +8,6 @@
 #include <windows.h>
 #include <d2d1.h>
 
-static HWND Window;
-
 struct RenderManager
 { 
 	RenderManager()
@@ -38,14 +36,16 @@ struct RenderManager
 			&device,
 			&m_featureLevel,
 			&deviceContext);
-
-		if (FAILED(hr))
+		
+		if (SUCCEEDED(hr))
 		{
-			MessageBox(Window, L"Error", L"Could not create device", MB_OK | MB_ICONERROR); 
+			OutputDebugStringA("You are genius");
+		}
+		else
+		{
+			OutputDebugStringA("Iditiota");
 		}
 
-		MessageBox(Window, L"Well done!", L"Device created!", MB_OK | MB_ICONINFORMATION); 
-	
 	}
 
 	~RenderManager() {}
@@ -53,28 +53,27 @@ struct RenderManager
 
 struct RenderManager2D
 {
-	ID2D1Factory* Factory; 
-	ID2D1HwndRenderTarget* RenderTarget; 
+	ID2D1Factory* Factory;
+	ID2D1HwndRenderTarget* RenderTarget;
 	ID2D1SolidColorBrush* Brush;
-	D2D1_ELLIPSE ellipse; 
+	D2D1_ELLIPSE ellipse;
+	HWND Window; 
 
 	void    CalculateLayout();
 	HRESULT CreateGraphicsResources();
-	void    DiscardGraphicsResources();
 	void    OnPaint();
-	void    Resize();	
+	void    Resize();
+	void    Shutdown(); 
+	void	GetHwnd(HWND hwnd);
 
-
-    template <class T> void SafeRelease(T** ppT)
-    {
-        if (*ppT)
-        {
-            (*ppT)->Release();
-            *ppT = NULL;
-        }
-    }
+	template <class T> void SafeRelease(T** ppT)
+	{
+		if (*ppT)
+		{
+			(*ppT)->Release();
+			*ppT = NULL;
+		}
+	}
 };
-
-
 
 #endif
