@@ -1,0 +1,2 @@
+#include "../source/resource.h"
+IDI_ICON1 ICON "../data/icon/lunora.ico"

@@ -1,5 +1,12 @@
 #include <windows.h>
 #include "renderer.h"
+#include "Renderer.cpp"
+#include "resource.h"
+
+#pragma comment(lib, "user32")
+#pragma comment(lib, "d3d11")
+#pragma comment(lib, "d2d1")
+#pragma comment(lib, "gdi32")
 
 RenderManager2D manager2D;
 static bool Running; 
@@ -8,10 +15,9 @@ LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM WParam, LPARAM LPa
 
 int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowCode)
 {
-    WNDCLASS wc = {};
+    WNDCLASSA wc = {};
     RenderManager manager;
 
-    HICON Icon = (HICON)LoadImage(NULL, L"source/lunora.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE); 
     DWORD wStyles = WS_EX_ACCEPTFILES | WS_EX_TOOLWINDOW | WS_OVERLAPPEDWINDOW;
 
     wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
@@ -19,13 +25,13 @@ int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine
     wc.cbClsExtra = 0;
     wc.cbWndExtra = 0;
     wc.hInstance = Instance;
-    wc.hIcon = Icon;
+    wc.hIcon = LoadIcon(Instance, MAKEINTRESOURCE(IDI_ICON1));;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
     wc.lpszMenuName = NULL; 
-    wc.lpszClassName = L"Lunora";
+    wc.lpszClassName = "Lunora";
 
-    if (!RegisterClass(&wc))
+    if (!RegisterClassA(&wc))
     {
         DWORD dwError = GetLastError();
         if (dwError != ERROR_CLASS_ALREADY_EXISTS)
@@ -37,9 +43,9 @@ int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine
     int x = CW_USEDEFAULT;
     int y = CW_USEDEFAULT;
 
-    HWND Window = CreateWindowEx(0,                   
+    HWND Window = CreateWindowExA(0,                   
                                  wc.lpszClassName,          
-                                 L"Lunora",  
+                                 "Lunora",  
                                  wStyles,        
                                  x, y, x, y,
                                  NULL,       
