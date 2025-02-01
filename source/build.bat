@@ -1,5 +1,4 @@
 @echo off
-call ..\misc\shell.bat
 mkdir ..\build
 pushd ..\build
 pwd

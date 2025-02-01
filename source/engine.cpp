@@ -9,17 +9,19 @@
 #pragma comment(lib, "d2d1")
 #pragma comment(lib, "gdi32")
 
-RenderManager2D manager2D; 
+// RenderManager2D manager2D; 
 
 static bool Running;
 
-static void InitializeDX11(HWND Window)
+void InitializeDX11(HWND Window)
 {
   HRESULT result;
   DXGI_SWAP_CHAIN_DESC SwapChainDesc;
   ID3D11Device* Device = nullptr;
   ID3D11DeviceContext* DeviceContext = nullptr; 
   IDXGISwapChain* DXGISwapChain = nullptr;              
+  ID3D11RenderTargetView* RenderTargetView = nullptr; 
+  ID3D11Texture2D* BackBuffer = nullptr; 
   
   ZeroMemory(&SwapChainDesc, sizeof(SwapChainDesc));
   SwapChainDesc.BufferCount = 1;
@@ -53,8 +55,57 @@ static void InitializeDX11(HWND Window)
     {
       MessageBoxA(Window, "Congrats", "Device created successfully.", MB_OK | MB_ICONINFORMATION);
     }
-}
 
+  result = DXGISwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&BackBuffer);
+  if (FAILED(result))
+    {
+      MessageBoxA(Window, "Error", "You forgot something", MB_OK | MB_ICONERROR);
+    }
+  
+  
+  result = Device->CreateRenderTargetView(BackBuffer, nullptr, &RenderTargetView);
+  if (FAILED(result))
+    {
+      MessageBoxA(Window, "Error", "Could not create render target view.", MB_OK | MB_ICONERROR);
+    }
+  else
+    {
+      MessageBoxA(Window, "Congrats", "Render target view created successfully.", MB_OK | MB_ICONINFORMATION);
+    }
+   
+  BackBuffer->Release();
+  BackBuffer = nullptr;
+
+  /*
+  if (Device)
+    {
+      Device->Release();
+      Device = nullptr;
+      MessageBoxA(Window, "Congrats", "Device released successfully.", MB_OK | MB_ICONINFORMATION);
+    }
+  
+  if (DeviceContext)
+    {
+      DeviceContext->Release();
+      DeviceContext = nullptr;
+      MessageBoxA(Window, "Congrats", "Device context released successfully.", MB_OK | MB_ICONINFORMATION);
+    }
+
+  if (DXGISwapChain)
+    {
+      DXGISwapChain->Release();
+      DXGISwapChain = nullptr;
+      MessageBoxA(Window, "Congrats", "DXGI Swap Chain released successfully.", MB_OK | MB_ICONINFORMATION);
+    }
+
+    if (RenderTargetView)
+    {
+      RenderTargetView->Release();
+      RenderTargetView = nullptr;
+      MessageBoxA(Window, "Congrats", "Render Target View released successfully.", MB_OK | MB_ICONINFORMATION);
+    }
+  */
+}
 
 LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam);
 
@@ -94,7 +145,7 @@ int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine
       if (Window)
 	{
 	  ShowWindow(Window, ShowCode);
-	  manager2D.GetHwnd(Window);  
+	  // manager2D.GetHwnd(Window);  
 	  InitializeDX11(Window);
       
 	  Running = true; 
@@ -116,7 +167,7 @@ int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine
 		// renderer->Update(); 
 		// renderer->Render();
 		// deviceResources->Present();
-		manager2D.~RenderManager2D();
+		// manager2D.~RenderManager2D();
 	      }
 	    }
 	}
@@ -132,44 +183,47 @@ LRESULT CALLBACK WindowProc(HWND Window,
                             WPARAM WParam, 
                             LPARAM LParam)
 {
-  LRESULT Result = 0;
-
+  LRESULT Result = DefWindowProc(Window, Message, WParam, LParam);;
+ 
   switch (Message)
     {
+      
     case WM_CREATE:
       {
-	//	InitializeDX11(Window);
-        if (FAILED(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &manager2D.Factory)))
-	  {
-            return -1;
-	  }
+	// InitializeDX11(Window);
+        // if (FAILED(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &manager2D.Factory)))
+	// {
+	//   return -1;
+	// }
       } break;
-
+      
     case WM_CLOSE: 
       {
-        // TODO: Handle this with a message to the user. 
+        // TODO: Handle this with a message to the user.
         Running = false;
+	// DestroyWindow(Window);
       } break;
 
     case WM_DESTROY:
       {
         Running = false;
-        manager2D.Shutdown();
+	// PostQuitMessage(0); 
+        // manager2D.Shutdown();
       } break;
 
     case WM_PAINT:
       {
-        manager2D.OnPaint();
+        // manager2D.OnPaint();
       } break;
 
     case WM_SIZE:
       {
-        manager2D.Resize();
+        // manager2D.Resize();
       } break;
 
     default:
       {
-        Result = DefWindowProc(Window, Message, WParam, LParam);
+
       } break;
     }
     
