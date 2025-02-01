@@ -51,7 +51,7 @@ static void InitializeDX11(HWND Window)
     }
   else
     {
-      MessageBoxA(Window, "Congrates", "Device created successfully.", MB_OK | MB_ICONINFORMATION);
+      MessageBoxA(Window, "Congrats", "Device created successfully.", MB_OK | MB_ICONINFORMATION);
     }
 }
 
@@ -60,69 +60,69 @@ LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM WParam, LPARAM LPa
 
 int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowCode)
 {
-  WNDCLASSA wc = {};
-
+  WNDCLASSEXA wc = {};
+  
   DWORD wStyles = WS_EX_ACCEPTFILES | WS_EX_TOOLWINDOW | WS_OVERLAPPEDWINDOW;
 
+  wc.cbSize = sizeof(WNDCLASSEXA);
   wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
   wc.lpfnWndProc = WindowProc;
-  wc.cbClsExtra = 0;
-  wc.cbWndExtra = 0;
   wc.hInstance = Instance;
   wc.hIcon = LoadIcon(Instance, MAKEINTRESOURCE(IDI_ICON1));;
   wc.hCursor = LoadCursor(NULL, IDC_ARROW);
   wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
-  wc.lpszMenuName = NULL; 
+  wc.lpszMenuName = 0; 
   wc.lpszClassName = "Lunora";
 
-  if (!RegisterClassA(&wc))
+  if (RegisterClassExA(&wc))
     {
-      DWORD dwError = GetLastError();
-      if (dwError != ERROR_CLASS_ALREADY_EXISTS)
-        {
-	  return HRESULT_FROM_WIN32(dwError);
-        }
-    }
+      int x = CW_USEDEFAULT;
+      int y = CW_USEDEFAULT;
 
-  int x = CW_USEDEFAULT;
-  int y = CW_USEDEFAULT;
+      HWND Window = CreateWindowExA(0,                   
+				    wc.lpszClassName,          
+				    "Lunora",  
+				    wStyles,        
+				    x, y, x, y,
+				    NULL,       
+				    NULL,       
+				    Instance,  
+				    NULL);
 
-  HWND Window = CreateWindowExA(0,                   
-				wc.lpszClassName,          
-				"Lunora",  
-				wStyles,        
-				x, y, x, y,
-				NULL,       
-				NULL,       
-				Instance,  
-				NULL);
-
-  if (Window)
-    {
-      ShowWindow(Window, ShowCode);
-      manager2D.GetHwnd(Window);  
-      InitializeDX11(Window);
       
-      MSG Message;
-      Running = true; 
-      while(Running)
-        {
-	  BOOL MessageResult = GetMessageA(&Message, NULL, 0, 0);
-	  if (MessageResult)
-            {
-	      TranslateMessage(&Message);
-	      DispatchMessageA(&Message);
-            }
-	  else
-            {
-	      // renderer->Update(); 
-	      // renderer->Render();
-	      // deviceResources->Present();
-	      manager2D.~RenderManager2D();
-	      break;
-            }
-        }
+  
+      if (Window)
+	{
+	  ShowWindow(Window, ShowCode);
+	  manager2D.GetHwnd(Window);  
+	  InitializeDX11(Window);
+      
+	  Running = true; 
+	  while(Running)
+	    {
+	      MSG Message;
+	      while(PeekMessageA(&Message, 0, 0, 0, PM_REMOVE))
+		{
+		  if (Message.message == WM_QUIT)
+		    {
+		      Running = false; 
+		    }
+		  
+		  TranslateMessage(&Message);
+		  DispatchMessageA(&Message);
+		}
+	  
+	      {
+		// renderer->Update(); 
+		// renderer->Render();
+		// deviceResources->Present();
+		manager2D.~RenderManager2D();
+	      }
+	    }
+	}
+
     }
+
    
   return 0;
 }

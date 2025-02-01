@@ -3,5 +3,5 @@ call ..\misc\shell.bat
 mkdir ..\build
 pushd ..\build
 pwd
-cl -Zi ..\..\Lunora\source\engine.cpp ..\data\resource.res
+cl -FC -Zi ..\..\Lunora\source\engine.cpp ..\data\resource.res
 popd
