@@ -51,28 +51,19 @@ void InitializeDX11(HWND Window)
     {
       MessageBoxA(Window, "Error", "Could not create device.", MB_OK | MB_ICONERROR);
     }
-  else
-    {
-      MessageBoxA(Window, "Congrats", "Device created successfully.", MB_OK | MB_ICONINFORMATION);
-    }
 
   result = DXGISwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&BackBuffer);
   if (FAILED(result))
     {
       MessageBoxA(Window, "Error", "You forgot something", MB_OK | MB_ICONERROR);
     }
-  
-  
+   
   result = Device->CreateRenderTargetView(BackBuffer, nullptr, &RenderTargetView);
   if (FAILED(result))
     {
       MessageBoxA(Window, "Error", "Could not create render target view.", MB_OK | MB_ICONERROR);
     }
-  else
-    {
-      MessageBoxA(Window, "Congrats", "Render target view created successfully.", MB_OK | MB_ICONINFORMATION);
-    }
-   
+  
   BackBuffer->Release();
   BackBuffer = nullptr;
 
@@ -107,7 +98,53 @@ void InitializeDX11(HWND Window)
   */
 }
 
-LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam);
+LRESULT CALLBACK WindowProc(HWND Window, 
+                            UINT Message, 
+                            WPARAM WParam, 
+                            LPARAM LParam)
+{
+  LRESULT Result = DefWindowProc(Window, Message, WParam, LParam); 
+
+  switch (Message)
+    {
+      
+    case WM_CREATE:
+      {
+      } break;
+      
+    case WM_CLOSE: 
+      {
+        // TODO: Handle this with a message to the user.
+	Result = 0; 
+        Running = false;
+	// DestroyWindow(Window);
+      } break;
+
+    case WM_DESTROY:
+      {
+	Result = 0; 
+        Running = false;
+	// PostQuitMessage(0); 
+      } break;
+
+    case WM_PAINT:
+      {
+
+      } break;
+
+    case WM_SIZE:
+      {
+
+      } break;
+
+    default:
+      {
+	Result = DefWindowProc(Window, Message, WParam, LParam);
+      } break;
+    }
+    
+  return Result;
+}
 
 int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowCode)
 {
@@ -145,9 +182,8 @@ int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine
       if (Window)
 	{
 	  ShowWindow(Window, ShowCode);
-	  // manager2D.GetHwnd(Window);  
-	  InitializeDX11(Window);
-      
+	  // manager2D.GetHwnd(Window);
+	  InitializeDX11(Window); // You can't call initializing code in a while loop. 
 	  Running = true; 
 	  while(Running)
 	    {
@@ -162,13 +198,7 @@ int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine
 		  TranslateMessage(&Message);
 		  DispatchMessageA(&Message);
 		}
-	  
-	      {
-		// renderer->Update(); 
-		// renderer->Render();
-		// deviceResources->Present();
-		// manager2D.~RenderManager2D();
-	      }
+
 	    }
 	}
 
@@ -178,54 +208,3 @@ int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine
   return 0;
 }
 
-LRESULT CALLBACK WindowProc(HWND Window, 
-                            UINT Message, 
-                            WPARAM WParam, 
-                            LPARAM LParam)
-{
-  LRESULT Result = DefWindowProc(Window, Message, WParam, LParam);;
- 
-  switch (Message)
-    {
-      
-    case WM_CREATE:
-      {
-	// InitializeDX11(Window);
-        // if (FAILED(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &manager2D.Factory)))
-	// {
-	//   return -1;
-	// }
-      } break;
-      
-    case WM_CLOSE: 
-      {
-        // TODO: Handle this with a message to the user.
-        Running = false;
-	// DestroyWindow(Window);
-      } break;
-
-    case WM_DESTROY:
-      {
-        Running = false;
-	// PostQuitMessage(0); 
-        // manager2D.Shutdown();
-      } break;
-
-    case WM_PAINT:
-      {
-        // manager2D.OnPaint();
-      } break;
-
-    case WM_SIZE:
-      {
-        // manager2D.Resize();
-      } break;
-
-    default:
-      {
-
-      } break;
-    }
-    
-  return Result;
-}
