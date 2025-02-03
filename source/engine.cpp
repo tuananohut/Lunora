@@ -21,7 +21,10 @@ void InitializeDX11(HWND Window)
   ID3D11DeviceContext* DeviceContext = nullptr; 
   IDXGISwapChain* DXGISwapChain = nullptr;              
   ID3D11RenderTargetView* RenderTargetView = nullptr; 
-  ID3D11Texture2D* BackBuffer = nullptr; 
+  ID3D11Texture2D* BackBuffer = nullptr;
+  D3D11_TEXTURE2D_DESC DepthBufferDesc; 
+  D3D11_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc;
+  ID3D11Texture2D* DepthStencilBuffer; 
   
   ZeroMemory(&SwapChainDesc, sizeof(SwapChainDesc));
   SwapChainDesc.BufferCount = 1;
@@ -63,6 +66,32 @@ void InitializeDX11(HWND Window)
     {
       MessageBoxA(Window, "Error", "Could not create render target view.", MB_OK | MB_ICONERROR);
     }
+
+  ZeroMemory(&DepthBufferDesc, sizeof(DepthBufferDesc));
+
+  /*IMPORTANT!!!*/
+  // ZeroMemory(&DepthStencilViewDesc, sizeof(DepthStencilViewDesc));
+  DepthBufferDesc.Width = CW_USEDEFAULT; // We have to set screen size globally or with another definition
+  DepthBufferDesc.Height = CW_USEDEFAULT;
+  DepthBufferDesc.MipLevels = 1;
+  DepthBufferDesc.ArraySize = 1;
+  DepthBufferDesc.Format = DXGI_FORMAT_UNKNOWN; // Search it!!!
+  DepthBufferDesc.SampleDesc.Count = 1;
+  DepthBufferDesc.SampleDesc.Quality = 0;
+  DepthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+  DepthBufferDesc.BindFlags = D3D11_BIND_RENDER_TARGET;
+  DepthBufferDesc.CPUAccessFlags = 0;
+  DepthBufferDesc.MiscFlags = 0;
+
+  result = Device->CreateTexture2D(&DepthBufferDesc, NULL, &DepthStencilBuffer);
+  if(FAILED(result))
+    {
+      MessageBoxA(Window, "Error", "Could not create depth stencil view desc.", MB_OK | MB_ICONERROR);
+
+    }
+
+  
+  // result = Device->CreateDepthStencilView(, )
   
   BackBuffer->Release();
   BackBuffer = nullptr;
@@ -198,7 +227,6 @@ int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine
 		  TranslateMessage(&Message);
 		  DispatchMessageA(&Message);
 		}
-
 	    }
 	}
 
