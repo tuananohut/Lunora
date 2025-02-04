@@ -53,18 +53,21 @@ void InitializeDX11(HWND Window)
   if (FAILED(result))
     {
       MessageBoxA(Window, "Error", "Could not create device.", MB_OK | MB_ICONERROR);
+      // Running = false;
     }
 
   result = DXGISwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&BackBuffer);
   if (FAILED(result))
     {
       MessageBoxA(Window, "Error", "You forgot something", MB_OK | MB_ICONERROR);
+      // Running = false;
     }
-   
+  
   result = Device->CreateRenderTargetView(BackBuffer, nullptr, &RenderTargetView);
   if (FAILED(result))
     {
       MessageBoxA(Window, "Error", "Could not create render target view.", MB_OK | MB_ICONERROR);
+      // Running = false;
     }
 
   ZeroMemory(&DepthBufferDesc, sizeof(DepthBufferDesc));
@@ -87,7 +90,7 @@ void InitializeDX11(HWND Window)
   if(FAILED(result))
     {
       MessageBoxA(Window, "Error", "Could not create depth stencil view desc.", MB_OK | MB_ICONERROR);
-
+      //  Running = false;
     }
 
   
@@ -132,35 +135,34 @@ LRESULT CALLBACK WindowProc(HWND Window,
                             WPARAM WParam, 
                             LPARAM LParam)
 {
-  LRESULT Result = DefWindowProc(Window, Message, WParam, LParam); 
+  LRESULT Result = DefWindowProc(Window, Message, WParam, LParam);
 
   switch (Message)
     {
       
     case WM_CREATE:
       {
+	InitializeDX11(Window);
       } break;
       
     case WM_CLOSE: 
       {
         // TODO: Handle this with a message to the user.
-	Result = 0; 
         Running = false;
-	// DestroyWindow(Window);
+	DestroyWindow(Window);
       } break;
 
     case WM_DESTROY:
       {
-	Result = 0; 
         Running = false;
-	// PostQuitMessage(0); 
+	PostQuitMessage(0); 
       } break;
 
     case WM_PAINT:
       {
-
+	// InitializeDX11(Window);
       } break;
-
+      
     case WM_SIZE:
       {
 
@@ -200,7 +202,7 @@ int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine
 				    wc.lpszClassName,          
 				    "Lunora",  
 				    wStyles,        
-				    x, y, x, y,
+				    x, y, 1280, 720,
 				    NULL,       
 				    NULL,       
 				    Instance,  
@@ -211,23 +213,29 @@ int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine
       if (Window)
 	{
 	  ShowWindow(Window, ShowCode);
+	  UpdateWindow(Window);
+	  
+	  InitializeDX11(Window); // You can't call initializing code in a while loop.  
 	  // manager2D.GetHwnd(Window);
-	  InitializeDX11(Window); // You can't call initializing code in a while loop. 
-	  Running = true; 
+	  
+	  Running = true;
 	  while(Running)
 	    {
 	      MSG Message;
 	      while(PeekMessageA(&Message, 0, 0, 0, PM_REMOVE))
-		{
+		{		  
 		  if (Message.message == WM_QUIT)
 		    {
 		      Running = false; 
 		    }
-		  
+
 		  TranslateMessage(&Message);
 		  DispatchMessageA(&Message);
 		}
+
+
 	    }
+	 
 	}
 
     }
@@ -235,4 +243,5 @@ int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine
    
   return 0;
 }
+
 
