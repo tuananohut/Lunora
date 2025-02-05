@@ -184,7 +184,7 @@ int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine
   DWORD wStyles = WS_EX_ACCEPTFILES | WS_EX_TOOLWINDOW | WS_OVERLAPPEDWINDOW;
 
   wc.cbSize = sizeof(WNDCLASSEXA);
-  wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+  wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS | CS_OWNDC; // Try OWNDC 
   wc.lpfnWndProc = WindowProc;
   wc.hInstance = Instance;
   wc.hIcon = LoadIcon(Instance, MAKEINTRESOURCE(IDI_ICON1));;
