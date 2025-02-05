@@ -15,90 +15,32 @@ static bool Running;
 
 void InitializeDX11(HWND Window)
 {
-  HRESULT result;
-  DXGI_SWAP_CHAIN_DESC SwapChainDesc;
-  ID3D11Device* Device = nullptr;
-  ID3D11DeviceContext* DeviceContext = nullptr; 
-  IDXGISwapChain* DXGISwapChain = nullptr;              
-  ID3D11RenderTargetView* RenderTargetView = nullptr; 
-  ID3D11Texture2D* BackBuffer = nullptr;
-  D3D11_TEXTURE2D_DESC DepthBufferDesc; 
-  D3D11_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc;
-  ID3D11Texture2D* DepthStencilBuffer; 
-  
-  ZeroMemory(&SwapChainDesc, sizeof(SwapChainDesc));
-  SwapChainDesc.BufferCount = 1;
-  SwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-  SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-  SwapChainDesc.OutputWindow = Window;
-  SwapChainDesc.SampleDesc.Count = 4;
-  SwapChainDesc.Windowed = TRUE;
-
-  D3D_FEATURE_LEVEL FeatureLevelsRequested = D3D_FEATURE_LEVEL_11_0;
-  UINT numFeatureLevelsRequested = 1;
-  D3D_FEATURE_LEVEL FeatureLevelsSupported;
-
-  result = D3D11CreateDeviceAndSwapChain(NULL,
-					 D3D_DRIVER_TYPE_HARDWARE,
-					 NULL,
-					 0,
-					 &FeatureLevelsRequested,
-					 numFeatureLevelsRequested,
-					 D3D11_SDK_VERSION,
-					 &SwapChainDesc,
-					 &DXGISwapChain,
-					 &Device,
-					 &FeatureLevelsSupported,
-					 &DeviceContext);
-  if (FAILED(result))
+  HRESULT Result;
+  D3D_FEATURE_LEVEL FeatureLevels[] =
     {
-      MessageBoxA(Window, "Error", "Could not create device.", MB_OK | MB_ICONERROR);
-      // Running = false;
+      D3D_FEATURE_LEVEL_11_1,
+      D3D_FEATURE_LEVEL_11_0,
+      D3D_FEATURE_LEVEL_10_1,
+      D3D_FEATURE_LEVEL_10_0,
+    };
+  ID3D11Device* Device;
+  D3D_FEATURE_LEVEL SelectedFeatureLevel;
+  ID3D11DeviceContext* DeviceContext;
+
+  Result = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE,
+			     NULL, 0, FeatureLevels,
+			     ARRAYSIZE(FeatureLevels),
+			     D3D11_SDK_VERSION,
+			     &Device, &SelectedFeatureLevel,
+			     &DeviceContext);
+
+  if (FAILED(Result))
+    {
+      MessageBoxA(Window, "Device could not created", "Error.", MB_OK | MB_ICONERROR);
     }
 
-  result = DXGISwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&BackBuffer);
-  if (FAILED(result))
-    {
-      MessageBoxA(Window, "Error", "You forgot something", MB_OK | MB_ICONERROR);
-      // Running = false;
-    }
+  // Swap chain
   
-  result = Device->CreateRenderTargetView(BackBuffer, nullptr, &RenderTargetView);
-  if (FAILED(result))
-    {
-      MessageBoxA(Window, "Error", "Could not create render target view.", MB_OK | MB_ICONERROR);
-      // Running = false;
-    }
-
-  ZeroMemory(&DepthBufferDesc, sizeof(DepthBufferDesc));
-
-  /*IMPORTANT!!!*/
-  // ZeroMemory(&DepthStencilViewDesc, sizeof(DepthStencilViewDesc));
-  DepthBufferDesc.Width = CW_USEDEFAULT; // We have to set screen size globally or with another definition
-  DepthBufferDesc.Height = CW_USEDEFAULT;
-  DepthBufferDesc.MipLevels = 1;
-  DepthBufferDesc.ArraySize = 1;
-  DepthBufferDesc.Format = DXGI_FORMAT_UNKNOWN; // Search it!!!
-  DepthBufferDesc.SampleDesc.Count = 1;
-  DepthBufferDesc.SampleDesc.Quality = 0;
-  DepthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-  DepthBufferDesc.BindFlags = D3D11_BIND_RENDER_TARGET;
-  DepthBufferDesc.CPUAccessFlags = 0;
-  DepthBufferDesc.MiscFlags = 0;
-
-  result = Device->CreateTexture2D(&DepthBufferDesc, NULL, &DepthStencilBuffer);
-  if(FAILED(result))
-    {
-      MessageBoxA(Window, "Error", "Could not create depth stencil view desc.", MB_OK | MB_ICONERROR);
-      //  Running = false;
-    }
-
-  
-  // result = Device->CreateDepthStencilView(, )
-  
-  BackBuffer->Release();
-  BackBuffer = nullptr;
-
   /*
   if (Device)
     {
@@ -177,7 +119,10 @@ LRESULT CALLBACK WindowProc(HWND Window,
   return Result;
 }
 
-int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowCode)
+int WINAPI WinMain(HINSTANCE Instance,
+		   HINSTANCE PrevInstance,
+		   LPSTR CommandLine,
+		   int ShowCode)
 {
   WNDCLASSEXA wc = {};
   
