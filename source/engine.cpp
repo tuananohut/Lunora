@@ -26,19 +26,32 @@ void InitializeDX11(HWND Window)
   ID3D11Device* Device;
   D3D_FEATURE_LEVEL SelectedFeatureLevel;
   ID3D11DeviceContext* DeviceContext;
+  DXGI_SWAP_CHAIN_DESC SwapChainDesc;
+  IDXGISwapChain* SwapChain;
 
-  Result = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE,
-			     NULL, 0, FeatureLevels,
-			     ARRAYSIZE(FeatureLevels),
-			     D3D11_SDK_VERSION,
-			     &Device, &SelectedFeatureLevel,
-			     &DeviceContext);
+  ZeroMemory(&SwapChainDesc, sizeof(SwapChainDesc));
+  SwapChainDesc.BufferDesc.Width = 1280;
+  SwapChainDesc.BufferDesc.Height = 720;
+  SwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
+  Result = D3D11CreateDeviceAndSwapChain(NULL,
+					 D3D_DRIVER_TYPE_HARDWARE,
+					 NULL,
+					 0,
+					 FeatureLevels,
+					 1,
+					 D3D11_SDK_VERSION,
+					 &SwapChainDesc,
+					 &SwapChain, 
+					 &Device,
+					 NULL,
+					 &DeviceContext);
   if (FAILED(Result))
     {
-      MessageBoxA(Window, "Device could not created", "Error.", MB_OK | MB_ICONERROR);
+      MessageBoxA(Window, "Error", "Device released successfully.", MB_OK | MB_ICONINFORMATION);
     }
-
+    
+  
   // Swap chain
   
   /*
