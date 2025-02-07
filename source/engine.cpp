@@ -13,9 +13,26 @@
 
 static bool Running;
 
+#define DeleteObject(object) if ((object) != NULL) { delete object; object = NULL; }
+#define DeleteObjects(objects) if ((objects) != NULL) { delete[] objects; objects = NULL; }
+#define ReleaseObject(object) if ((object) != NULL) { object->Release(); object = NULL; }
+
+static ID3D11Device* Device = nullptr;
+static ID3D11DeviceContext* DeviceContext = nullptr;
+static IDXGISwapChain* SwapChain;
+static ID3D11RenderTargetView* RenderTargetView = nullptr;  
+static ID3D11DepthStencilView* DepthStencilView = nullptr;
+static FLOAT BackgroundColor[4] = {1.f, 0.f, 0.f, 1.f};
+
 void InitializeDX11(HWND Window)
 {
   HRESULT Result;
+  UINT CreateDeviceFlags = 0;
+
+#if defined(DEBUG) || defined(_DEBUG)
+  CreateDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+  
   D3D_FEATURE_LEVEL FeatureLevels[] =
     {
       D3D_FEATURE_LEVEL_11_1,
@@ -23,66 +40,145 @@ void InitializeDX11(HWND Window)
       D3D_FEATURE_LEVEL_10_1,
       D3D_FEATURE_LEVEL_10_0,
     };
-  ID3D11Device* Device;
-  D3D_FEATURE_LEVEL SelectedFeatureLevel;
-  ID3D11DeviceContext* DeviceContext;
+
+  D3D_FEATURE_LEVEL FeatureLevel = D3D_FEATURE_LEVEL_11_1;
+  
   DXGI_SWAP_CHAIN_DESC SwapChainDesc;
-  IDXGISwapChain* SwapChain;
+
+  UINT MultiSamplingCount = 4;
+  UINT MultiSamplingQualityLevels = 0;
+  UINT ScreenWidth = 800;
+  UINT ScreenHeight = 600;
+  bool MultiSamplingEnabled = false; 
 
   ZeroMemory(&SwapChainDesc, sizeof(SwapChainDesc));
-  SwapChainDesc.BufferDesc.Width = 1280;
-  SwapChainDesc.BufferDesc.Height = 720;
+  SwapChainDesc.OutputWindow = Window;
+  SwapChainDesc.Windowed = TRUE;
+  SwapChainDesc.BufferDesc.Width = ScreenWidth;
+  SwapChainDesc.BufferDesc.Height = ScreenHeight;
   SwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
-  Result = D3D11CreateDeviceAndSwapChain(NULL,
-					 D3D_DRIVER_TYPE_HARDWARE,
-					 NULL,
-					 0,
-					 FeatureLevels,
-					 1,
-					 D3D11_SDK_VERSION,
+  if (MultiSamplingEnabled)
+    {
+      SwapChainDesc.SampleDesc.Count = MultiSamplingCount;
+      SwapChainDesc.SampleDesc.Quality = MultiSamplingQualityLevels - 1;
+    }
+  else
+    {
+      SwapChainDesc.SampleDesc.Count = 1;
+      SwapChainDesc.SampleDesc.Quality = 0;
+    }
+   
+  SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+  SwapChainDesc.BufferCount = 1;
+  SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+  SwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
+  SwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
+ 
+  Result = D3D11CreateDeviceAndSwapChain(NULL, 
+					 D3D_DRIVER_TYPE_HARDWARE, 
+					 NULL, 
+					 CreateDeviceFlags, 
+					 FeatureLevels, 
+					 ARRAYSIZE(FeatureLevels),
+					 D3D11_SDK_VERSION, 
 					 &SwapChainDesc,
 					 &SwapChain, 
-					 &Device,
-					 NULL,
-					 &DeviceContext);
+					 &Device, 
+					 &FeatureLevel, 
+					 &DeviceContext); 
   if (FAILED(Result))
     {
-      MessageBoxA(Window, "Error", "Device released successfully.", MB_OK | MB_ICONINFORMATION);
+      MessageBoxA(Window, "Device and swap chain", "Error", MB_OK | MB_ICONERROR);
+    }
+  
+  IDXGIDevice* DXGIDevice = nullptr;
+  Result = Device->QueryInterface(__uuidof(IDXGIDevice), reinterpret_cast<void**>(&DXGIDevice));
+  if (FAILED(Result))
+    {
+      MessageBoxA(Window, "Failed to get DXGI Device", "Error", MB_OK | MB_ICONERROR);
+    }
+  
+  IDXGIAdapter* DXGIAdapter = nullptr;
+  Result = DXGIDevice->GetParent(__uuidof(IDXGIAdapter), reinterpret_cast<void**>(&DXGIAdapter));
+  if (FAILED(Result))
+    {
+      MessageBoxA(Window, "DXGI Adapter", "Error", MB_OK | MB_ICONERROR);
     }
     
-  
-  // Swap chain
-  
-  /*
-  if (Device)
+  Result = Device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM,
+						 MultiSamplingCount,
+						 &MultiSamplingQualityLevels);
+  if (FAILED(Result))
     {
-      Device->Release();
-      Device = nullptr;
-      MessageBoxA(Window, "Congrats", "Device released successfully.", MB_OK | MB_ICONINFORMATION);
-    }
-  
-  if (DeviceContext)
-    {
-      DeviceContext->Release();
-      DeviceContext = nullptr;
-      MessageBoxA(Window, "Congrats", "Device context released successfully.", MB_OK | MB_ICONINFORMATION);
+      MessageBoxA(Window, "Multi sample quality levels", "Error.", MB_OK | MB_ICONERROR);
     }
 
-  if (DXGISwapChain)
+  ReleaseObject(DXGIDevice);
+  ReleaseObject(DXGIAdapter);
+  
+  ID3D11Texture2D* BackBuffer;
+  Result = SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&BackBuffer));
+  if (FAILED(Result))
     {
-      DXGISwapChain->Release();
-      DXGISwapChain = nullptr;
-      MessageBoxA(Window, "Congrats", "DXGI Swap Chain released successfully.", MB_OK | MB_ICONINFORMATION);
+      MessageBoxA(Window, "Back Buffer failed", "Error.", MB_OK | MB_ICONERROR);
     }
 
-    if (RenderTargetView)
+  Result = Device->CreateRenderTargetView(BackBuffer, nullptr, &RenderTargetView); 
+  if (FAILED(Result))
     {
-      RenderTargetView->Release();
-      RenderTargetView = nullptr;
-      MessageBoxA(Window, "Congrats", "Render Target View released successfully.", MB_OK | MB_ICONINFORMATION);
+      MessageBoxA(Window, "Render target view failed", "Error.", MB_OK | MB_ICONERROR);
     }
-  */
+  
+  ReleaseObject(BackBuffer);
+
+  ID3D11Texture2D* DepthStencilBuffer = nullptr;
+  
+  D3D11_TEXTURE2D_DESC DepthStencilDesc;
+  ZeroMemory(&DepthStencilDesc, sizeof(DepthStencilDesc));
+  DepthStencilDesc.Width = ScreenWidth;
+  DepthStencilDesc.Height = ScreenHeight;
+  DepthStencilDesc.MipLevels = 1;
+  DepthStencilDesc.ArraySize = 1;
+  DepthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+  DepthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+  DepthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+
+  if (MultiSamplingEnabled)
+    {
+      DepthStencilDesc.SampleDesc.Count = MultiSamplingCount;
+      DepthStencilDesc.SampleDesc.Quality = MultiSamplingQualityLevels - 1;
+    }
+  else
+    {
+      DepthStencilDesc.SampleDesc.Count = 1;
+      DepthStencilDesc.SampleDesc.Quality = 0;
+    }
+  
+  Result = Device->CreateTexture2D(&DepthStencilDesc, nullptr, &DepthStencilBuffer);
+  if (FAILED(Result))
+    {
+      MessageBoxA(Window, "Depth Stencil View failed", "Error.", MB_OK | MB_ICONERROR);
+    }
+
+  
+  Result = Device->CreateDepthStencilView(DepthStencilBuffer, nullptr, &DepthStencilView);
+  if (FAILED(Result))
+    {
+      MessageBoxA(Window, "Depth stencil buffer failed", "Error.", MB_OK | MB_ICONERROR);
+    }
+  
+  DeviceContext->OMSetRenderTargets(1, &RenderTargetView, DepthStencilView);
+  
+  D3D11_VIEWPORT Viewport;
+  Viewport.TopLeftX = 0.f;
+  Viewport.TopLeftY = 0.f;
+  Viewport.Width = static_cast<float>(ScreenWidth);
+  Viewport.Height = static_cast<float>(ScreenHeight);
+  Viewport.MinDepth = 0.f;
+  Viewport.MaxDepth = 1.f;
+
+  DeviceContext->RSSetViewports(1, &Viewport);
 }
 
 LRESULT CALLBACK WindowProc(HWND Window, 
@@ -90,7 +186,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
                             WPARAM WParam, 
                             LPARAM LParam)
 {
-  LRESULT Result = DefWindowProc(Window, Message, WParam, LParam);
+  LRESULT Result = 0;
 
   switch (Message)
     {
@@ -109,18 +205,27 @@ LRESULT CALLBACK WindowProc(HWND Window,
 
     case WM_DESTROY:
       {
-        Running = false;
+	ReleaseObject(DeviceContext);
+	ReleaseObject(RenderTargetView);
+	ReleaseObject(DepthStencilView);
+	ReleaseObject(SwapChain);
+	ReleaseObject(Device);
+	
+	Running = false;
 	PostQuitMessage(0); 
       } break;
 
     case WM_PAINT:
       {
+	DeviceContext->ClearRenderTargetView(RenderTargetView, BackgroundColor);
+	DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
+	SwapChain->Present(0, 0);
 	// InitializeDX11(Window);
       } break;
       
     case WM_SIZE:
       {
-
+	InitializeDX11(Window);
       } break;
 
     default:
@@ -151,6 +256,8 @@ int WINAPI WinMain(HINSTANCE Instance,
   wc.lpszMenuName = 0; 
   wc.lpszClassName = "Lunora";
 
+  HRESULT Result; 
+  
   if (RegisterClassExA(&wc))
     {
       int x = CW_USEDEFAULT;
@@ -190,8 +297,10 @@ int WINAPI WinMain(HINSTANCE Instance,
 		  TranslateMessage(&Message);
 		  DispatchMessageA(&Message);
 		}
-
-
+	      
+	      DeviceContext->ClearRenderTargetView(RenderTargetView, BackgroundColor);
+	      DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
+	      SwapChain->Present(0, 0);
 	    }
 	 
 	}
