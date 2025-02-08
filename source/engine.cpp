@@ -3,6 +3,9 @@
 #include "Renderer.cpp"
 #include "resource.h"
 #include <d3d11.h>
+#include <DirectXMath.h>
+
+using namespace DirectX;
 
 #pragma comment(lib, "user32")
 #pragma comment(lib, "d3d11")
@@ -11,18 +14,18 @@
 
 // RenderManager2D manager2D; 
 
-static bool Running;
-
 #define DeleteObject(object) if ((object) != NULL) { delete object; object = NULL; }
 #define DeleteObjects(objects) if ((objects) != NULL) { delete[] objects; objects = NULL; }
 #define ReleaseObject(object) if ((object) != NULL) { object->Release(); object = NULL; }
+
+static bool Running;
 
 static ID3D11Device* Device = nullptr;
 static ID3D11DeviceContext* DeviceContext = nullptr;
 static IDXGISwapChain* SwapChain;
 static ID3D11RenderTargetView* RenderTargetView = nullptr;  
 static ID3D11DepthStencilView* DepthStencilView = nullptr;
-static FLOAT BackgroundColor[4] = {1.f, 0.f, 0.f, 1.f};
+static FLOAT BackgroundColor[4] = {0.141f, 0.137f, 0.365f, 1.f};
 
 void InitializeDX11(HWND Window)
 {
@@ -181,6 +184,37 @@ void InitializeDX11(HWND Window)
   DeviceContext->RSSetViewports(1, &Viewport);
 }
 
+struct MatrixBufferType
+{
+  XMMATRIX World;
+  XMMATRIX View;
+  XMMATRIX Projection;
+};
+
+void CreateCube()
+{
+  HRESULT Result; 
+  ID3D11Buffer* MatrixBuffer;
+  MatrixBufferType* MatrixBufferTypePointer;
+  
+  D3D11_BUFFER_DESC BufferDesc;
+
+  ZeroMemory(&BufferDesc, sizeof(BufferDesc));
+  BufferDesc.ByteWidth = sizeof(MatrixBufferType);
+  BufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  BufferDesc.MiscFlags = 0;
+  BufferDesc.StructureByteStride = 0;
+  
+  Result = Device->CreateBuffer(&BufferDesc, 0,  &MatrixBuffer);
+
+  if (FAILED(Result))
+    {
+      MessageBoxA(NULL, "Buffer desc failed", "Error.", MB_OK | MB_ICONERROR);
+    }
+}
+
 LRESULT CALLBACK WindowProc(HWND Window, 
                             UINT Message, 
                             WPARAM WParam, 
@@ -217,6 +251,8 @@ LRESULT CALLBACK WindowProc(HWND Window,
 
     case WM_PAINT:
       {
+	CreateCube();
+	
 	DeviceContext->ClearRenderTargetView(RenderTargetView, BackgroundColor);
 	DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 	SwapChain->Present(0, 0);
