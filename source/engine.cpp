@@ -4,13 +4,15 @@
 #include "resource.h"
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include <d3dcompiler.h>
 
-using namespace DirectX;
-
-#pragma comment(lib, "user32")
-#pragma comment(lib, "d3d11")
 #pragma comment(lib, "d2d1")
 #pragma comment(lib, "gdi32")
+#pragma comment(lib, "d3d11")
+#pragma comment(lib, "user32")
+#pragma comment(lib, "d3dcompiler.lib")
+
+using namespace DirectX;
 
 // RenderManager2D manager2D; 
 
@@ -191,11 +193,54 @@ struct MatrixBufferType
   XMMATRIX Projection;
 };
 
-void CreateCube()
+void CreateCube(HWND Window)
 {
   HRESULT Result; 
   ID3D11Buffer* MatrixBuffer;
   MatrixBufferType* MatrixBufferTypePointer;
+
+  ID3DBlob* VertexShaderBlob = nullptr;
+  ID3DBlob* PixelShaderBlob = nullptr;
+  ID3DBlob* ErrorBlob = nullptr;
+
+  LPCWSTR FileName = L"../color.vs"; 
+  ID3D11VertexShader* VertexShader;
+  ID3D11PixelShader* PixelShader;
+  
+  Result = D3DCompileFromFile(FileName,
+			      NULL,
+			      NULL,
+			      "ColorVertexShader", // function name
+			      "vs_5_0",
+			      D3DCOMPILE_ENABLE_STRICTNESS,
+			      0,
+			      &VertexShaderBlob,
+			      &ErrorBlob);
+  if(FAILED(Result))
+    {
+      if (ErrorBlob)
+	{
+	  MessageBoxA(Window, (char*)ErrorBlob->GetBufferPointer(), "Shader Compile Error", MB_OK | MB_ICONERROR);
+	  ErrorBlob->Release();
+	}
+      else
+	{
+	  MessageBoxA(Window, "Compile from file failed", "Error.", MB_OK | MB_ICONERROR);
+	}
+    }
+
+  Result = Device->CreateVertexShader(VertexShaderBlob->GetBufferPointer(),
+				      VertexShaderBlob->GetBufferSize(),
+				      NULL,
+				      &VertexShader);
+  if(FAILED(Result))
+    {
+      MessageBoxA(Window, "Could not create vertex shader", "Error.", MB_OK | MB_ICONERROR);
+    }
+
+  if (VertexShaderBlob) VertexShaderBlob->Release();
+  if (PixelShaderBlob) PixelShaderBlob->Release();
+  if (ErrorBlob) ErrorBlob->Release();
   
   D3D11_BUFFER_DESC BufferDesc;
 
@@ -207,11 +252,11 @@ void CreateCube()
   BufferDesc.MiscFlags = 0;
   BufferDesc.StructureByteStride = 0;
   
-  Result = Device->CreateBuffer(&BufferDesc, 0,  &MatrixBuffer);
-
+  Result = Device->CreateBuffer(&BufferDesc, nullptr, &MatrixBuffer);
   if (FAILED(Result))
     {
-      MessageBoxA(NULL, "Buffer desc failed", "Error.", MB_OK | MB_ICONERROR);
+      MessageBoxA(Window, "Buffer desc failed", "Error.", MB_OK | MB_ICONERROR);
+      MatrixBuffer = nullptr;
     }
 }
 
@@ -234,7 +279,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
       {
         // TODO: Handle this with a message to the user.
         Running = false;
-	DestroyWindow(Window);
+	//	DestroyWindow(Window);
       } break;
 
     case WM_DESTROY:
@@ -246,13 +291,11 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	ReleaseObject(Device);
 	
 	Running = false;
-	PostQuitMessage(0); 
+	// PostQuitMessage(0); 
       } break;
 
     case WM_PAINT:
-      {
-	CreateCube();
-	
+      {	
 	DeviceContext->ClearRenderTargetView(RenderTargetView, BackgroundColor);
 	DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 	SwapChain->Present(0, 0);
@@ -261,7 +304,13 @@ LRESULT CALLBACK WindowProc(HWND Window,
       
     case WM_SIZE:
       {
-	InitializeDX11(Window);
+	if (Device)
+	  {
+	    ReleaseObject(RenderTargetView);
+	    ReleaseObject(DepthStencilView);
+	    SwapChain->ResizeBuffers(0, LOWORD(LParam), HIWORD(LParam), DXGI_FORMAT_UNKNOWN, 0);
+	    InitializeDX11(Window);
+	  }
       } break;
 
     default:
@@ -317,6 +366,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  UpdateWindow(Window);
 	  
 	  InitializeDX11(Window); // You can't call initializing code in a while loop.  
+	  CreateCube(Window);
 	  // manager2D.GetHwnd(Window);
 	  
 	  Running = true;
