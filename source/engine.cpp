@@ -5,6 +5,7 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
+#include <fstream>
 
 #pragma comment(lib, "d2d1")
 #pragma comment(lib, "gdi32")
@@ -13,6 +14,7 @@
 #pragma comment(lib, "d3dcompiler.lib")
 
 using namespace DirectX;
+using namespace std; 
 
 // RenderManager2D manager2D; 
 
@@ -202,45 +204,46 @@ void CreateCube(HWND Window)
   ID3DBlob* VertexShaderBlob = nullptr;
   ID3DBlob* PixelShaderBlob = nullptr;
   ID3DBlob* ErrorBlob = nullptr;
-
-  LPCWSTR FileName = L"../color.vs"; 
+ 
+  wchar_t VSFileName[128];
+  
   ID3D11VertexShader* VertexShader;
   ID3D11PixelShader* PixelShader;
-  
-  Result = D3DCompileFromFile(FileName,
-			      NULL,
-			      NULL,
-			      "ColorVertexShader", // function name
-			      "vs_5_0",
-			      D3DCOMPILE_ENABLE_STRICTNESS,
-			      0,
-			      &VertexShaderBlob,
-			      &ErrorBlob);
-  if(FAILED(Result))
+
+  if (wcscpy_s(VSFileName, 128, L"../source/color.vs"))
     {
-      if (ErrorBlob)
+      
+      Result = D3DCompileFromFile(VSFileName,
+				  NULL,
+				  NULL,
+				  "ColorVertexShader",
+				  "vs_5_0",
+				  D3DCOMPILE_ENABLE_STRICTNESS,
+				  0,
+				  &VertexShaderBlob,
+				  &ErrorBlob);
+      if(FAILED(Result))
 	{
-	  MessageBoxA(Window, (char*)ErrorBlob->GetBufferPointer(), "Shader Compile Error", MB_OK | MB_ICONERROR);
-	  ErrorBlob->Release();
-	}
-      else
-	{
-	  MessageBoxA(Window, "Compile from file failed", "Error.", MB_OK | MB_ICONERROR);
+	  OutputDebugStringA("Could not create vertex shader");
 	}
     }
-
+  else
+    {
+      OutputDebugStringA("Could not use file");
+    }
+  /*
   Result = Device->CreateVertexShader(VertexShaderBlob->GetBufferPointer(),
 				      VertexShaderBlob->GetBufferSize(),
 				      NULL,
 				      &VertexShader);
   if(FAILED(Result))
     {
-      MessageBoxA(Window, "Could not create vertex shader", "Error.", MB_OK | MB_ICONERROR);
+      OutputDebugStringA("Could not create vertex shader");
     }
-
+  */
   if (VertexShaderBlob) VertexShaderBlob->Release();
   if (PixelShaderBlob) PixelShaderBlob->Release();
-  if (ErrorBlob) ErrorBlob->Release();
+  if (ErrorBlob) VertexShaderBlob->Release();
   
   D3D11_BUFFER_DESC BufferDesc;
 
@@ -255,7 +258,7 @@ void CreateCube(HWND Window)
   Result = Device->CreateBuffer(&BufferDesc, nullptr, &MatrixBuffer);
   if (FAILED(Result))
     {
-      MessageBoxA(Window, "Buffer desc failed", "Error.", MB_OK | MB_ICONERROR);
+      OutputDebugStringA("Could not create vertex shader");
       MatrixBuffer = nullptr;
     }
 }
@@ -304,13 +307,6 @@ LRESULT CALLBACK WindowProc(HWND Window,
       
     case WM_SIZE:
       {
-	if (Device)
-	  {
-	    ReleaseObject(RenderTargetView);
-	    ReleaseObject(DepthStencilView);
-	    SwapChain->ResizeBuffers(0, LOWORD(LParam), HIWORD(LParam), DXGI_FORMAT_UNKNOWN, 0);
-	    InitializeDX11(Window);
-	  }
       } break;
 
     default:
