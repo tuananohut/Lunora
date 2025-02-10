@@ -210,28 +210,36 @@ void CreateCube(HWND Window)
   ID3D11VertexShader* VertexShader;
   ID3D11PixelShader* PixelShader;
 
-  if (wcscpy_s(VSFileName, 128, L"../source/color.vs"))
+  bool error = wcscpy_s(VSFileName, 128, L"../Lunora/source/color.vs");
+  
+  if (error != 0)
     {
-      
       Result = D3DCompileFromFile(VSFileName,
 				  NULL,
 				  NULL,
 				  "ColorVertexShader",
 				  "vs_5_0",
-				  D3DCOMPILE_ENABLE_STRICTNESS,
+				  D3D10_SHADER_ENABLE_STRICTNESS,
 				  0,
 				  &VertexShaderBlob,
 				  &ErrorBlob);
       if(FAILED(Result))
 	{
-	  OutputDebugStringA("Could not create vertex shader");
+	  if (ErrorBlob)
+	    {
+	      OutputDebugStringA((char*)ErrorBlob->GetBufferPointer());
+	      ErrorBlob->Release();
+	    }
+	  OutputDebugStringA("Could not compile from file");
 	}
+      
     }
-  else
+  
+  if (VertexShaderBlob == nullptr)
     {
-      OutputDebugStringA("Could not use file");
+      OutputDebugStringA("VertexShaderBlob is nullptr. Compilation probably failed.");
     }
-  /*
+ 
   Result = Device->CreateVertexShader(VertexShaderBlob->GetBufferPointer(),
 				      VertexShaderBlob->GetBufferSize(),
 				      NULL,
@@ -240,7 +248,9 @@ void CreateCube(HWND Window)
     {
       OutputDebugStringA("Could not create vertex shader");
     }
-  */
+
+
+  
   if (VertexShaderBlob) VertexShaderBlob->Release();
   if (PixelShaderBlob) PixelShaderBlob->Release();
   if (ErrorBlob) VertexShaderBlob->Release();
