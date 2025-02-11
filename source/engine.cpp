@@ -7,11 +7,10 @@
 #include <d3dcompiler.h>
 #include <fstream>
 
-#pragma comment(lib, "d2d1")
 #pragma comment(lib, "gdi32")
 #pragma comment(lib, "d3d11")
 #pragma comment(lib, "user32")
-#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "d3dcompiler")
 
 using namespace DirectX;
 using namespace std; 
@@ -40,14 +39,6 @@ void InitializeDX11(HWND Window)
   CreateDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
   
-  D3D_FEATURE_LEVEL FeatureLevels[] =
-    {
-      D3D_FEATURE_LEVEL_11_1,
-      D3D_FEATURE_LEVEL_11_0,
-      D3D_FEATURE_LEVEL_10_1,
-      D3D_FEATURE_LEVEL_10_0,
-    };
-
   D3D_FEATURE_LEVEL FeatureLevel = D3D_FEATURE_LEVEL_11_1;
   
   DXGI_SWAP_CHAIN_DESC SwapChainDesc;
@@ -59,12 +50,18 @@ void InitializeDX11(HWND Window)
   bool MultiSamplingEnabled = false; 
 
   ZeroMemory(&SwapChainDesc, sizeof(SwapChainDesc));
-  SwapChainDesc.OutputWindow = Window;
-  SwapChainDesc.Windowed = TRUE;
   SwapChainDesc.BufferDesc.Width = ScreenWidth;
   SwapChainDesc.BufferDesc.Height = ScreenHeight;
   SwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-
+  SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+  SwapChainDesc.BufferCount = 1;
+  SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+  SwapChainDesc.OutputWindow = Window;
+  SwapChainDesc.Windowed = TRUE;
+  SwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
+  SwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
+  SwapChainDesc.Flags = 0;
+  
   if (MultiSamplingEnabled)
     {
       SwapChainDesc.SampleDesc.Count = MultiSamplingCount;
@@ -75,42 +72,36 @@ void InitializeDX11(HWND Window)
       SwapChainDesc.SampleDesc.Count = 1;
       SwapChainDesc.SampleDesc.Quality = 0;
     }
-   
-  SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-  SwapChainDesc.BufferCount = 1;
-  SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-  SwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
-  SwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
- 
+  
   Result = D3D11CreateDeviceAndSwapChain(NULL, 
 					 D3D_DRIVER_TYPE_HARDWARE, 
 					 NULL, 
-					 CreateDeviceFlags, 
-					 FeatureLevels, 
-					 ARRAYSIZE(FeatureLevels),
+					 0, 
+					 &FeatureLevel, 
+					 1,
 					 D3D11_SDK_VERSION, 
 					 &SwapChainDesc,
 					 &SwapChain, 
 					 &Device, 
-					 &FeatureLevel, 
+					 NULL,
 					 &DeviceContext); 
   if (FAILED(Result))
     {
-      MessageBoxA(Window, "Device and swap chain", "Error", MB_OK | MB_ICONERROR);
+      OutputDebugStringA("Device and swap chain");
     }
   
   IDXGIDevice* DXGIDevice = nullptr;
   Result = Device->QueryInterface(__uuidof(IDXGIDevice), reinterpret_cast<void**>(&DXGIDevice));
   if (FAILED(Result))
     {
-      MessageBoxA(Window, "Failed to get DXGI Device", "Error", MB_OK | MB_ICONERROR);
+      OutputDebugStringA("Failed to get DXGI Device");
     }
   
   IDXGIAdapter* DXGIAdapter = nullptr;
   Result = DXGIDevice->GetParent(__uuidof(IDXGIAdapter), reinterpret_cast<void**>(&DXGIAdapter));
   if (FAILED(Result))
     {
-      MessageBoxA(Window, "DXGI Adapter", "Error", MB_OK | MB_ICONERROR);
+      OutputDebugStringA("DXGI Adapter");
     }
     
   Result = Device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM,
@@ -128,13 +119,13 @@ void InitializeDX11(HWND Window)
   Result = SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&BackBuffer));
   if (FAILED(Result))
     {
-      MessageBoxA(Window, "Back Buffer failed", "Error.", MB_OK | MB_ICONERROR);
+      OutputDebugStringA("Back Buffer failed");
     }
 
   Result = Device->CreateRenderTargetView(BackBuffer, nullptr, &RenderTargetView); 
   if (FAILED(Result))
     {
-      MessageBoxA(Window, "Render target view failed", "Error.", MB_OK | MB_ICONERROR);
+      OutputDebugStringA("Render target view failed");
     }
   
   ReleaseObject(BackBuffer);
@@ -165,14 +156,14 @@ void InitializeDX11(HWND Window)
   Result = Device->CreateTexture2D(&DepthStencilDesc, nullptr, &DepthStencilBuffer);
   if (FAILED(Result))
     {
-      MessageBoxA(Window, "Depth Stencil View failed", "Error.", MB_OK | MB_ICONERROR);
+      OutputDebugStringA("Depth Stencil View failed");
     }
 
   
   Result = Device->CreateDepthStencilView(DepthStencilBuffer, nullptr, &DepthStencilView);
   if (FAILED(Result))
     {
-      MessageBoxA(Window, "Depth stencil buffer failed", "Error.", MB_OK | MB_ICONERROR);
+      OutputDebugStringA("Depth stencil buffer failed");
     }
   
   DeviceContext->OMSetRenderTargets(1, &RenderTargetView, DepthStencilView);
@@ -278,41 +269,45 @@ LRESULT CALLBACK WindowProc(HWND Window,
                             WPARAM WParam, 
                             LPARAM LParam)
 {
-  LRESULT Result = 0;
+  LRESULT Result = DefWindowProc(Window, Message, WParam, LParam);
 
   switch (Message)
     {
       
     case WM_CREATE:
       {
-	InitializeDX11(Window);
+	/*
+	if (!DeviceContext)
+	  InitializeDX11(Window);
+	*/
       } break;
       
     case WM_CLOSE: 
       {
         // TODO: Handle this with a message to the user.
-        Running = false;
-	//	DestroyWindow(Window);
+	OutputDebugStringA("WM_CLOSE alýndý, pencere kapanýyor...\n");
+	Running = false;
+	DestroyWindow(Window);
       } break;
 
     case WM_DESTROY:
       {
+	Running = false;
+	
 	ReleaseObject(DeviceContext);
 	ReleaseObject(RenderTargetView);
 	ReleaseObject(DepthStencilView);
 	ReleaseObject(SwapChain);
 	ReleaseObject(Device);
 	
-	Running = false;
-	// PostQuitMessage(0); 
+	PostQuitMessage(0); 
       } break;
 
     case WM_PAINT:
-      {	
+      {
 	DeviceContext->ClearRenderTargetView(RenderTargetView, BackgroundColor);
 	DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 	SwapChain->Present(0, 0);
-	// InitializeDX11(Window);
       } break;
       
     case WM_SIZE:
@@ -338,13 +333,11 @@ int WINAPI WinMain(HINSTANCE Instance,
   DWORD wStyles = WS_EX_ACCEPTFILES | WS_EX_TOOLWINDOW | WS_OVERLAPPEDWINDOW;
 
   wc.cbSize = sizeof(WNDCLASSEXA);
-  wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS | CS_OWNDC; // Try OWNDC 
+  wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC; 
   wc.lpfnWndProc = WindowProc;
   wc.hInstance = Instance;
   wc.hIcon = LoadIcon(Instance, MAKEINTRESOURCE(IDI_ICON1));;
   wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-  wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
-  wc.lpszMenuName = 0; 
   wc.lpszClassName = "Lunora";
 
   HRESULT Result; 
@@ -357,7 +350,7 @@ int WINAPI WinMain(HINSTANCE Instance,
       HWND Window = CreateWindowExA(0,                   
 				    wc.lpszClassName,          
 				    "Lunora",  
-				    wStyles,        
+				    WS_OVERLAPPEDWINDOW | WS_VISIBLE,        
 				    x, y, 1280, 720,
 				    NULL,       
 				    NULL,       
@@ -368,13 +361,10 @@ int WINAPI WinMain(HINSTANCE Instance,
   
       if (Window)
 	{
-	  ShowWindow(Window, ShowCode);
-	  UpdateWindow(Window);
-	  
-	  InitializeDX11(Window); // You can't call initializing code in a while loop.  
-	  CreateCube(Window);
+	 
+	  // CreateCube(Window);
 	  // manager2D.GetHwnd(Window);
-	  
+	  InitializeDX11(Window);
 	  Running = true;
 	  while(Running)
 	    {
@@ -389,10 +379,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 		  TranslateMessage(&Message);
 		  DispatchMessageA(&Message);
 		}
-	      
-	      DeviceContext->ClearRenderTargetView(RenderTargetView, BackgroundColor);
-	      DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
-	      SwapChain->Present(0, 0);
+
 	    }
 	 
 	}
