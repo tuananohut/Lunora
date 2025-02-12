@@ -1,2 +1,6 @@
+<<<<<<< HEAD
 #include "../source/resource.h"
+=======
+#include "../source/resource.h"
+>>>>>>> 5f3959a5cbd24d57183e26cb01d76f05cb37a034
 IDI_ICON1 ICON "../data/icon/lunora.ico"

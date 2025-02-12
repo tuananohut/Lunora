@@ -6,9 +6,7 @@
 #include "resource.h"
 
 using namespace DirectX;
-using namespace std; 
-
-// RenderManager2D manager2D; 
+using namespace std;
 
 #define DeleteObject(object) if ((object) != NULL) { delete object; object = NULL; }
 #define DeleteObjects(objects) if ((objects) != NULL) { delete[] objects; objects = NULL; }
@@ -344,5 +342,4 @@ int WINAPI WinMain(HINSTANCE Instance,
 
   return 0;
 }
-
 

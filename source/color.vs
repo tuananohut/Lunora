@@ -30,4 +30,4 @@ PixelInputType ColorVertexShader(VertexInputType input)
 	output.color = input.color;
 
 	return output;
-}
+}	

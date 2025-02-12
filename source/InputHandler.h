@@ -5,5 +5,3 @@ struct InputHandler
 {
 
 };
-
-#endif
