@@ -1,16 +1,9 @@
 #include <windows.h>
-#include "renderer.h"
-#include "Renderer.cpp"
-#include "resource.h"
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
 #include <fstream>
-
-#pragma comment(lib, "gdi32")
-#pragma comment(lib, "d3d11")
-#pragma comment(lib, "user32")
-#pragma comment(lib, "d3dcompiler")
+#include "resource.h"
 
 using namespace DirectX;
 using namespace std; 
@@ -196,41 +189,34 @@ void CreateCube(HWND Window)
   ID3DBlob* PixelShaderBlob = nullptr;
   ID3DBlob* ErrorBlob = nullptr;
  
-  wchar_t VSFileName[128];
+  LPCWSTR VSFileName = L"../source/color.vs";
   
   ID3D11VertexShader* VertexShader;
   ID3D11PixelShader* PixelShader;
-
-  bool error = wcscpy_s(VSFileName, 128, L"../Lunora/source/color.vs");
   
-  if (error != 0)
+
+  Result = D3DCompileFromFile(VSFileName,
+			      NULL,
+			      NULL,
+			      "ColorVertexShader",
+			      "vs_5_0",
+			      D3D10_SHADER_ENABLE_STRICTNESS,
+			      0,
+			      &VertexShaderBlob,
+			      &ErrorBlob);
+  if(FAILED(Result))
     {
-      Result = D3DCompileFromFile(VSFileName,
-				  NULL,
-				  NULL,
-				  "ColorVertexShader",
-				  "vs_5_0",
-				  D3D10_SHADER_ENABLE_STRICTNESS,
-				  0,
-				  &VertexShaderBlob,
-				  &ErrorBlob);
-      if(FAILED(Result))
+      if (ErrorBlob)
 	{
-	  if (ErrorBlob)
-	    {
-	      OutputDebugStringA((char*)ErrorBlob->GetBufferPointer());
-	      ErrorBlob->Release();
+	  OutputDebugStringA((char*)ErrorBlob->GetBufferPointer());
+	  ErrorBlob->Release();
 	    }
+      else
+	{
 	  OutputDebugStringA("Could not compile from file");
 	}
-      
     }
-  
-  if (VertexShaderBlob == nullptr)
-    {
-      OutputDebugStringA("VertexShaderBlob is nullptr. Compilation probably failed.");
-    }
- 
+
   Result = Device->CreateVertexShader(VertexShaderBlob->GetBufferPointer(),
 				      VertexShaderBlob->GetBufferSize(),
 				      NULL,
@@ -239,8 +225,7 @@ void CreateCube(HWND Window)
     {
       OutputDebugStringA("Could not create vertex shader");
     }
-
-
+    
   
   if (VertexShaderBlob) VertexShaderBlob->Release();
   if (PixelShaderBlob) PixelShaderBlob->Release();
@@ -269,51 +254,26 @@ LRESULT CALLBACK WindowProc(HWND Window,
                             WPARAM WParam, 
                             LPARAM LParam)
 {
-  LRESULT Result = DefWindowProc(Window, Message, WParam, LParam);
+  LRESULT Result = 0;
 
   switch (Message)
-    {
-      
-    case WM_CREATE:
-      {
-	/*
-	if (!DeviceContext)
-	  InitializeDX11(Window);
-	*/
-      } break;
-      
+    {      
     case WM_CLOSE: 
       {
-        // TODO: Handle this with a message to the user.
-	OutputDebugStringA("WM_CLOSE alýndý, pencere kapanýyor...\n");
 	Running = false;
-	DestroyWindow(Window);
       } break;
 
     case WM_DESTROY:
       {
-	Running = false;
-	
 	ReleaseObject(DeviceContext);
 	ReleaseObject(RenderTargetView);
 	ReleaseObject(DepthStencilView);
 	ReleaseObject(SwapChain);
 	ReleaseObject(Device);
-	
-	PostQuitMessage(0); 
-      } break;
 
-    case WM_PAINT:
-      {
-	DeviceContext->ClearRenderTargetView(RenderTargetView, BackgroundColor);
-	DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
-	SwapChain->Present(0, 0);
+	Running = false;		
       } break;
       
-    case WM_SIZE:
-      {
-      } break;
-
     default:
       {
 	Result = DefWindowProc(Window, Message, WParam, LParam);
@@ -329,8 +289,6 @@ int WINAPI WinMain(HINSTANCE Instance,
 		   int ShowCode)
 {
   WNDCLASSEXA wc = {};
-  
-  DWORD wStyles = WS_EX_ACCEPTFILES | WS_EX_TOOLWINDOW | WS_OVERLAPPEDWINDOW;
 
   wc.cbSize = sizeof(WNDCLASSEXA);
   wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC; 
@@ -361,10 +319,8 @@ int WINAPI WinMain(HINSTANCE Instance,
   
       if (Window)
 	{
-	 
-	  // CreateCube(Window);
-	  // manager2D.GetHwnd(Window);
 	  InitializeDX11(Window);
+	  CreateCube(Window); 
 	  Running = true;
 	  while(Running)
 	    {
@@ -379,14 +335,13 @@ int WINAPI WinMain(HINSTANCE Instance,
 		  TranslateMessage(&Message);
 		  DispatchMessageA(&Message);
 		}
-
-	    }
-	 
+	      DeviceContext->ClearRenderTargetView(RenderTargetView, BackgroundColor);
+	      DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
+	      SwapChain->Present(0, 0);
+	    } 
 	}
-
     }
 
-   
   return 0;
 }
 
