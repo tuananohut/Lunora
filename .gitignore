@@ -1,7 +1,11 @@
-<<<<<<< HEAD
 .vs/
 build/
- 
-=======
-"build/.vs/*" 
->>>>>>> 5f3959a5cbd24d57183e26cb01d76f05cb37a034
+*.ipch
+*.pdb
+*.obj
+*.exe
+*.dll
+*.lib
+*.exp
+*.ilk
+*.res
