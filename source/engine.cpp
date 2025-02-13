@@ -188,11 +188,11 @@ void CreateCube(HWND Window)
   ID3DBlob* ErrorBlob = nullptr;
  
   LPCWSTR VSFileName = L"../source/color.vs";
+  LPCWSTR PSFileName = L"../source/color.ps";
   
   ID3D11VertexShader* VertexShader;
   ID3D11PixelShader* PixelShader;
   
-
   Result = D3DCompileFromFile(VSFileName,
 			      NULL,
 			      NULL,
@@ -208,7 +208,7 @@ void CreateCube(HWND Window)
 	{
 	  OutputDebugStringA((char*)ErrorBlob->GetBufferPointer());
 	  ErrorBlob->Release();
-	    }
+	}
       else
 	{
 	  OutputDebugStringA("Could not compile from file");
@@ -223,12 +223,72 @@ void CreateCube(HWND Window)
     {
       OutputDebugStringA("Could not create vertex shader");
     }
-    
+  
+  Result = D3DCompileFromFile(PSFileName,
+			      NULL,
+			      NULL,
+			      "ColorPixelShader",
+			      "ps_5_0",
+			      D3D10_SHADER_ENABLE_STRICTNESS,
+			      0,
+			      &PixelShaderBlob,
+			      &ErrorBlob);
+  if(FAILED(Result))
+    {
+      if (ErrorBlob)
+	{
+	  OutputDebugStringA((char*)ErrorBlob->GetBufferPointer());
+	  ErrorBlob->Release();
+	}
+      else
+	{
+	  OutputDebugStringA("Could not compile from file");
+	}
+    }
+  
+  Result = Device->CreatePixelShader(PixelShaderBlob->GetBufferPointer(),
+				     PixelShaderBlob->GetBufferSize(),
+				     NULL,
+				     &PixelShader);
+  if(FAILED(Result))
+    {
+      OutputDebugStringA("Could not create pixel shader"); 
+    }
+  
+  D3D11_INPUT_ELEMENT_DESC PolygonLayout[2];
+  ID3D11InputLayout* Layout; 
+  int NumElements; 
+
+  PolygonLayout[0].SemanticName = "POSITION";
+  PolygonLayout[0].SemanticIndex = 0;
+  PolygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+  PolygonLayout[0].InputSlot = 0;
+  PolygonLayout[0].AlignedByteOffset = 0;
+  PolygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+  PolygonLayout[0].InstanceDataStepRate = 0;
+  
+  PolygonLayout[1].SemanticName = "COLOR";
+  PolygonLayout[1].SemanticIndex = 0;
+  PolygonLayout[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+  PolygonLayout[1].InputSlot = 0;
+  PolygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+  PolygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+  PolygonLayout[1].InstanceDataStepRate = 0;
+
+  NumElements = sizeof(PolygonLayout) / sizeof(PolygonLayout[0]);
+
+  Result = Device->CreateInputLayout(PolygonLayout, NumElements,
+				     VertexShaderBlob->GetBufferPointer(),
+				     VertexShaderBlob->GetBufferSize(), &Layout);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("Could not create layout"); 
+    }
   
   if (VertexShaderBlob) VertexShaderBlob->Release();
   if (PixelShaderBlob) PixelShaderBlob->Release();
   if (ErrorBlob) VertexShaderBlob->Release();
-  
+
   D3D11_BUFFER_DESC BufferDesc;
 
   ZeroMemory(&BufferDesc, sizeof(BufferDesc));
