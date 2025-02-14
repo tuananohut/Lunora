@@ -170,6 +170,7 @@ void InitializeDX11(HWND Window)
   DeviceContext->RSSetViewports(1, &Viewport);
 }
 
+// For shading
 struct MatrixBufferType
 {
   XMMATRIX World;
@@ -177,11 +178,16 @@ struct MatrixBufferType
   XMMATRIX Projection;
 };
 
+struct VertexType
+{
+  XMFLOAT3 position;
+  XMFLOAT4 color; 
+};
+
 void CreateCube(HWND Window)
 {
   HRESULT Result; 
   ID3D11Buffer* MatrixBuffer;
-  MatrixBufferType* MatrixBufferTypePointer;
 
   ID3DBlob* VertexShaderBlob = nullptr;
   ID3DBlob* PixelShaderBlob = nullptr;
@@ -305,6 +311,28 @@ void CreateCube(HWND Window)
       OutputDebugStringA("Could not create vertex shader");
       MatrixBuffer = nullptr;
     }
+
+  D3D11_MAPPED_SUBRESOURCE MappedResource; 
+  MatrixBufferType* MatrixBufferTypePointer;
+  unsigned int BufferNumber;
+  // ? XMMATRIX WorldMatrix, XMMATRIX ViewMatrix, XMMATRIX ProjectionMatrix;   ? 
+
+  Result = DeviceContext->Map(&MatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("Could not map matrix buffer");
+    }
+
+  MatrixBufferTypePointer = (MatrixBufferType*)MappedResource.pData;
+
+  MatrixBufferTypePointer->World = WorldMatrix;
+  MatrixBufferTypePointer->View = ViewMatrix;
+  MatrixBufferTypePointer->Projection = ProjectionMatrix;
+
+  DeviceContext->Unmap(MatrixBuffer, 0);
+
+  DeviceContext->VSSetConstantBuffers(0, 1, &MatrixBuffer); 
+  
 }
 
 LRESULT CALLBACK WindowProc(HWND Window, 
