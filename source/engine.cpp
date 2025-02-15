@@ -295,6 +295,7 @@ void CreateCube(HWND Window)
   if (PixelShaderBlob) PixelShaderBlob->Release();
   if (ErrorBlob) VertexShaderBlob->Release();
 
+  // Rendering 
   D3D11_BUFFER_DESC BufferDesc;
 
   ZeroMemory(&BufferDesc, sizeof(BufferDesc));
@@ -333,6 +334,12 @@ void CreateCube(HWND Window)
 
   DeviceContext->VSSetConstantBuffers(0, 1, &MatrixBuffer); 
   
+  DeviceContext->IASetInputLayout(Layout);
+
+  DeviceContext->VSSetShader(&VertexShader, NULL, 0);
+  DeviceContext->PSSetShader(&PixelShader, NULL, 0);
+
+  deviceContext->DrawIndexed(indexCount, 0, 0);
 }
 
 LRESULT CALLBACK WindowProc(HWND Window, 
