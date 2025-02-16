@@ -120,7 +120,7 @@ void InitializeDX11(HWND Window)
     }
   
   ReleaseObject(BackBuffer);
-
+  
   ID3D11Texture2D* DepthStencilBuffer = nullptr;
   
   D3D11_TEXTURE2D_DESC DepthStencilDesc;
@@ -168,6 +168,30 @@ void InitializeDX11(HWND Window)
   Viewport.MaxDepth = 1.f;
 
   DeviceContext->RSSetViewports(1, &Viewport);
+
+  ID3D11RasterizerState* RasterizerState = nullptr;
+
+  D3D11_RASTERIZER_DESC RasterizerDesc;
+  ZeroMemory(&RasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
+
+  RasterizerDesc.FillMode = D3D11_FILL_SOLID;
+  RasterizerDesc.CullMode = D3D11_CULL_BACK; // Try also D3D11_CULL_NONE 
+  RasterizerDesc.FrontCounterClockwise = FALSE; // Try also TRUE 
+  RasterizerDesc.DepthBias = 0;
+  RasterizerDesc.DepthBiasClamp = 0;
+  RasterizerDesc.SlopeScaledDepthBias = 0;
+  RasterizerDesc.DepthClipEnable = TRUE;
+  RasterizerDesc.ScissorEnable = FALSE;
+  RasterizerDesc.MultisampleEnable = FALSE;
+  RasterizerDesc.AntialiasedLineEnable = FALSE;
+
+  Result = Device->CreateRasterizerState(&RasterizerDesc, &RasterizerState);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("Rasterizer failed");
+    }
+
+  DeviceContext->RSSetState(RasterizerState);
 }
 
 // For shading
@@ -187,7 +211,6 @@ struct VertexType
 void CreateCube(HWND Window)
 {
   HRESULT Result; 
-  ID3D11Buffer* MatrixBuffer;
 
   ID3DBlob* VertexShaderBlob = nullptr;
   ID3DBlob* PixelShaderBlob = nullptr;
@@ -295,7 +318,10 @@ void CreateCube(HWND Window)
   if (PixelShaderBlob) PixelShaderBlob->Release();
   if (ErrorBlob) VertexShaderBlob->Release();
 
-  // Rendering 
+
+  
+
+  ID3D11Buffer* MatrixBuffer;
   D3D11_BUFFER_DESC BufferDesc;
 
   ZeroMemory(&BufferDesc, sizeof(BufferDesc));
@@ -313,12 +339,17 @@ void CreateCube(HWND Window)
       MatrixBuffer = nullptr;
     }
 
+
+
+  
   D3D11_MAPPED_SUBRESOURCE MappedResource; 
   MatrixBufferType* MatrixBufferTypePointer;
   unsigned int BufferNumber;
-  // ? XMMATRIX WorldMatrix, XMMATRIX ViewMatrix, XMMATRIX ProjectionMatrix;   ? 
-
-  Result = DeviceContext->Map(&MatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
+  // XMMATRIX WorldMatrix = ;
+  // XMMATRIX ViewMatrix = ;
+  // XMMATRIX ProjectionMatrix = ;
+  
+  Result = DeviceContext->Map(MatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
   if (FAILED(Result))
     {
       OutputDebugStringA("Could not map matrix buffer");
@@ -326,9 +357,9 @@ void CreateCube(HWND Window)
 
   MatrixBufferTypePointer = (MatrixBufferType*)MappedResource.pData;
 
-  MatrixBufferTypePointer->World = WorldMatrix;
-  MatrixBufferTypePointer->View = ViewMatrix;
-  MatrixBufferTypePointer->Projection = ProjectionMatrix;
+  // MatrixBufferTypePointer->World = WorldMatrix;
+  // MatrixBufferTypePointer->View = ViewMatrix;
+  // MatrixBufferTypePointer->Projection = ProjectionMatrix;
 
   DeviceContext->Unmap(MatrixBuffer, 0);
 
@@ -336,11 +367,14 @@ void CreateCube(HWND Window)
   
   DeviceContext->IASetInputLayout(Layout);
 
-  DeviceContext->VSSetShader(&VertexShader, NULL, 0);
-  DeviceContext->PSSetShader(&PixelShader, NULL, 0);
+  DeviceContext->VSSetShader(VertexShader, NULL, 0);
+  DeviceContext->PSSetShader(PixelShader, NULL, 0);
 
-  deviceContext->DrawIndexed(indexCount, 0, 0);
+  int indexCount = 3;
+  
+  DeviceContext->DrawIndexed(indexCount, 0, 0);
 }
+
 
 LRESULT CALLBACK WindowProc(HWND Window, 
                             UINT Message, 
