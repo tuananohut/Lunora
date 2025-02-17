@@ -162,8 +162,8 @@ void InitializeDX11(HWND Window)
   D3D11_VIEWPORT Viewport;
   Viewport.TopLeftX = 0.f;
   Viewport.TopLeftY = 0.f;
-  Viewport.Width = static_cast<float>(ScreenWidth);
-  Viewport.Height = static_cast<float>(ScreenHeight);
+  Viewport.Width = (float)ScreenWidth;
+  Viewport.Height = (float)ScreenHeight;
   Viewport.MinDepth = 0.f;
   Viewport.MaxDepth = 1.f;
 
@@ -318,12 +318,13 @@ void CreateCube(HWND Window)
   if (PixelShaderBlob) PixelShaderBlob->Release();
   if (ErrorBlob) VertexShaderBlob->Release();
 
+  // UpdateRender   
 
+  // Shader
   
-
   ID3D11Buffer* MatrixBuffer;
-  D3D11_BUFFER_DESC BufferDesc;
 
+  D3D11_BUFFER_DESC BufferDesc;
   ZeroMemory(&BufferDesc, sizeof(BufferDesc));
   BufferDesc.ByteWidth = sizeof(MatrixBufferType);
   BufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -339,8 +340,40 @@ void CreateCube(HWND Window)
       MatrixBuffer = nullptr;
     }
 
+  // Cube Vertex
 
+  D3D11_BUFFER_DESC VertexBufferDesc; 
+  ID3D11Buffer *VertexBuffer; 
+  int VertexCount = 3;
+  VertexType* Vertices = new VertexType[VertexCount];
 
+  Vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f); 
+  Vertices[0].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+
+  Vertices[1].position = XMFLOAT3(0.0f, 1.0f, 0.0f); 
+  Vertices[1].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+
+  Vertices[2].position = XMFLOAT3(1.0f, -1.0f, 0.0f);
+  Vertices[2].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+
+  ZeroMemory(&VertexBufferDesc, sizeof(VertexBufferDesc));
+  VertexBufferDesc.ByteWidth = sizeof(VertexType) * VertexCount;
+  VertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  VertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+  VertexBufferDesc.CPUAccessFlags = 0;
+  VertexBufferDesc.MiscFlags = 0;
+  VertexBufferDesc.StructureByteStride = 0;
+  
+  D3D11_SUBRESOURCE_DATA VertexData; 
+  VertexData.pSysMem = Vertices;
+  VertexData.SysMemPitch = 0;
+  VertexData.SysMemSlicePitch = 0;
+  
+  Result = Device->CreateBuffer(&VertexBufferDesc, &VertexData, &VertexBuffer);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("Could not create vertex buffer");
+    }
   
   D3D11_MAPPED_SUBRESOURCE MappedResource; 
   MatrixBufferType* MatrixBufferTypePointer;
