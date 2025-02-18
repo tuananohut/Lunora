@@ -358,7 +358,7 @@ void CreateCube(HWND Window)
 
   ZeroMemory(&VertexBufferDesc, sizeof(VertexBufferDesc));
   VertexBufferDesc.ByteWidth = sizeof(VertexType) * VertexCount;
-  VertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  VertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
   VertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
   VertexBufferDesc.CPUAccessFlags = 0;
   VertexBufferDesc.MiscFlags = 0;
@@ -374,6 +374,50 @@ void CreateCube(HWND Window)
     {
       OutputDebugStringA("Could not create vertex buffer");
     }
+  
+  // Index Vertex
+
+  D3D11_BUFFER_DESC IndexBufferDesc; 
+  ID3D11Buffer *IndexBuffer; 
+  int IndexCount = 3;
+  unsigned long *Indices = new unsigned long[IndexCount];
+
+  Indices[0] = 0;
+  Indices[1] = 1;
+  Indices[2] = 2;
+  
+  ZeroMemory(&IndexBufferDesc, sizeof(IndexBufferDesc));
+  IndexBufferDesc.ByteWidth = sizeof(unsigned long) * IndexCount;
+  IndexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+  IndexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+  IndexBufferDesc.CPUAccessFlags = 0;
+  IndexBufferDesc.MiscFlags = 0;
+  IndexBufferDesc.StructureByteStride = 0;
+  
+  D3D11_SUBRESOURCE_DATA IndexData; 
+  IndexData.pSysMem = Indices;
+  IndexData.SysMemPitch = 0;
+  IndexData.SysMemSlicePitch = 0;
+  
+  Result = Device->CreateBuffer(&IndexBufferDesc, &IndexData, &IndexBuffer);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("Could not create index buffer");
+    }
+
+  delete[] Vertices;
+  Vertices = 0;
+
+  delete[] Indices;
+  Indices = 0;
+
+  unsigned int stride = sizeof(VertexType);
+  unsigned int offset = 0;
+
+  DeviceContext->IASetVertexBuffers(0, 1, &VertexBuffer, &stride, &offset);
+  DeviceContext->IASetIndexBuffer(IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+  DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
   
   D3D11_MAPPED_SUBRESOURCE MappedResource; 
   MatrixBufferType* MatrixBufferTypePointer;
