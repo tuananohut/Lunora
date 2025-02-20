@@ -174,6 +174,8 @@ static void InitializeDX11(HWND Window)
 
   DeviceContext->RSSetViewports(1, &Viewport);
 
+  DeviceContext->OMSetRenderTargets(1, &RenderTargetView, DepthStencilView);
+  
   ID3D11RasterizerState* RasterizerState = nullptr;
 
   D3D11_RASTERIZER_DESC RasterizerDesc;
@@ -341,14 +343,14 @@ static void CreateCube(HWND Window)
   int VertexCount = 3;
   VertexType* Vertices = new VertexType[VertexCount];
 
-  Vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f); 
-  Vertices[0].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+  Vertices[0].position = XMFLOAT3(-0.1f, -0.1f, 0.f); 
+  Vertices[0].color = XMFLOAT4(1.f, 0.f, 0.f, 1.f);
 
-  Vertices[1].position = XMFLOAT3(0.0f, 1.0f, 0.0f); 
-  Vertices[1].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+  Vertices[1].position = XMFLOAT3(0.f, 0.1f, 0.f); 
+  Vertices[1].color = XMFLOAT4(0.f, 1.f, 0.f, 1.f);
 
-  Vertices[2].position = XMFLOAT3(1.0f, -1.0f, 0.0f);
-  Vertices[2].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+  Vertices[2].position = XMFLOAT3(0.1f, -0.1f, 0.f);
+  Vertices[2].color = XMFLOAT4(0.f, 0.f, 1.f, 1.f);
 
   ZeroMemory(&VertexBufferDesc, sizeof(VertexBufferDesc));
   VertexBufferDesc.ByteWidth = sizeof(VertexType) * VertexCount;
@@ -417,12 +419,22 @@ static void RenderCube(ID3D11VertexShader *VertexShader,
 		       ID3D11Buffer *IndexBuffer,
 		       ID3D11InputLayout *Layout)
 {
+  unsigned int stride = sizeof(VertexType);
+  unsigned int offset = 0;
+  
+  DeviceContext->IASetVertexBuffers(0, 1, &VertexBuffer, &stride, &offset);
+  DeviceContext->IASetIndexBuffer(IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+  
+  DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+  
   D3D11_MAPPED_SUBRESOURCE MappedResource; 
   MatrixBufferType* MatrixBufferTypePointer;
   unsigned int BufferNumber;
   HRESULT Result; 
 
-  DeviceContext->OMSetRenderTargets(1, &RenderTargetView, DepthStencilView);
+  WorldMatrix = XMMatrixTranspose(WorldMatrix);
+  ViewMatrix = XMMatrixTranspose(ViewMatrix);
+  ProjectionMatrix = XMMatrixTranspose(ProjectionMatrix);
   
   Result = DeviceContext->Map(MatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
   if (FAILED(Result))
@@ -435,9 +447,9 @@ static void RenderCube(ID3D11VertexShader *VertexShader,
   MatrixBufferTypePointer->World = WorldMatrix;
   MatrixBufferTypePointer->View = ViewMatrix;
   MatrixBufferTypePointer->Projection = ProjectionMatrix;
-
+  
   DeviceContext->Unmap(MatrixBuffer, 0);
-
+  
   DeviceContext->VSSetConstantBuffers(0, 1, &MatrixBuffer); 
   
   DeviceContext->IASetInputLayout(Layout);
@@ -446,14 +458,6 @@ static void RenderCube(ID3D11VertexShader *VertexShader,
   DeviceContext->PSSetShader(PixelShader, NULL, 0);
   
   DeviceContext->DrawIndexed(IndexCount, 0, 0);
-  
-  unsigned int stride = sizeof(VertexType);
-  unsigned int offset = 0;
-
-  DeviceContext->IASetVertexBuffers(0, 1, &VertexBuffer, &stride, &offset);
-  DeviceContext->IASetIndexBuffer(IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
-  DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 LRESULT CALLBACK WindowProc(HWND Window, 
@@ -546,7 +550,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  XMMATRIX ProjectionMatrix = XMMatrixPerspectiveFovLH
 	    (
 	     XM_PIDIV4,
-	     1920.0f / 1080.0f,
+	     800.0f / 600.0f,
 	     0.1f,
 	     1000.0f
 	     );
@@ -566,8 +570,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 		  DispatchMessageA(&Message);
 		}
 	      DeviceContext->ClearRenderTargetView(RenderTargetView, BackgroundColor);
-	      // DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
-	      SwapChain->Present(1, 0);
+	      DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH, 1.f, 0);
+	      // SwapChain->Present(1, 0);
 	      
 	      RenderCube(VertexShader,
 			 PixelShader,
@@ -580,7 +584,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 			 IndexBuffer,
 			 Layout);
 	      
-	      // SwapChain->Present(1, 0);
+	      SwapChain->Present(1, 0);
 	    } 
 	}
     }
