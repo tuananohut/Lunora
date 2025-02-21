@@ -14,6 +14,9 @@ using namespace std;
 
 static bool Running;
 
+static UINT ScreenWidth = 1200;
+static UINT ScreenHeight = 720;
+
 static ID3D11Device* Device = nullptr;
 static ID3D11DeviceContext* DeviceContext = nullptr;
 static IDXGISwapChain* SwapChain;
@@ -43,8 +46,6 @@ static void InitializeDX11(HWND Window)
 
   UINT MultiSamplingCount = 4;
   UINT MultiSamplingQualityLevels = 0;
-  UINT ScreenWidth = 800;
-  UINT ScreenHeight = 600;
   bool MultiSamplingEnabled = false; 
 
   ZeroMemory(&SwapChainDesc, sizeof(SwapChainDesc));
@@ -182,15 +183,15 @@ static void InitializeDX11(HWND Window)
   ZeroMemory(&RasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
 
   RasterizerDesc.FillMode = D3D11_FILL_SOLID;
-  RasterizerDesc.CullMode = D3D11_CULL_BACK; // Try also D3D11_CULL_NONE 
-  RasterizerDesc.FrontCounterClockwise = FALSE; // Try also TRUE 
+  RasterizerDesc.CullMode = D3D11_CULL_NONE;  
+  RasterizerDesc.FrontCounterClockwise = FALSE; 
   RasterizerDesc.DepthBias = 0;
   RasterizerDesc.DepthBiasClamp = 0;
   RasterizerDesc.SlopeScaledDepthBias = 0;
   RasterizerDesc.DepthClipEnable = TRUE;
   RasterizerDesc.ScissorEnable = FALSE;
   RasterizerDesc.MultisampleEnable = FALSE;
-  RasterizerDesc.AntialiasedLineEnable = FALSE;
+  RasterizerDesc.AntialiasedLineEnable = TRUE;
 
   Result = Device->CreateRasterizerState(&RasterizerDesc, &RasterizerState);
   if (FAILED(Result))
@@ -201,7 +202,6 @@ static void InitializeDX11(HWND Window)
   DeviceContext->RSSetState(RasterizerState);
 }
 
-// For shading
 struct MatrixBufferType
 {
   XMMATRIX World;
@@ -527,7 +527,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 				    wc.lpszClassName,          
 				    "Lunora",  
 				    WS_OVERLAPPEDWINDOW | WS_VISIBLE,        
-				    x, y, 1280, 720,
+				    x, y, ScreenWidth, ScreenHeight,
 				    NULL,       
 				    NULL,       
 				    Instance,  
@@ -550,7 +550,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  XMMATRIX ProjectionMatrix = XMMatrixPerspectiveFovLH
 	    (
 	     XM_PIDIV4,
-	     800.0f / 600.0f,
+	     ScreenWidth / ScreenHeight,
 	     0.1f,
 	     1000.0f
 	     );
@@ -571,7 +571,13 @@ int WINAPI WinMain(HINSTANCE Instance,
 		}
 	      DeviceContext->ClearRenderTargetView(RenderTargetView, BackgroundColor);
 	      DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH, 1.f, 0);
-	      // SwapChain->Present(1, 0);
+	      
+	      XMMATRIX RotationMatrixX = XMMatrixRotationX(0.01f);
+	      XMMATRIX RotationMatrixY = XMMatrixRotationY(0.3f);
+
+	      XMMATRIX RotationMatrix = XMMatrixMultiply(RotationMatrixX, RotationMatrixY);
+	      
+	      WorldMatrix  = XMMatrixMultiply(WorldMatrix, RotationMatrix);
 	      
 	      RenderCube(VertexShader,
 			 PixelShader,
