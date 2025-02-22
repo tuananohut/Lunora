@@ -14,7 +14,7 @@ using namespace std;
 
 static bool Running;
 
-static UINT ScreenWidth = 1200;
+static UINT ScreenWidth = 1280;
 static UINT ScreenHeight = 720;
 
 static ID3D11Device* Device = nullptr;
@@ -41,13 +41,88 @@ static void InitializeDX11(HWND Window)
 #endif
   
   D3D_FEATURE_LEVEL FeatureLevel = D3D_FEATURE_LEVEL_11_1;
-  
-  DXGI_SWAP_CHAIN_DESC SwapChainDesc;
 
+  IDXGIFactory *DXGIFactory;
+  IDXGIAdapter *Adapter = nullptr;
+  IDXGIOutput *Display;
+  UINT NumModes, Numerator, Denominator;
+
+  DXGI_MODE_DESC *DisplayModeList;
+  DXGI_ADAPTER_DESC AdapterDesc; 
+  
+  Result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void **)&DXGIFactory); 
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("Failed to get DXGI Factory");
+    }
+
+  Result = DXGIFactory->EnumAdapters(0, &Adapter);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("There is no adapter");
+    }
+  
+  Result = Adapter->EnumOutputs(0, &Display);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("There is no display");
+    }
+
+  Result = Display->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &NumModes, NULL);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("GetDisplayModeList did not work");
+    }
+
+  DisplayModeList = new DXGI_MODE_DESC[NumModes];
+  if(!DisplayModeList)
+    {
+      OutputDebugStringA("Could not create DisplayModeList");
+    }
+
+  Result = Display->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &NumModes, DisplayModeList);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("GetDisplayModeList with DisplayModeList did not work");
+    }
+  
+  for (UINT i = 0;
+       i < NumModes;
+       i++)
+    {
+      if (DisplayModeList[i].Width == (UINT)ScreenWidth)
+	{
+	  if (DisplayModeList[i].Height == (UINT)ScreenHeight)
+	    {
+	      Numerator = DisplayModeList[i].RefreshRate.Numerator;
+	      Denominator = DisplayModeList[i].RefreshRate.Denominator; 
+	    }
+	}
+    }
+
+  Result = Adapter->GetDesc(&AdapterDesc);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("GetDesc did not work");
+    }
+
+  int VideoCardMemory = (int)(AdapterDesc.DedicatedVideoMemory / 1024 / 1024); 
+
+  delete[] DisplayModeList;
+  DisplayModeList = 0;
+
+  Display->Release();
+  Display = 0;
+
+  DXGIFactory->Release();
+  DXGIFactory = 0;
+  
   UINT MultiSamplingCount = 4;
   UINT MultiSamplingQualityLevels = 0;
-  bool MultiSamplingEnabled = false; 
-
+  bool MultiSamplingEnabled = false;
+  
+  DXGI_SWAP_CHAIN_DESC SwapChainDesc;
+    
   ZeroMemory(&SwapChainDesc, sizeof(SwapChainDesc));
   SwapChainDesc.BufferDesc.Width = ScreenWidth;
   SwapChainDesc.BufferDesc.Height = ScreenHeight;
@@ -56,9 +131,31 @@ static void InitializeDX11(HWND Window)
   SwapChainDesc.BufferCount = 1;
   SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
   SwapChainDesc.OutputWindow = Window;
-  SwapChainDesc.Windowed = TRUE;
-  SwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
-  SwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
+
+  bool FullScreen = false;
+  
+  if (FullScreen)
+    {
+      SwapChainDesc.Windowed = FALSE;
+    }
+  else
+    {
+      SwapChainDesc.Windowed = TRUE;
+    }
+  
+  bool VSYNC_ENABLED = true;
+
+  if (VSYNC_ENABLED)
+    {
+      SwapChainDesc.BufferDesc.RefreshRate.Numerator = Numerator;
+      SwapChainDesc.BufferDesc.RefreshRate.Denominator = Denominator;
+    }
+  else
+    {
+      SwapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
+      SwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
+    }
+  
   SwapChainDesc.Flags = 0;
   
   if (MultiSamplingEnabled)
@@ -96,13 +193,12 @@ static void InitializeDX11(HWND Window)
       OutputDebugStringA("Failed to get DXGI Device");
     }
   
-  IDXGIAdapter* DXGIAdapter = nullptr;
-  Result = DXGIDevice->GetParent(__uuidof(IDXGIAdapter), reinterpret_cast<void**>(&DXGIAdapter));
+  Result = DXGIDevice->GetParent(__uuidof(Adapter), reinterpret_cast<void**>(&Adapter));
   if (FAILED(Result))
     {
       OutputDebugStringA("DXGI Adapter");
     }
-    
+   
   Result = Device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM,
 						 MultiSamplingCount,
 						 &MultiSamplingQualityLevels);
@@ -112,7 +208,7 @@ static void InitializeDX11(HWND Window)
     }
 
   ReleaseObject(DXGIDevice);
-  ReleaseObject(DXGIAdapter);
+  ReleaseObject(Adapter);
   
   ID3D11Texture2D* BackBuffer;
   Result = SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&BackBuffer));
