@@ -2,7 +2,6 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
-#include <fstream>
 #include "resource.h"
 
 using namespace DirectX;
@@ -562,9 +561,36 @@ LRESULT CALLBACK WindowProc(HWND Window,
                             LPARAM LParam)
 {
   LRESULT Result = 0;
+  HRESULT ResultE;
 
   switch (Message)
-    {      
+    {
+    case WM_INPUT:
+      {
+	UINT DwSize;
+
+	GetRawInputData((HRAWINPUT)LParam, RID_INPUT, NULL, &DwSize, sizeof(RAWINPUTHEADER));
+	LPBYTE InputSizeInBytes = new BYTE[DwSize];
+
+	if (GetRawInputData((HRAWINPUT)LParam, RID_INPUT, InputSizeInBytes, &DwSize, sizeof(RAWINPUTHEADER)))
+	  {
+	    OutputDebugStringA("GetRawInputData does not return correct size");
+	  }
+
+	RAWINPUT* Raw = (RAWINPUT *)InputSizeInBytes;
+
+	if (Raw->header.dwType == RIM_TYPEKEYBOARD)
+	  {
+	    OutputDebugStringA("What does it even mean?\n");
+	  }
+	else
+	  {
+	    OutputDebugStringA("What did not work?\n");
+	  }
+
+	delete[] InputSizeInBytes;
+      }break;
+      
     case WM_CLOSE: 
       {
 	Running = false;
