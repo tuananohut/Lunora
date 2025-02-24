@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <windows.h>
 #include <d3d11.h>
 #include <DirectXMath.h>
@@ -565,30 +566,50 @@ LRESULT CALLBACK WindowProc(HWND Window,
 
   switch (Message)
     {
-    case WM_INPUT:
+    case WM_SYSKEYDOWN:
+    case WM_SYSKEYUP:
+    case WM_KEYDOWN:
+    case WM_KEYUP:  
       {
-	UINT DwSize;
+	uint32_t VKCode = WParam;
+	int32_t WasDown = ((LParam & (1 << 30)) != 0);
+	int32_t IsDown = ((LParam & (1 << 31)) == 0);
 
-	GetRawInputData((HRAWINPUT)LParam, RID_INPUT, NULL, &DwSize, sizeof(RAWINPUTHEADER));
-	LPBYTE InputSizeInBytes = new BYTE[DwSize];
-
-	if (GetRawInputData((HRAWINPUT)LParam, RID_INPUT, InputSizeInBytes, &DwSize, sizeof(RAWINPUTHEADER)))
+	if (WasDown != IsDown)
 	  {
-	    OutputDebugStringA("GetRawInputData does not return correct size");
+	    if (VKCode == 'W')
+	      {
+		OutputDebugStringA("W: ");
+		if (IsDown)
+		  {
+		    OutputDebugStringA("IsDown ");
+		  }
+		if (WasDown)
+		  {
+		    OutputDebugStringA("KeyDown ");
+		  }
+		OutputDebugStringA("\n");
+	      }
+
+	    else if (VKCode == 'A') {}  
+	    else if (VKCode == 'S') {}
+	    else if (VKCode == 'D') {}
+	    else if (VKCode == 'Q') {}
+	    else if (VKCode == 'E') {}
+	    else if (VKCode == VK_UP) {}
+	    else if (VKCode == VK_LEFT) {}
+	    else if (VKCode == VK_DOWN) {}
+	    else if (VKCode == VK_RIGHT) {}
+	    else if (VKCode == VK_ESCAPE) {}
+	    else if (VKCode == VK_SPACE) {}
 	  }
-
-	RAWINPUT* Raw = (RAWINPUT *)InputSizeInBytes;
-
-	if (Raw->header.dwType == RIM_TYPEKEYBOARD)
+	
+	int32_t AltKeyWasDown = (LParam & (1 << 29));
+	if ((VKCode == VK_F4) && AltKeyWasDown)
 	  {
-	    OutputDebugStringA("What does it even mean?\n");
-	  }
-	else
-	  {
-	    OutputDebugStringA("What did not work?\n");
-	  }
-
-	delete[] InputSizeInBytes;
+	    Running = false; 
+	  } 
+	
       }break;
       
     case WM_CLOSE: 
