@@ -31,6 +31,21 @@ static ID3D11Buffer *IndexBuffer;
 static ID3D11Buffer *MatrixBuffer;
 static ID3D11InputLayout *Layout; 
 
+static XMMATRIX WorldMatrix = XMMatrixIdentity();
+static XMMATRIX ViewMatrix = XMMatrixLookAtLH
+  (
+   XMVectorSet(0.0f, 0.0f, -1.0f, 1.0f),
+   XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
+   XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)
+   );
+static XMMATRIX ProjectionMatrix = XMMatrixPerspectiveFovLH
+  (
+   XM_PIDIV4,
+   ScreenWidth / ScreenHeight,
+   0.1f,
+   1000.0f
+   );
+
 static void InitializeDX11(HWND Window)
 {
   HRESULT Result;
@@ -580,9 +595,20 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	    if (VKCode == 'W')
 	      {
 		OutputDebugStringA("W: ");
-		if (IsDown)
+		float speed = 0.15f;
+		static float time = 0.f;
+
+		time -= 0.01;
+		if (time < 0.f)
 		  {
-		    OutputDebugStringA("IsDown ");
+		    time += 0.5f;
+		  }
+		
+		if (IsDown)
+		  {        
+		    speed *= time; 
+		    WorldMatrix = XMMatrixTranslation(0.f, speed, 0.f);
+		    OutputDebugStringA("IsDown ");   
 		  }
 		if (WasDown)
 		  {
@@ -682,22 +708,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	{
 	  InitializeDX11(Window);
 	  CreateCube(Window);
-	  
-	  XMMATRIX WorldMatrix = XMMatrixIdentity();
-	  XMMATRIX ViewMatrix = XMMatrixLookAtLH
-	    (
-	     XMVectorSet(0.0f, 0.0f, -1.0f, 1.0f),
-	     XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
-	     XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)
-	     );
-	  XMMATRIX ProjectionMatrix = XMMatrixPerspectiveFovLH
-	    (
-	     XM_PIDIV4,
-	     ScreenWidth / ScreenHeight,
-	     0.1f,
-	     1000.0f
-	     );
-	  
+	  	  
 	  Running = true;
 	  while(Running)
 	    {
