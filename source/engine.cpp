@@ -594,8 +594,10 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	  {
 	    if (VKCode == 'W')
 	      {
+		/*
 		OutputDebugStringA("W: ");
-		float speed = 0.15f;
+	        float speed = 0.15f;
+		static float location = 0.f; 
 		static float time = 0.f;
 
 		time -= 0.01;
@@ -606,8 +608,8 @@ LRESULT CALLBACK WindowProc(HWND Window,
 		
 		if (IsDown)
 		  {        
-		    speed *= time; 
-		    WorldMatrix = XMMatrixTranslation(0.f, speed, 0.f);
+		    location += speed * time; 
+		    WorldMatrix = XMMatrixTranslation(0.f, location, 0.f);
 		    OutputDebugStringA("IsDown ");   
 		  }
 		if (WasDown)
@@ -615,6 +617,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
 		    OutputDebugStringA("KeyDown ");
 		  }
 		OutputDebugStringA("\n");
+		*/
 	      }
 
 	    else if (VKCode == 'A') {}  
@@ -628,6 +631,48 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	    else if (VKCode == VK_RIGHT) {}
 	    else if (VKCode == VK_ESCAPE) {}
 	    else if (VKCode == VK_SPACE) {}
+	  }
+
+	static struct
+	  Velocity
+	{
+	  float x;
+	  float y; 
+	};
+
+	static Velocity velocity = {0};
+	
+	if (IsDown)
+	  {
+	    float speed = 0.15f;
+	    
+	    static float locationX = 0.f; 
+	    static float locationY = 0.f;
+
+	    if (VKCode == 'W')
+	      {
+		velocity.y = +speed;
+	      }
+	    
+	    else if (VKCode == 'S')
+	      {
+		velocity.y = -speed;
+	      }
+	    
+	    else if (VKCode == 'D')
+	      {
+		velocity.x = +speed;
+	      }
+	    
+	    else if (VKCode == 'A')
+	      {
+		velocity.x = -speed;
+	      }
+
+	    locationX += velocity.x; 
+	    locationY += velocity.y;
+	    
+	    WorldMatrix = XMMatrixTranslation(locationX, locationY, 0.f);
 	  }
 	
 	int32_t AltKeyWasDown = (LParam & (1 << 29));
@@ -725,14 +770,14 @@ int WINAPI WinMain(HINSTANCE Instance,
 		}
 	      DeviceContext->ClearRenderTargetView(RenderTargetView, BackgroundColor);
 	      DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH, 1.f, 0);
-	      
+	      /* 
 	      XMMATRIX RotationMatrixX = XMMatrixRotationX(0.01f);
 	      XMMATRIX RotationMatrixY = XMMatrixRotationY(0.3f);
 
 	      XMMATRIX RotationMatrix = XMMatrixMultiply(RotationMatrixX, RotationMatrixY);
 	      
 	      WorldMatrix  = XMMatrixMultiply(WorldMatrix, RotationMatrix);
-	      
+	      */ 
 	      RenderCube(VertexShader,
 			 PixelShader,
 			 3,
