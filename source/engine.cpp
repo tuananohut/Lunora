@@ -309,7 +309,7 @@ static void InitializeDX11(HWND Window)
     {
       OutputDebugStringA("Rasterizer failed");
     }
-
+  
   DeviceContext->RSSetState(RasterizerState);
 }
 
@@ -631,48 +631,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	    else if (VKCode == VK_RIGHT) {}
 	    else if (VKCode == VK_ESCAPE) {}
 	    else if (VKCode == VK_SPACE) {}
-	  }
-
-	static struct
-	  Velocity
-	{
-	  float x;
-	  float y; 
-	};
-
-	static Velocity velocity = {0};
-	
-	if (IsDown)
-	  {
-	    float speed = 0.15f;
-	    
-	    static float locationX = 0.f; 
-	    static float locationY = 0.f;
-
-	    if (VKCode == 'W')
-	      {
-		velocity.y = +speed;
-	      }
-	    
-	    else if (VKCode == 'S')
-	      {
-		velocity.y = -speed;
-	      }
-	    
-	    else if (VKCode == 'D')
-	      {
-		velocity.x = +speed;
-	      }
-	    
-	    else if (VKCode == 'A')
-	      {
-		velocity.x = -speed;
-	      }
-
-	    locationX += velocity.x; 
-	    locationY += velocity.y;
-	    
-	    WorldMatrix = XMMatrixTranslation(locationX, locationY, 0.f);
+   
 	  }
 	
 	int32_t AltKeyWasDown = (LParam & (1 << 29));
@@ -752,8 +711,10 @@ int WINAPI WinMain(HINSTANCE Instance,
       if (Window)
 	{
 	  InitializeDX11(Window);
+	  
 	  CreateCube(Window);
-	  	  
+	  // CreateCube(Window);
+	  
 	  Running = true;
 	  while(Running)
 	    {
@@ -770,14 +731,42 @@ int WINAPI WinMain(HINSTANCE Instance,
 		}
 	      DeviceContext->ClearRenderTargetView(RenderTargetView, BackgroundColor);
 	      DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH, 1.f, 0);
-	      /* 
+
+	      WorldMatrix = XMMatrixIdentity();
+	      ViewMatrix = XMMatrixLookAtLH
+		(
+		 XMVectorSet(0.0f, 0.0f, -1.0f, 1.0f),
+		 XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
+		 XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)
+		 );
+	      ProjectionMatrix = XMMatrixPerspectiveFovLH
+		(
+		 XM_PIDIV4,
+		 ScreenWidth / ScreenHeight,
+		 0.1f,
+		 1000.0f
+		 );
+	      
 	      XMMATRIX RotationMatrixX = XMMatrixRotationX(0.01f);
 	      XMMATRIX RotationMatrixY = XMMatrixRotationY(0.3f);
 
 	      XMMATRIX RotationMatrix = XMMatrixMultiply(RotationMatrixX, RotationMatrixY);
 	      
-	      WorldMatrix  = XMMatrixMultiply(WorldMatrix, RotationMatrix);
-	      */ 
+	      WorldMatrix = XMMatrixMultiply(RotationMatrix, WorldMatrix);
+	      
+	      RenderCube(VertexShader,
+			 PixelShader,
+			 3,
+			 MatrixBuffer,
+			 WorldMatrix,
+			 ViewMatrix,
+			 ProjectionMatrix,
+			 VertexBuffer,
+			 IndexBuffer,
+			 Layout);
+
+	      WorldMatrix = XMMatrixTranslation(0.f, 0.2f, 0.f);
+	      
 	      RenderCube(VertexShader,
 			 PixelShader,
 			 3,
