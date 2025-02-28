@@ -2,26 +2,39 @@
 #define _RENDERER_H_
 
 #include <d3d11.h>
-#include <WinUser.h>
-#include <wrl/client.h>
+#include <DirectXMath.h>
 
-#include <windows.h>
-#include <d2d1.h>
+using namespace DirectX;
 
-struct RenderManager2D
-{
-  ID2D1Factory* Factory;
-  ID2D1HwndRenderTarget* RenderTarget;
-  ID2D1SolidColorBrush* Brush;
-  D2D1_ELLIPSE ellipse;
-  HWND Window; 
+#define DeleteObject(object) if ((object) != NULL) { delete object; object = NULL; }
+#define DeleteObjects(objects) if ((objects) != NULL) { delete[] objects; objects = NULL; }
+#define ReleaseObject(object) if ((object) != NULL) { object->Release(); object = NULL; }
 
-  void    CalculateLayout();
-  HRESULT CreateGraphicsResources();
-  void    OnPaint();
-  void    Resize();
-  void    Shutdown(); 
-  void	  GetHwnd(HWND hwnd);
-};
+static UINT ScreenWidth = 1280;
+static UINT ScreenHeight = 720;
+
+static XMMATRIX WorldMatrix = XMMatrixIdentity();
+static XMMATRIX ViewMatrix = XMMatrixLookAtLH
+  (
+   XMVectorSet(0.0f, 0.0f, -1.0f, 1.0f),
+   XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
+   XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)
+   );
+static XMMATRIX ProjectionMatrix = XMMatrixPerspectiveFovLH
+  (
+   XM_PIDIV4,
+   ScreenWidth / ScreenHeight,
+   0.1f,
+   1000.0f
+   );
+
+static ID3D11Device* Device = nullptr;
+static ID3D11DeviceContext* DeviceContext = nullptr;
+static IDXGISwapChain* SwapChain;
+static ID3D11RenderTargetView* RenderTargetView = nullptr;  
+static ID3D11DepthStencilView* DepthStencilView = nullptr;
+static FLOAT BackgroundColor[4] = {0.141f, 0.137f, 0.365f, 1.f};
+
+static void InitializeDX11(HWND Window);
 
 #endif
