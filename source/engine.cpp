@@ -30,16 +30,13 @@ struct VertexBufferType
   XMFLOAT4 color; 
 };
 
-static void CreateCube(HWND Window)
+static void CreateCube(HWND Window, const LPCWSTR VSFilename, const LPCWSTR PSFilename)
 {
   HRESULT Result; 
 
   ID3DBlob* VertexShaderBlob = nullptr;
   ID3DBlob* PixelShaderBlob = nullptr;
   ID3DBlob* ErrorBlob = nullptr;
- 
-  LPCWSTR VSFileName = L"../source/color.vs";
-  LPCWSTR PSFileName = L"../source/color.ps";
   
   Result = D3DCompileFromFile(VSFileName,
 			      NULL,
@@ -160,13 +157,13 @@ static void CreateCube(HWND Window)
 
   Vertices[0].position = XMFLOAT3(-0.1f, -0.1f, 0.f); 
   Vertices[0].color = XMFLOAT4(1.f, 0.f, 0.f, 1.f);
-
+    
   Vertices[1].position = XMFLOAT3(0.f, 0.1f, 0.f); 
   Vertices[1].color = XMFLOAT4(0.f, 1.f, 0.f, 1.f);
-
+    
   Vertices[2].position = XMFLOAT3(0.1f, -0.1f, 0.f);
   Vertices[2].color = XMFLOAT4(0.f, 0.f, 1.f, 1.f);
-
+  
   ZeroMemory(&VertexBufferDesc, sizeof(VertexBufferDesc));
   VertexBufferDesc.ByteWidth = sizeof(VertexBufferType) * VertexCount;
   VertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -174,7 +171,7 @@ static void CreateCube(HWND Window)
   VertexBufferDesc.CPUAccessFlags = 0;
   VertexBufferDesc.MiscFlags = 0;
   VertexBufferDesc.StructureByteStride = 0;
-  
+
   D3D11_SUBRESOURCE_DATA VertexData; 
   VertexData.pSysMem = Vertices;
   VertexData.SysMemPitch = 0;
@@ -264,6 +261,15 @@ static void RenderCube(ID3D11VertexShader *VertexShader,
   MatrixBufferTypePointer->Projection = ProjectionMatrix;
   
   DeviceContext->Unmap(MatrixBuffer, 0);
+
+  float currentTime = static_cast<float>(GetTickCount64()) / 1000.f;
+  ID3D11Buffer* TimeBuffer;
+  
+  DeviceContext->Map(TimeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
+
+  memcpy(MappedResource.pData, &currentTime, sizeof(float));
+
+  DeviceContext->Unmap(TimeBuffer, 0);
   
   DeviceContext->VSSetConstantBuffers(0, 1, &MatrixBuffer); 
   
@@ -416,7 +422,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	{
 	  InitializeDX11(Window);
 	  
-	  CreateCube(Window);
+	  CreateCube(Window, VSFileName, PSFileName);
 	  // CreateCube(Window);
 	  
 	  Running = true;

@@ -35,6 +35,11 @@ static ID3D11RenderTargetView* RenderTargetView = nullptr;
 static ID3D11DepthStencilView* DepthStencilView = nullptr;
 static FLOAT BackgroundColor[4] = {0.141f, 0.137f, 0.365f, 1.f};
 
+// Default colors 
+LPCWSTR VSFileName = L"../source/color.vs";
+LPCWSTR PSFileName = L"../source/color.ps";
+
 static void InitializeDX11(HWND Window);
+static void CreateCube(HWND Window, LPCWSTR VSFilename, LPCWSTR PSFilename);
 
 #endif

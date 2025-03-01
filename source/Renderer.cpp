@@ -18,7 +18,7 @@ static void InitializeDX11(HWND Window)
 
   DXGI_MODE_DESC *DisplayModeList;
   DXGI_ADAPTER_DESC AdapterDesc; 
-  
+
   Result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void **)&DXGIFactory); 
   if (FAILED(Result))
     {
