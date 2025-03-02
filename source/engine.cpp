@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <windows.h>
 #include <d3dcompiler.h>
+#include <vector>
 
 #include "resource.h"
 #include "renderer.h"
@@ -30,7 +31,32 @@ struct VertexBufferType
   XMFLOAT4 color; 
 };
 
-static void CreateCube(HWND Window, const LPCWSTR VSFilename, const LPCWSTR PSFilename)
+struct Color
+{
+  float R;
+  float G;
+  float B;
+  float A; 
+};
+
+static std::vector<XMFLOAT4> VertexColors
+  {
+    XMFLOAT4(1.f, 0.f, 0.f, 1.f),
+    XMFLOAT4(0.f, 1.f, 0.f, 1.f),
+    XMFLOAT4(0.f, 0.f, 1.f, 1.f)
+  };
+
+static void ChangeColor(const Color& Color, std::vector<XMFLOAT4>& VertexColors)
+{
+  VertexColors =
+    {
+      XMFLOAT4(Color.R, Color.G, Color.B, Color.A),
+      XMFLOAT4(Color.R, Color.G, Color.B, Color.A),
+      XMFLOAT4(Color.R, Color.G, Color.B, Color.A)
+    };
+}
+
+static void CreateCube(HWND Window, const LPCWSTR VSFileName, const LPCWSTR PSFileName)
 {
   HRESULT Result; 
 
@@ -156,13 +182,13 @@ static void CreateCube(HWND Window, const LPCWSTR VSFilename, const LPCWSTR PSFi
   VertexBufferType* Vertices = new VertexBufferType[VertexCount];
 
   Vertices[0].position = XMFLOAT3(-0.1f, -0.1f, 0.f); 
-  Vertices[0].color = XMFLOAT4(1.f, 0.f, 0.f, 1.f);
+  Vertices[0].color = VertexColors[0];
     
   Vertices[1].position = XMFLOAT3(0.f, 0.1f, 0.f); 
-  Vertices[1].color = XMFLOAT4(0.f, 1.f, 0.f, 1.f);
+  Vertices[1].color = VertexColors[1];
     
   Vertices[2].position = XMFLOAT3(0.1f, -0.1f, 0.f);
-  Vertices[2].color = XMFLOAT4(0.f, 0.f, 1.f, 1.f);
+  Vertices[2].color = VertexColors[2];
   
   ZeroMemory(&VertexBufferDesc, sizeof(VertexBufferDesc));
   VertexBufferDesc.ByteWidth = sizeof(VertexBufferType) * VertexCount;
@@ -217,7 +243,6 @@ static void CreateCube(HWND Window, const LPCWSTR VSFilename, const LPCWSTR PSFi
 
   delete[] Indices;
   Indices = 0;
-
 }
 
 static void RenderCube(ID3D11VertexShader *VertexShader,
@@ -231,6 +256,7 @@ static void RenderCube(ID3D11VertexShader *VertexShader,
 		       ID3D11Buffer *IndexBuffer,
 		       ID3D11InputLayout *Layout)
 {
+  HRESULT Result;
   unsigned int stride = sizeof(VertexBufferType);
   unsigned int offset = 0;
   
@@ -242,7 +268,6 @@ static void RenderCube(ID3D11VertexShader *VertexShader,
   D3D11_MAPPED_SUBRESOURCE MappedResource; 
   MatrixBufferType* MatrixBufferTypePointer;
   unsigned int BufferNumber;
-  HRESULT Result; 
 
   WorldMatrix = XMMatrixTranspose(WorldMatrix);
   ViewMatrix = XMMatrixTranspose(ViewMatrix);
@@ -261,15 +286,6 @@ static void RenderCube(ID3D11VertexShader *VertexShader,
   MatrixBufferTypePointer->Projection = ProjectionMatrix;
   
   DeviceContext->Unmap(MatrixBuffer, 0);
-
-  float currentTime = static_cast<float>(GetTickCount64()) / 1000.f;
-  ID3D11Buffer* TimeBuffer;
-  
-  DeviceContext->Map(TimeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
-
-  memcpy(MappedResource.pData, &currentTime, sizeof(float));
-
-  DeviceContext->Unmap(TimeBuffer, 0);
   
   DeviceContext->VSSetConstantBuffers(0, 1, &MatrixBuffer); 
   
@@ -304,30 +320,15 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	  {
 	    if (VKCode == 'W')
 	      {
-		/*
-		OutputDebugStringA("W: ");
-	        float speed = 0.15f;
-		static float location = 0.f; 
-		static float time = 0.f;
-
-		time -= 0.01;
-		if (time < 0.f)
-		  {
-		    time += 0.5f;
-		  }
-		
 		if (IsDown)
 		  {        
-		    location += speed * time; 
-		    WorldMatrix = XMMatrixTranslation(0.f, location, 0.f);
-		    OutputDebugStringA("IsDown ");   
+		    Color Red = {1.f, 0.f, 0.f, 1.f}; 
+		    ChangeColor(Red, VertexColors);	    
 		  }
 		if (WasDown)
 		  {
-		    OutputDebugStringA("KeyDown ");
-		  }
-		OutputDebugStringA("\n");
-		*/
+        
+		  }	
 	      }
 
 	    else if (VKCode == 'A') {}  
@@ -421,10 +422,17 @@ int WINAPI WinMain(HINSTANCE Instance,
       if (Window)
 	{
 	  InitializeDX11(Window);
+
+	  static float R = 0.f;
+	  static float G = 0.f;
+	  static float B = 0.f;
+	  static float A = 1.f;
+
+	  static Color Colorful{R, G, B, A};
+	  ChangeColor(Colorful, VertexColors); 
 	  
 	  CreateCube(Window, VSFileName, PSFileName);
-	  // CreateCube(Window);
-	  
+
 	  Running = true;
 	  while(Running)
 	    {
@@ -463,20 +471,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      XMMATRIX RotationMatrix = XMMatrixMultiply(RotationMatrixX, RotationMatrixY);
 	      
 	      WorldMatrix = XMMatrixMultiply(RotationMatrix, WorldMatrix);
-	      
-	      RenderCube(VertexShader,
-			 PixelShader,
-			 3,
-			 MatrixBuffer,
-			 WorldMatrix,
-			 ViewMatrix,
-			 ProjectionMatrix,
-			 VertexBuffer,
-			 IndexBuffer,
-			 Layout);
 
-	      WorldMatrix = XMMatrixTranslation(0.f, 0.2f, 0.f);
-	      
 	      RenderCube(VertexShader,
 			 PixelShader,
 			 3,

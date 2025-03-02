@@ -10,8 +10,8 @@ using namespace DirectX;
 #define DeleteObjects(objects) if ((objects) != NULL) { delete[] objects; objects = NULL; }
 #define ReleaseObject(object) if ((object) != NULL) { object->Release(); object = NULL; }
 
-static UINT ScreenWidth = 1280;
-static UINT ScreenHeight = 720;
+const UINT ScreenWidth = 1280;
+const UINT ScreenHeight = 720;
 
 static XMMATRIX WorldMatrix = XMMatrixIdentity();
 static XMMATRIX ViewMatrix = XMMatrixLookAtLH
@@ -36,8 +36,8 @@ static ID3D11DepthStencilView* DepthStencilView = nullptr;
 static FLOAT BackgroundColor[4] = {0.141f, 0.137f, 0.365f, 1.f};
 
 // Default colors 
-LPCWSTR VSFileName = L"../source/color.vs";
-LPCWSTR PSFileName = L"../source/color.ps";
+static LPCWSTR VSFileName = L"../source/color.vs";
+static LPCWSTR PSFileName = L"../source/color.ps";
 
 static void InitializeDX11(HWND Window);
 static void CreateCube(HWND Window, LPCWSTR VSFilename, LPCWSTR PSFilename);
