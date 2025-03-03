@@ -179,31 +179,16 @@ static void CreateCube(HWND Window, const LPCWSTR VSFileName, const LPCWSTR PSFi
 
   D3D11_BUFFER_DESC VertexBufferDesc; 
   int VertexCount = 3;
-  VertexBufferType* Vertices = new VertexBufferType[VertexCount];
 
-  Vertices[0].position = XMFLOAT3(-0.1f, -0.1f, 0.f); 
-  Vertices[0].color = VertexColors[0];
-    
-  Vertices[1].position = XMFLOAT3(0.f, 0.1f, 0.f); 
-  Vertices[1].color = VertexColors[1];
-    
-  Vertices[2].position = XMFLOAT3(0.1f, -0.1f, 0.f);
-  Vertices[2].color = VertexColors[2];
-  
   ZeroMemory(&VertexBufferDesc, sizeof(VertexBufferDesc));
   VertexBufferDesc.ByteWidth = sizeof(VertexBufferType) * VertexCount;
-  VertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+  VertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC ;
   VertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-  VertexBufferDesc.CPUAccessFlags = 0;
+  VertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
   VertexBufferDesc.MiscFlags = 0;
   VertexBufferDesc.StructureByteStride = 0;
-
-  D3D11_SUBRESOURCE_DATA VertexData; 
-  VertexData.pSysMem = Vertices;
-  VertexData.SysMemPitch = 0;
-  VertexData.SysMemSlicePitch = 0;
   
-  Result = Device->CreateBuffer(&VertexBufferDesc, &VertexData, &VertexBuffer);
+  Result = Device->CreateBuffer(&VertexBufferDesc, nullptr, &VertexBuffer);
   if (FAILED(Result))
     {
       OutputDebugStringA("Could not create vertex buffer");
@@ -238,9 +223,6 @@ static void CreateCube(HWND Window, const LPCWSTR VSFileName, const LPCWSTR PSFi
       OutputDebugStringA("Could not create index buffer");
     }
 
-  delete[] Vertices;
-  Vertices = 0;
-
   delete[] Indices;
   Indices = 0;
 }
@@ -259,16 +241,38 @@ static void RenderCube(ID3D11VertexShader *VertexShader,
   HRESULT Result;
   unsigned int stride = sizeof(VertexBufferType);
   unsigned int offset = 0;
+
+  D3D11_MAPPED_SUBRESOURCE MappedResource; 
+  
+  MatrixBufferType* MatrixBufferTypePointer;
+  unsigned int BufferNumber;
+
+  VertexBufferType* VertexBufferTypePointer;
+
+  Result = DeviceContext->Map(VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("Could not map vertex buffer");
+    }
+  
+  VertexBufferTypePointer = (VertexBufferType*)MappedResource.pData;
+
+  VertexBufferTypePointer[0].position = XMFLOAT3(-0.1f, -0.1f, 0.f);
+  VertexBufferTypePointer[0].color = VertexColors[0];
+
+  VertexBufferTypePointer[1].position = XMFLOAT3(0.f, 0.1f, 0.f);
+  VertexBufferTypePointer[1].color = VertexColors[1]; 
+  
+  VertexBufferTypePointer[2].position = XMFLOAT3(0.1f, -0.1f, 0.f);
+  VertexBufferTypePointer[2].color = VertexColors[2]; 
+
+  DeviceContext->Unmap(VertexBuffer, 0);
   
   DeviceContext->IASetVertexBuffers(0, 1, &VertexBuffer, &stride, &offset);
   DeviceContext->IASetIndexBuffer(IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
   
   DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
   
-  D3D11_MAPPED_SUBRESOURCE MappedResource; 
-  MatrixBufferType* MatrixBufferTypePointer;
-  unsigned int BufferNumber;
-
   WorldMatrix = XMMatrixTranspose(WorldMatrix);
   ViewMatrix = XMMatrixTranspose(ViewMatrix);
   ProjectionMatrix = XMMatrixTranspose(ProjectionMatrix);
@@ -316,24 +320,32 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	int32_t WasDown = ((LParam & (1 << 30)) != 0);
 	int32_t IsDown = ((LParam & (1 << 31)) == 0);
 
+	Color Red = {1.f, 0.f, 0.f, 1.f}; 
+	Color Green = {0.f, 1.f, 0.f, 1.f}; 
+	Color Blue = {0.f, 0.f, 1.f, 1.f}; 
+
 	if (WasDown != IsDown)
 	  {
 	    if (VKCode == 'W')
-	      {
-		if (IsDown)
-		  {        
-		    Color Red = {1.f, 0.f, 0.f, 1.f}; 
-		    ChangeColor(Red, VertexColors);	    
-		  }
-		if (WasDown)
-		  {
-        
-		  }	
+	      {        	
+		ChangeColor(Red, VertexColors);	    
 	      }
 
-	    else if (VKCode == 'A') {}  
-	    else if (VKCode == 'S') {}
-	    else if (VKCode == 'D') {}
+	    else if (VKCode == 'A')
+	      {
+		ChangeColor(Green, VertexColors);
+	      }
+	    
+	    else if (VKCode == 'S')
+	      {	
+		ChangeColor(Blue, VertexColors);
+	      }
+	    
+	    else if (VKCode == 'D')
+	      {
+	        
+	      }
+	    
 	    else if (VKCode == 'Q') {}
 	    else if (VKCode == 'E') {}
 	    else if (VKCode == VK_UP) {}
@@ -423,14 +435,14 @@ int WINAPI WinMain(HINSTANCE Instance,
 	{
 	  InitializeDX11(Window);
 
-	  static float R = 0.f;
+	  /* static float R = 0.f;
 	  static float G = 0.f;
 	  static float B = 0.f;
 	  static float A = 1.f;
 
 	  static Color Colorful{R, G, B, A};
 	  ChangeColor(Colorful, VertexColors); 
-	  
+	  */
 	  CreateCube(Window, VSFileName, PSFileName);
 
 	  Running = true;
