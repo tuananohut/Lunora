@@ -46,7 +46,7 @@ static std::vector<XMFLOAT4> VertexColors
     XMFLOAT4(0.f, 0.f, 1.f, 1.f)
   };
 
-static void ChangeColor(const Color& Color, std::vector<XMFLOAT4>& VertexColors)
+static void ChangeColor(const Color& Color)
 {
   VertexColors =
     {
@@ -54,6 +54,13 @@ static void ChangeColor(const Color& Color, std::vector<XMFLOAT4>& VertexColors)
       XMFLOAT4(Color.R, Color.G, Color.B, Color.A),
       XMFLOAT4(Color.R, Color.G, Color.B, Color.A)
     };
+}
+
+static void ChangeColor(const std::vector<XMFLOAT4>& vertexColors)
+{ 
+  VertexColors[0] = vertexColors[0];
+  VertexColors[1] = vertexColors[1];
+  VertexColors[2] = vertexColors[2];
 }
 
 static void CreateCube(HWND Window, const LPCWSTR VSFileName, const LPCWSTR PSFileName)
@@ -328,22 +335,30 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	  {
 	    if (VKCode == 'W')
 	      {        	
-		ChangeColor(Red, VertexColors);	    
+		ChangeColor(Red);
 	      }
 
 	    else if (VKCode == 'A')
 	      {
-		ChangeColor(Green, VertexColors);
+		ChangeColor(Green);
 	      }
 	    
 	    else if (VKCode == 'S')
 	      {	
-		ChangeColor(Blue, VertexColors);
+		ChangeColor(Blue);
 	      }
 	    
 	    else if (VKCode == 'D')
 	      {
-	        
+		std::vector<XMFLOAT4> vertexColors
+		  {
+		    XMFLOAT4(1.f, 0.f, 0.f, 1.f),
+		    XMFLOAT4(0.f, 1.f, 0.f, 1.f),
+		    XMFLOAT4(0.f, 0.f, 1.f, 1.f)
+		    
+		  };
+		
+	        ChangeColor(vertexColors);
 	      }
 	    
 	    else if (VKCode == 'Q') {}
