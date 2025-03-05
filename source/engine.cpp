@@ -248,7 +248,7 @@ static void RenderCube(ID3D11VertexShader *VertexShader,
   HRESULT Result;
   unsigned int stride = sizeof(VertexBufferType);
   unsigned int offset = 0;
-
+  
   D3D11_MAPPED_SUBRESOURCE MappedResource; 
   
   MatrixBufferType* MatrixBufferTypePointer;
@@ -256,14 +256,18 @@ static void RenderCube(ID3D11VertexShader *VertexShader,
 
   VertexBufferType* VertexBufferTypePointer;
 
+  WorldMatrix = XMMatrixTranspose(WorldMatrix);
+  ViewMatrix = XMMatrixTranspose(ViewMatrix);
+  ProjectionMatrix = XMMatrixTranspose(ProjectionMatrix);
+
   Result = DeviceContext->Map(VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
   if (FAILED(Result))
     {
       OutputDebugStringA("Could not map vertex buffer");
     }
-  
+ 
   VertexBufferTypePointer = (VertexBufferType*)MappedResource.pData;
-
+  
   VertexBufferTypePointer[0].position = XMFLOAT3(-0.1f, -0.1f, 0.f);
   VertexBufferTypePointer[0].color = VertexColors[0];
 
@@ -280,9 +284,7 @@ static void RenderCube(ID3D11VertexShader *VertexShader,
   
   DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
   
-  WorldMatrix = XMMatrixTranspose(WorldMatrix);
-  ViewMatrix = XMMatrixTranspose(ViewMatrix);
-  ProjectionMatrix = XMMatrixTranspose(ProjectionMatrix);
+  //
   
   Result = DeviceContext->Map(MatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
   if (FAILED(Result))
@@ -449,17 +451,24 @@ int WINAPI WinMain(HINSTANCE Instance,
       if (Window)
 	{
 	  InitializeDX11(Window);
-
-	  /* static float R = 0.f;
-	  static float G = 0.f;
-	  static float B = 0.f;
-	  static float A = 1.f;
-
-	  static Color Colorful{R, G, B, A};
-	  ChangeColor(Colorful, VertexColors); 
-	  */
+	  
 	  CreateCube(Window, VSFileName, PSFileName);
 
+	  WorldMatrix = XMMatrixIdentity();
+	  ViewMatrix = XMMatrixLookAtLH
+	    (
+	     XMVectorSet(0.0f, 0.0f, -1.0f, 1.0f),
+	     XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
+	     XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)
+	     );
+	  ProjectionMatrix = XMMatrixPerspectiveFovLH
+	    (
+	     XM_PIDIV4,
+	     ScreenWidth / ScreenHeight,
+	     0.1f,
+	     1000.0f
+	     );
+	  
 	  Running = true;
 	  while(Running)
 	    {
@@ -476,29 +485,46 @@ int WINAPI WinMain(HINSTANCE Instance,
 		}
 	      DeviceContext->ClearRenderTargetView(RenderTargetView, BackgroundColor);
 	      DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH, 1.f, 0);
-
-	      WorldMatrix = XMMatrixIdentity();
-	      ViewMatrix = XMMatrixLookAtLH
-		(
-		 XMVectorSet(0.0f, 0.0f, -1.0f, 1.0f),
-		 XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
-		 XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)
-		 );
-	      ProjectionMatrix = XMMatrixPerspectiveFovLH
-		(
-		 XM_PIDIV4,
-		 ScreenWidth / ScreenHeight,
-		 0.1f,
-		 1000.0f
-		 );
 	      
-	      XMMATRIX RotationMatrixX = XMMatrixRotationX(0.01f);
-	      XMMATRIX RotationMatrixY = XMMatrixRotationY(0.3f);
+	      const float half_gravity = 5.f;
+	      static float height = 0.35f;
+	      static float time = 0.0174532925f; // 1.f/60.f;
+	      
+	      height -= (half_gravity * time * time) + (0.0025f); 
+	      if (height < -0.5f)
+		{
+		  height = 0.5f;
+		}
 
+	      static float rotation = 0.f; 
+	      
+	      rotation -= 0.0174532925f * 2.f;
+	      if(rotation < 0.0f)
+		{
+		  rotation += 360.0f;
+		}
+	      
+	      XMMATRIX RotationMatrixX = XMMatrixRotationX(rotation);
+	      XMMATRIX RotationMatrixY = XMMatrixRotationY(rotation);
+	      
 	      XMMATRIX RotationMatrix = XMMatrixMultiply(RotationMatrixX, RotationMatrixY);
 	      
-	      WorldMatrix = XMMatrixMultiply(RotationMatrix, WorldMatrix);
+	      XMMATRIX TranslationMatrix = XMMatrixTranslation(0.f, height, 0.f); 
+	      
+	      // WorldMatrix = XMMatrixMultiply(WorldMatrix, RotationMatrix);
 
+	       
+	      
+	      XMMATRIX TranslationAndRotation = XMMatrixMultiply(RotationMatrixY, TranslationMatrix);
+	      
+	      // WorldMatrix = XMMatrixMultiply(WorldMatrix, TranslationAndRotation); 
+
+	      // WorldMatrix = XMMatrixMultiply(RotationMatrix, TranslationMatrix);
+
+	      WorldMatrix = TranslationAndRotation; 
+	      
+	      // WorldMatrix = XMMatrixMultiply(TranslationAndRotation, WorldMatrix); 
+	      
 	      RenderCube(VertexShader,
 			 PixelShader,
 			 3,
