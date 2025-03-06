@@ -333,31 +333,83 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	Color Green = {0.f, 1.f, 0.f, 1.f}; 
 	Color Blue = {0.f, 0.f, 1.f, 1.f}; 
 
+	static float moveX = 0.f; 
+	static float moveY = 0.f;
+	
+	XMMATRIX Translation = XMMatrixTranslation(moveX, moveY, 0.f);
+	
 	if (WasDown != IsDown)
 	  {
 	    if (VKCode == 'W')
-	      {        	
+	      {
+		if(IsDown)
+		  {
+		    if (moveY >= 0.35f)
+		      {
+			moveY = 0.3f;
+		      }
+		    else
+		      {
+			moveY += 0.1f;
+		      }
+		  }
+		
 		ChangeColor(Red);
 	      }
 
 	    else if (VKCode == 'A')
 	      {
+		if (IsDown)
+		  {
+		    if (moveX <= -0.35f)
+		      {
+			moveX = -0.3f; 
+		      }
+		    else
+		      {
+			moveX -= 0.1f;
+		      }
+		  }
+
 		ChangeColor(Green);
 	      }
 	    
 	    else if (VKCode == 'S')
-	      {	
+	      {
+		if (IsDown)
+		  {
+		    if (moveY <= -0.35f)
+		      {
+			moveY = -0.3f; 
+		      }
+		    else
+		      {
+			moveY -= 0.1f;
+		      }
+		  }
+		
 		ChangeColor(Blue);
 	      }
 	    
 	    else if (VKCode == 'D')
 	      {
+		if (IsDown)
+		  {
+		    if (moveX >= 0.35f)
+		      {
+ 			moveX = 0.3f;
+		      }
+		    else
+		      {
+			moveX += 0.1f; 
+		      }
+		  }
+		
 		std::vector<XMFLOAT4> vertexColors
 		  {
 		    XMFLOAT4(1.f, 0.f, 0.f, 1.f),
 		    XMFLOAT4(0.f, 1.f, 0.f, 1.f),
 		    XMFLOAT4(0.f, 0.f, 1.f, 1.f)
-		    
 		  };
 		
 	        ChangeColor(vertexColors);
@@ -371,7 +423,10 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	    else if (VKCode == VK_RIGHT) {}
 	    else if (VKCode == VK_ESCAPE) {}
 	    else if (VKCode == VK_SPACE) {}
-   
+
+	    Translation = XMMatrixTranslation(moveX, moveY, 0.f);
+     
+	    WorldMatrix = Translation; 
 	  }
 	
 	int32_t AltKeyWasDown = (LParam & (1 << 29));
@@ -503,7 +558,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 		{
 		  rotation += 360.0f;
 		}
-	      
+	      /*
 	      XMMATRIX RotationMatrixX = XMMatrixRotationX(rotation);
 	      XMMATRIX RotationMatrixY = XMMatrixRotationY(rotation);
 	      
@@ -511,20 +566,10 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      
 	      XMMATRIX TranslationMatrix = XMMatrixTranslation(0.f, height, 0.f); 
 	      
-	      // WorldMatrix = XMMatrixMultiply(WorldMatrix, RotationMatrix);
-
-	       
-	      
 	      XMMATRIX TranslationAndRotation = XMMatrixMultiply(RotationMatrixY, TranslationMatrix);
-	      
-	      // WorldMatrix = XMMatrixMultiply(WorldMatrix, TranslationAndRotation); 
-
-	      // WorldMatrix = XMMatrixMultiply(RotationMatrix, TranslationMatrix);
-
+	     
 	      WorldMatrix = TranslationAndRotation; 
-	      
-	      // WorldMatrix = XMMatrixMultiply(TranslationAndRotation, WorldMatrix); 
-	      
+	      */
 	      RenderCube(VertexShader,
 			 PixelShader,
 			 3,
