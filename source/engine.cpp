@@ -16,7 +16,20 @@ static ID3D11PixelShader* PixelShader;
 static ID3D11Buffer *VertexBuffer; 
 static ID3D11Buffer *IndexBuffer; 
 static ID3D11Buffer *MatrixBuffer;
-static ID3D11InputLayout *Layout; 
+static ID3D11InputLayout *Layout;
+
+static float rotation = 0.f; 
+
+static XMMATRIX RotationMatrixX = XMMatrixRotationX(rotation);
+static XMMATRIX RotationMatrixY = XMMatrixRotationY(rotation);
+static XMMATRIX RotationMatrixZ = XMMatrixRotationZ(rotation);
+
+static XMMATRIX RotationMatrix = XMMatrixMultiply(RotationMatrixX, RotationMatrixY);
+
+static float moveX = 0.f; 
+static float moveY = 0.f;
+	
+static XMMATRIX Translation = XMMatrixTranslation(moveX, moveY, 0.f);
 
 struct MatrixBufferType
 {
@@ -268,13 +281,13 @@ static void RenderCube(ID3D11VertexShader *VertexShader,
  
   VertexBufferTypePointer = (VertexBufferType*)MappedResource.pData;
   
-  VertexBufferTypePointer[0].position = XMFLOAT3(-0.1f, -0.1f, 0.f);
+  VertexBufferTypePointer[0].position = XMFLOAT3(-1.f, -1.f, 0.f);
   VertexBufferTypePointer[0].color = VertexColors[0];
 
-  VertexBufferTypePointer[1].position = XMFLOAT3(0.f, 0.1f, 0.f);
+  VertexBufferTypePointer[1].position = XMFLOAT3(0.f, 2.f, 0.f);
   VertexBufferTypePointer[1].color = VertexColors[1]; 
   
-  VertexBufferTypePointer[2].position = XMFLOAT3(0.1f, -0.1f, 0.f);
+  VertexBufferTypePointer[2].position = XMFLOAT3(1.f, -1.f, 0.f);
   VertexBufferTypePointer[2].color = VertexColors[2]; 
 
   DeviceContext->Unmap(VertexBuffer, 0);
@@ -317,7 +330,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
 {
   LRESULT Result = 0;
   HRESULT ResultE;
-
+  
   switch (Message)
     {
     case WM_SYSKEYDOWN:
@@ -332,11 +345,6 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	Color Red = {1.f, 0.f, 0.f, 1.f}; 
 	Color Green = {0.f, 1.f, 0.f, 1.f}; 
 	Color Blue = {0.f, 0.f, 1.f, 1.f}; 
-
-	static float moveX = 0.f; 
-	static float moveY = 0.f;
-	
-	XMMATRIX Translation = XMMatrixTranslation(moveX, moveY, 0.f);
 	
 	if (WasDown != IsDown)
 	  {
@@ -344,13 +352,13 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	      {
 		if(IsDown)
 		  {
-		    if (moveY >= 0.35f)
+		    if (moveY >= 3.5f)
 		      {
-			moveY = 0.3f;
+			moveY = 3.f;
 		      }
 		    else
 		      {
-			moveY += 0.1f;
+			moveY += 1.f;
 		      }
 		  }
 		
@@ -361,13 +369,13 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	      {
 		if (IsDown)
 		  {
-		    if (moveX <= -0.35f)
+		    if (moveX <= -3.5f)
 		      {
-			moveX = -0.3f; 
+			moveX = -3.f; 
 		      }
 		    else
 		      {
-			moveX -= 0.1f;
+			moveX -= 1.f;
 		      }
 		  }
 
@@ -378,13 +386,13 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	      {
 		if (IsDown)
 		  {
-		    if (moveY <= -0.35f)
+		    if (moveY <= -3.5f)
 		      {
-			moveY = -0.3f; 
+			moveY = -3.f; 
 		      }
 		    else
 		      {
-			moveY -= 0.1f;
+			moveY -= 1.f;
 		      }
 		  }
 		
@@ -395,13 +403,13 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	      {
 		if (IsDown)
 		  {
-		    if (moveX >= 0.35f)
+		    if (moveX >= 3.5f)
 		      {
- 			moveX = 0.3f;
+ 			moveX = 3.f;
 		      }
 		    else
 		      {
-			moveX += 0.1f; 
+			moveX += 1.f; 
 		      }
 		  }
 		
@@ -423,10 +431,6 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	    else if (VKCode == VK_RIGHT) {}
 	    else if (VKCode == VK_ESCAPE) {}
 	    else if (VKCode == VK_SPACE) {}
-
-	    Translation = XMMatrixTranslation(moveX, moveY, 0.f);
-     
-	    WorldMatrix = Translation; 
 	  }
 	
 	int32_t AltKeyWasDown = (LParam & (1 << 29));
@@ -512,9 +516,9 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  WorldMatrix = XMMatrixIdentity();
 	  ViewMatrix = XMMatrixLookAtLH
 	    (
-	     XMVectorSet(0.0f, 0.0f, -1.0f, 1.0f),
+	     XMVectorSet(0.0f, 0.0f, -10.0f, 1.0f), // -1
 	     XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
-	     XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)
+	     XMVectorSet(0.0f, 10.0f, 0.0f, 0.0f)
 	     );
 	  ProjectionMatrix = XMMatrixPerspectiveFovLH
 	    (
@@ -550,26 +554,26 @@ int WINAPI WinMain(HINSTANCE Instance,
 		{
 		  height = 0.5f;
 		}
-
-	      static float rotation = 0.f; 
 	      
 	      rotation -= 0.0174532925f * 2.f;
 	      if(rotation < 0.0f)
 		{
 		  rotation += 360.0f;
 		}
-	      /*
-	      XMMATRIX RotationMatrixX = XMMatrixRotationX(rotation);
-	      XMMATRIX RotationMatrixY = XMMatrixRotationY(rotation);
 	      
-	      XMMATRIX RotationMatrix = XMMatrixMultiply(RotationMatrixX, RotationMatrixY);
+	      Translation = XMMatrixTranslation(moveX, moveY, 0.f);
+
+	      RotationMatrixX = XMMatrixRotationX(rotation);
+	      RotationMatrixY = XMMatrixRotationY(rotation);
+	      RotationMatrixZ = XMMatrixRotationZ(rotation);
+
+	      RotationMatrix = XMMatrixMultiply(RotationMatrixX, RotationMatrixY);
+	      RotationMatrix = XMMatrixMultiply(RotationMatrix, RotationMatrixZ);
 	      
-	      XMMATRIX TranslationMatrix = XMMatrixTranslation(0.f, height, 0.f); 
+	      XMMATRIX TranslationAndRotation = XMMatrixMultiply(RotationMatrix, Translation);
 	      
-	      XMMATRIX TranslationAndRotation = XMMatrixMultiply(RotationMatrixY, TranslationMatrix);
-	     
 	      WorldMatrix = TranslationAndRotation; 
-	      */
+	      
 	      RenderCube(VertexShader,
 			 PixelShader,
 			 3,
