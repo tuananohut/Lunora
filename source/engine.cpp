@@ -18,19 +18,21 @@ static ID3D11Buffer *IndexBuffer;
 static ID3D11Buffer *MatrixBuffer;
 static ID3D11InputLayout *Layout;
 
+struct Transform
+{
+  XMMATRIX Translation;
+  XMMATRIX RotationMatrixX;
+  XMMATRIX RotationMatrixY;
+  XMMATRIX RotationMatrixZ;
+  XMMATRIX RotationMatrix;
+  XMMATRIX Scale; 
+};
+
 static float rotation = 0.f; 
-
-static XMMATRIX RotationMatrixX = XMMatrixRotationX(rotation);
-static XMMATRIX RotationMatrixY = XMMatrixRotationY(rotation);
-static XMMATRIX RotationMatrixZ = XMMatrixRotationZ(rotation);
-
-static XMMATRIX RotationMatrix = XMMatrixMultiply(RotationMatrixX, RotationMatrixY);
 
 static float moveX = 0.f; 
 static float moveY = 0.f;
 	
-static XMMATRIX Translation = XMMatrixTranslation(moveX, moveY, 0.f);
-
 struct MatrixBufferType
 {
   XMMATRIX World;
@@ -44,12 +46,19 @@ struct VertexBufferType
   XMFLOAT4 color; 
 };
 
+struct Entity
+{
+  ID3D11Buffer* vertexBuffer;
+  ID3D11Buffer* indexBuffer;
+  UINT indexCount;
+};
+
 struct Color
 {
   float R;
   float G;
   float B;
-  float A; 
+  float A;
 };
 
 static std::vector<XMFLOAT4> VertexColors
@@ -278,20 +287,20 @@ static void RenderCube(ID3D11VertexShader *VertexShader,
     {
       OutputDebugStringA("Could not map vertex buffer");
     }
- 
+   
   VertexBufferTypePointer = (VertexBufferType*)MappedResource.pData;
   
-  VertexBufferTypePointer[0].position = XMFLOAT3(-1.f, -1.f, 0.f);
-  VertexBufferTypePointer[0].color = VertexColors[0];
+  VertexBufferTypePointer[0].position = XMFLOAT3(-2.f, -2.f, 0.f);
+  VertexBufferTypePointer[0].color = VertexColors[1];
 
-  VertexBufferTypePointer[1].position = XMFLOAT3(0.f, 2.f, 0.f);
-  VertexBufferTypePointer[1].color = VertexColors[1]; 
+  VertexBufferTypePointer[1].position = XMFLOAT3(-1.f, 2.f, 0.f);
+  VertexBufferTypePointer[1].color = VertexColors[0]; 
   
-  VertexBufferTypePointer[2].position = XMFLOAT3(1.f, -1.f, 0.f);
+  VertexBufferTypePointer[2].position = XMFLOAT3(0.f, -1.f, 0.f);
   VertexBufferTypePointer[2].color = VertexColors[2]; 
 
   DeviceContext->Unmap(VertexBuffer, 0);
-  
+ 
   DeviceContext->IASetVertexBuffers(0, 1, &VertexBuffer, &stride, &offset);
   DeviceContext->IASetIndexBuffer(IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
   
@@ -341,7 +350,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	uint32_t VKCode = WParam;
 	int32_t WasDown = ((LParam & (1 << 30)) != 0);
 	int32_t IsDown = ((LParam & (1 << 31)) == 0);
-
+	
 	Color Red = {1.f, 0.f, 0.f, 1.f}; 
 	Color Green = {0.f, 1.f, 0.f, 1.f}; 
 	Color Blue = {0.f, 0.f, 1.f, 1.f}; 
@@ -405,7 +414,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
 		  {
 		    if (moveX >= 3.5f)
 		      {
- 			moveX = 3.f;
+			moveX = 3.f;
 		      }
 		    else
 		      {
@@ -420,7 +429,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
 		    XMFLOAT4(0.f, 0.f, 1.f, 1.f)
 		  };
 		
-	        ChangeColor(vertexColors);
+		ChangeColor(vertexColors);
 	      }
 	    
 	    else if (VKCode == 'Q') {}
@@ -431,6 +440,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	    else if (VKCode == VK_RIGHT) {}
 	    else if (VKCode == VK_ESCAPE) {}
 	    else if (VKCode == VK_SPACE) {}
+	  
 	  }
 	
 	int32_t AltKeyWasDown = (LParam & (1 << 29));
@@ -560,17 +570,19 @@ int WINAPI WinMain(HINSTANCE Instance,
 		{
 		  rotation += 360.0f;
 		}
-	      
-	      Translation = XMMatrixTranslation(moveX, moveY, 0.f);
 
-	      RotationMatrixX = XMMatrixRotationX(rotation);
-	      RotationMatrixY = XMMatrixRotationY(rotation);
-	      RotationMatrixZ = XMMatrixRotationZ(rotation);
-
-	      RotationMatrix = XMMatrixMultiply(RotationMatrixX, RotationMatrixY);
-	      RotationMatrix = XMMatrixMultiply(RotationMatrix, RotationMatrixZ);
+	      Transform CubeTransform;
 	      
-	      XMMATRIX TranslationAndRotation = XMMatrixMultiply(RotationMatrix, Translation);
+	      CubeTransform.Translation = XMMatrixTranslation(moveX, moveY, 0.f);
+
+	      CubeTransform.RotationMatrixX = XMMatrixRotationX(rotation);
+	      CubeTransform.RotationMatrixY = XMMatrixRotationY(rotation);
+	      CubeTransform.RotationMatrixZ = XMMatrixRotationZ(rotation);
+
+	      CubeTransform.RotationMatrix = XMMatrixMultiply(CubeTransform.RotationMatrixX, CubeTransform.RotationMatrixY);
+	      CubeTransform.RotationMatrix = XMMatrixMultiply(CubeTransform.RotationMatrix, CubeTransform.RotationMatrixZ);
+	      
+	      XMMATRIX TranslationAndRotation = XMMatrixMultiply(CubeTransform.RotationMatrix, CubeTransform.Translation);
 	      
 	      WorldMatrix = TranslationAndRotation; 
 	      
