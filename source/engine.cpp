@@ -46,13 +46,6 @@ struct VertexBufferType
   XMFLOAT4 color; 
 };
 
-struct Entity
-{
-  ID3D11Buffer* vertexBuffer;
-  ID3D11Buffer* indexBuffer;
-  UINT indexCount;
-};
-
 struct Color
 {
   float R;
@@ -289,8 +282,13 @@ static void RenderCube(ID3D11VertexShader *VertexShader,
     }
    
   VertexBufferTypePointer = (VertexBufferType*)MappedResource.pData;
+
+  // TODO: Automate 
+  VertexBufferType vertexBufferType[3]; 
+  vertexBufferType[0].position = XMFLOAT3(-2.f, -2.f, 0.f);
   
-  VertexBufferTypePointer[0].position = XMFLOAT3(-2.f, -2.f, 0.f);
+  // VertexBufferTypePointer[0].position = XMFLOAT3(-2.f, -2.f, 0.f);
+  VertexBufferTypePointer[0].position = vertexBufferType[0].position;
   VertexBufferTypePointer[0].color = VertexColors[1];
 
   VertexBufferTypePointer[1].position = XMFLOAT3(-1.f, 2.f, 0.f);
@@ -596,6 +594,26 @@ int WINAPI WinMain(HINSTANCE Instance,
 			 VertexBuffer,
 			 IndexBuffer,
 			 Layout);
+
+	      Transform CubeTransform2;
+	      CubeTransform2.Translation = XMMatrixTranslation(-1.f, 0.f, 0.f);
+	      CubeTransform2.RotationMatrixX = XMMatrixRotationX(rotation);
+
+	      CubeTransform2.RotationMatrix = XMMatrixMultiply(CubeTransform2.Translation, CubeTransform2.RotationMatrixX); 
+
+	      WorldMatrix = CubeTransform2.RotationMatrix;
+			      
+	      RenderCube(VertexShader,
+			 PixelShader,
+			 3,
+			 MatrixBuffer,
+			 WorldMatrix,
+			 ViewMatrix,
+			 ProjectionMatrix,
+			 VertexBuffer,
+			 IndexBuffer,
+			 Layout);
+
 	      
 	      SwapChain->Present(1, 0);
 	    } 
