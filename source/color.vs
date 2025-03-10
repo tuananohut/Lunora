@@ -3,7 +3,6 @@ cbuffer MatrixBuffer
 	matrix WorldMatrix;
 	matrix ViewMatrix;
 	matrix ProjectionMatrix;
-	float Time;
 };
 
 struct VertexInputType
