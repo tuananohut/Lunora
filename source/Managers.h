@@ -7,17 +7,13 @@ struct RenderManager
   RenderManager();
   ~RenderManager();
 
-  void StartUp(); 
-  void ShutDown();
+
 };
 
 struct PhysicsManager
 {
   PhysicsManager();
   ~PhysicsManager();
-
-  void StartUp();
-  void ShutDown();
 };
 
 struct MemoryManager{};
