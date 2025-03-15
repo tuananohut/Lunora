@@ -2,47 +2,36 @@
 #include <directxmath.h>
 // Examples
 
-struct Vertex // Name can change
+struct Vector4 
 {
   float X;
   float Y;
   float Z;
   float W = 1.f;
-
-  Vertex operator= (const Vertex& obj)
-    {
-      Vertex offset; 
-      
-      offset.X = obj.X;
-      offset.Y = obj.Y;
-      offset.Z = obj.Z;
-
-      return offset; 
-    };
 };
 
-struct Entity
+struct Model
 {
-  Vertex* vertex;
-  Vertex color;
-  Vertex* texture; 
+  Vector4* vertex;
+  Vector4 color;
+  Vector4* texture; 
 };
 
-Vertex UpdatePosition(const Vertex& position)
+Vector4 UpdatePosition(const Vector4& position)
 {
   // We need another solution for this 
 
-  Vertex pos;
+  Vector4 pos;
   pos.X = 1.f;
   pos.Y = 0.f;
   pos.Z = 0.f;
 
-  Vertex scale;
+  Vector4 scale;
   scale.X = 2.f;
   scale.Y = 1.f;
   scale.Z = 2.f;
   
-  Vertex rotation;
+  Vector4 rotation;
   rotation.X = 200.f;
   rotation.Y = 100.f;
   rotation.Z = 25.f;
@@ -55,7 +44,7 @@ Vertex UpdatePosition(const Vertex& position)
   Rotate = DirectX::XMMatrixRotationY(rotation.Y);
   Rotate = DirectX::XMMatrixRotationZ(rotation.Z);
   
-  Entity entity; 
+  Model entity; 
   
   entity.vertex->X = 1.f; 
   
