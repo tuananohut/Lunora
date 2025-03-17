@@ -1,27 +1,15 @@
+#ifndef MANAGERS_H
+#define MANAGERS_H
+
 #include <d3d11.h>
-#include <directxmath.h>
-// Examples
+#include <DirectXMath.h>
 
-struct Vector4 
-{
-  float X;
-  float Y;
-  float Z;
-  float W = 1.f;
-};
-
-struct Model
-{
-  Vector4* vertex;
-  Vector4 color;
-  Vector4* texture; 
-};
+using namespace DirectX;
 
 struct RenderManager
 {
   RenderManager();
   ~RenderManager();
-
 
 };
 
@@ -48,3 +36,4 @@ struct MaterialManager{};
 
 struct MeshManager{};
 
+#endif

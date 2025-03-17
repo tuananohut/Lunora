@@ -3,7 +3,7 @@
 #include <d3dcompiler.h>
 #include <vector>
 
-#include "managers.h"
+#include "managers.cpp"
 #include "resource.h"
 #include "renderer.h"
 #include "renderer.cpp"
