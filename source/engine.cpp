@@ -148,7 +148,7 @@ static void CreateCube(HWND Window, const LPCWSTR VSFileName, const LPCWSTR PSFi
     {
       OutputDebugStringA("Could not create pixel shader"); 
     }
-  
+
   D3D11_INPUT_ELEMENT_DESC PolygonLayout[2];
   int NumElements; 
 
