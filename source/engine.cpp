@@ -55,7 +55,7 @@ struct Color
   float A;
 };
 
-static std::vector<XMFLOAT4> VertexColors
+static XMFLOAT4 VertexColors[3]
   {
     XMFLOAT4(1.f, 0.f, 0.f, 1.f),
     XMFLOAT4(0.f, 1.f, 0.f, 1.f),
@@ -64,12 +64,8 @@ static std::vector<XMFLOAT4> VertexColors
 
 static void ChangeColor(const Color& Color)
 {
-  VertexColors =
-    {
-      XMFLOAT4(Color.R, Color.G, Color.B, Color.A),
-      XMFLOAT4(Color.R, Color.G, Color.B, Color.A),
-      XMFLOAT4(Color.R, Color.G, Color.B, Color.A)
-    };
+  for (int i = 0; i < 3; i++)
+    VertexColors[i] = XMFLOAT4(Color.R, Color.G, Color.B, Color.A);
 }
 
 static void ChangeColor(const std::vector<XMFLOAT4>& vertexColors)
