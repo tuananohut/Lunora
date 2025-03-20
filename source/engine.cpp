@@ -19,6 +19,8 @@ static ID3D11Buffer *IndexBuffer;
 static ID3D11Buffer *MatrixBuffer;
 static ID3D11InputLayout *Layout;
 
+static RenderManager* Renderer;
+
 struct Transform
 {
   XMMATRIX Translation;
@@ -145,24 +147,9 @@ static void CreateCube(HWND Window, const LPCWSTR VSFileName, const LPCWSTR PSFi
       OutputDebugStringA("Could not create pixel shader"); 
     }
 
-  D3D11_INPUT_ELEMENT_DESC PolygonLayout[2];
+  D3D11_INPUT_ELEMENT_DESC PolygonLayout[2] = { Renderer->ColorShader()[0],
+						Renderer->ColorShader()[1]};
   int NumElements; 
-
-  PolygonLayout[0].SemanticName = "POSITION";
-  PolygonLayout[0].SemanticIndex = 0;
-  PolygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-  PolygonLayout[0].InputSlot = 0;
-  PolygonLayout[0].AlignedByteOffset = 0;
-  PolygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-  PolygonLayout[0].InstanceDataStepRate = 0;
-  
-  PolygonLayout[1].SemanticName = "COLOR";
-  PolygonLayout[1].SemanticIndex = 0;
-  PolygonLayout[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-  PolygonLayout[1].InputSlot = 0;
-  PolygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-  PolygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-  PolygonLayout[1].InstanceDataStepRate = 0;
 
   NumElements = sizeof(PolygonLayout) / sizeof(PolygonLayout[0]);
 
