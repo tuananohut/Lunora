@@ -36,3 +36,29 @@ D3D11_INPUT_ELEMENT_DESC (&RenderManager::ColorShader())[2]
 
   return PolygonLayoutColor;
 }
+
+D3D11_INPUT_ELEMENT_DESC (&RenderManager::TextureShader())[2]
+  {
+    static D3D11_INPUT_ELEMENT_DESC PolygonLayoutTexture[2];
+
+    PolygonLayoutTexture[0].SemanticName = "POSITION";
+    PolygonLayoutTexture[0].SemanticIndex = 0;
+    PolygonLayoutTexture[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+    PolygonLayoutTexture[0].InputSlot = 0;
+    PolygonLayoutTexture[0].AlignedByteOffset = 0;
+    PolygonLayoutTexture[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+    PolygonLayoutTexture[0].InstanceDataStepRate = 0;
+  
+    PolygonLayoutTexture[1].SemanticName = "TEXTURE";
+    PolygonLayoutTexture[1].SemanticIndex = 0;
+    PolygonLayoutTexture[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+    PolygonLayoutTexture[1].InputSlot = 0;
+    PolygonLayoutTexture[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+    PolygonLayoutTexture[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+    PolygonLayoutTexture[1].InstanceDataStepRate = 0;
+
+    Layouts[0][0] = PolygonLayoutTexture[0]; 
+    Layouts[0][1] = PolygonLayoutTexture[1]; 
+
+    return PolygonLayoutTexture;
+  }

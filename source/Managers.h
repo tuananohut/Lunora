@@ -14,7 +14,7 @@ struct RenderManager
   static D3D11_INPUT_ELEMENT_DESC Layouts[3][2]; 
  
   D3D11_INPUT_ELEMENT_DESC (&RenderManager::ColorShader())[2];
-  D3D11_INPUT_ELEMENT_DESC TextureShader();
+  D3D11_INPUT_ELEMENT_DESC (&RenderManager::TextureShader())[2];
   D3D11_INPUT_ELEMENT_DESC LightShader(); 
 };
 
