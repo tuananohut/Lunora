@@ -48,8 +48,8 @@ struct VertexBufferType
   XMFLOAT4 color; 
 };
 
-/*
-struct VertexBufferType
+
+/*struct VertexBufferType
 {
   XMFLOAT3 position;
   XMFLOAT2 texture; 
@@ -94,7 +94,7 @@ static void CreateCube(HWND Window, const LPCWSTR VSFileName, const LPCWSTR PSFi
   Result = D3DCompileFromFile(VSFileName,
 			      NULL,
 			      NULL,
-			      "TextureVertexShader",  ////////////
+			      "ColorVertexShader",  ////////////
 			      "vs_5_0",
 			      D3D10_SHADER_ENABLE_STRICTNESS,
 			      0,
@@ -125,7 +125,7 @@ static void CreateCube(HWND Window, const LPCWSTR VSFileName, const LPCWSTR PSFi
   Result = D3DCompileFromFile(PSFileName,
 			      NULL,
 			      NULL,
-			      "TexturePixelShader",     ////////////
+			      "ColorPixelShader",     ////////////
 			      "ps_5_0",
 			      D3D10_SHADER_ENABLE_STRICTNESS,
 			      0,
@@ -153,8 +153,8 @@ static void CreateCube(HWND Window, const LPCWSTR VSFileName, const LPCWSTR PSFi
       OutputDebugStringA("Could not create pixel shader"); 
     }
 
-  D3D11_INPUT_ELEMENT_DESC PolygonLayout[2] = { Renderer->TextureShader()[0], ////
-						Renderer->TextureShader()[1]}; ////
+  D3D11_INPUT_ELEMENT_DESC PolygonLayout[2] = { Renderer->ColorShader()[0], ////
+						Renderer->ColorShader()[1]}; ////
   int NumElements; 
 
   NumElements = sizeof(PolygonLayout) / sizeof(PolygonLayout[0]);
