@@ -90,7 +90,9 @@ static void CreateCube(HWND Window, const LPCWSTR VSFileName, const LPCWSTR PSFi
   ID3DBlob* VertexShaderBlob = nullptr;
   ID3DBlob* PixelShaderBlob = nullptr;
   ID3DBlob* ErrorBlob = nullptr;
-  
+
+  VertexShaderBlob = CompileShader(VSFileName, "ColorVertexShader", "vs_5_0");
+  /*
   Result = D3DCompileFromFile(VSFileName,
 			      NULL,
 			      NULL,
@@ -99,7 +101,7 @@ static void CreateCube(HWND Window, const LPCWSTR VSFileName, const LPCWSTR PSFi
 			      D3D10_SHADER_ENABLE_STRICTNESS,
 			      0,
 			      &VertexShaderBlob,
-			      &ErrorBlob);
+			      &ErrorBlob);*/
   if(FAILED(Result))
     {
       if (ErrorBlob)
@@ -153,8 +155,8 @@ static void CreateCube(HWND Window, const LPCWSTR VSFileName, const LPCWSTR PSFi
       OutputDebugStringA("Could not create pixel shader"); 
     }
 
-  D3D11_INPUT_ELEMENT_DESC PolygonLayout[2] = { Renderer->ColorShader()[0], ////
-						Renderer->ColorShader()[1]}; ////
+  D3D11_INPUT_ELEMENT_DESC PolygonLayout[2] = { Renderer->ColorShader()[0], 
+						Renderer->ColorShader()[1]}; 
   int NumElements; 
 
   NumElements = sizeof(PolygonLayout) / sizeof(PolygonLayout[0]);

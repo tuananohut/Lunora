@@ -3,8 +3,10 @@
 
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include <string>
 
 using namespace DirectX;
+using namespace std;
 
 #define DeleteObject(object) if ((object) != NULL) { delete object; object = NULL; }
 #define DeleteObjects(objects) if ((objects) != NULL) { delete[] objects; objects = NULL; }
@@ -36,17 +38,32 @@ static ID3D11DepthStencilView* DepthStencilView = nullptr;
 static FLOAT BackgroundColor[4] = {0.141f, 0.137f, 0.365f, 1.f};
 
 // Default colors
-static LPCWSTR FileNames[2][2] = {{L"../source/color.vs", L"../source/color.ps"},
-				  {L"../source/texture.vs", L"../source/texture.ps"}};
-/*
-static LPCWSTR VSFileName = L"../source/color.vs";
-static LPCWSTR PSFileName = L"../source/color.ps";
-*/
+static LPCWSTR FileNames[2][2] = {{L"../Sandbox/color.vs", L"../Sandbox/color.ps"},
+				  {L"../Sandbox/texture.vs", L"../Sandbox/texture.ps"}};
 
 static LPCWSTR VSFileName = FileNames[0][0];
 static LPCWSTR PSFileName = FileNames[0][1];
 
 static void InitializeDX11(HWND Window);
 static void CreateCube(HWND Window, LPCWSTR VSFilename, LPCWSTR PSFilename);
+
+ID3DBlob* CompileShader(const std::wstring& shaderPath,
+			const std::string& entryPoint,
+			const std::string& target)
+{
+  ID3DBlob* shaderBlob = nullptr;
+  ID3DBlob* errorBlob = nullptr;
+  HRESULT hr = D3DCompileFromFile(shaderPath.c_str(),
+				  nullptr,
+				  nullptr,
+				  entryPoint.c_str(),
+				  target.c_str(),
+				  D3DCOMPILE_DEBUG,
+				  0,
+				  &shaderBlob,
+				  &errorBlob);
+  return shaderBlob;
+}
+
 
 #endif
