@@ -3,7 +3,6 @@
 
 #include <d3d11.h>
 #include <DirectXMath.h>
-#include <string>
 
 using namespace DirectX;
 using namespace std;
@@ -47,17 +46,17 @@ static LPCWSTR PSFileName = FileNames[0][1];
 static void InitializeDX11(HWND Window);
 static void CreateCube(HWND Window, LPCWSTR VSFilename, LPCWSTR PSFilename);
 
-ID3DBlob* CompileShader(const std::wstring& shaderPath,
-			const std::string& entryPoint,
-			const std::string& target)
+ID3DBlob* CompileShader(const LPCWSTR& shaderPath,
+			const LPCSTR& entryPoint,
+			const LPCSTR& target)
 {
   ID3DBlob* shaderBlob = nullptr;
   ID3DBlob* errorBlob = nullptr;
-  HRESULT hr = D3DCompileFromFile(shaderPath.c_str(),
+  HRESULT hr = D3DCompileFromFile(shaderPath,
 				  nullptr,
 				  nullptr,
-				  entryPoint.c_str(),
-				  target.c_str(),
+				  entryPoint,
+				  target,
 				  D3DCOMPILE_DEBUG,
 				  0,
 				  &shaderBlob,

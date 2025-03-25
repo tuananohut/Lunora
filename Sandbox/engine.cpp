@@ -1,7 +1,5 @@
-#include <stdint.h>
 #include <windows.h>
 #include <d3dcompiler.h>
-#include <vector>
 
 #include "managers.cpp"
 #include "resource.h"
@@ -48,13 +46,6 @@ struct VertexBufferType
   XMFLOAT4 color; 
 };
 
-
-/*struct VertexBufferType
-{
-  XMFLOAT3 position;
-  XMFLOAT2 texture; 
-};
-*/
 struct Color
 {
   float R;
@@ -63,6 +54,17 @@ struct Color
   float A;
 };
 
+void AssignXMFLOAT4(XMFLOAT4& dest, const XMFLOAT4* src)
+{
+  if (src != nullptr)
+    {
+      dest.x = src->x;
+      dest.y = src->y;
+      dest.z = src->z;
+      dest.w = src->w;
+    }
+}
+
 static XMFLOAT4 VertexColors[3]
   {
     XMFLOAT4(1.f, 0.f, 0.f, 1.f),
@@ -70,13 +72,21 @@ static XMFLOAT4 VertexColors[3]
     XMFLOAT4(0.f, 0.f, 1.f, 1.f)
   };
 
+
 static void ChangeColor(const Color& Color)
 {
+  XMFLOAT4 vertexColors[3] =
+    {
+      XMFLOAT4(Color.R, Color.G, Color.B, Color.A),
+      XMFLOAT4(Color.R, Color.G, Color.B, Color.A),
+      XMFLOAT4(Color.R, Color.G, Color.B, Color.A)
+    };
+  
   for (int i = 0; i < 3; i++)
-    VertexColors[i] = XMFLOAT4(Color.R, Color.G, Color.B, Color.A);
+    VertexColors[i] = vertexColors[i];
 }
 
-static void ChangeColor(const std::vector<XMFLOAT4>& vertexColors)
+static void ChangeColor(const XMFLOAT4 (&vertexColors)[3])
 { 
   VertexColors[0] = vertexColors[0];
   VertexColors[1] = vertexColors[1];
@@ -92,29 +102,7 @@ static void CreateCube(HWND Window, const LPCWSTR VSFileName, const LPCWSTR PSFi
   ID3DBlob* ErrorBlob = nullptr;
 
   VertexShaderBlob = CompileShader(VSFileName, "ColorVertexShader", "vs_5_0");
-  /*
-  Result = D3DCompileFromFile(VSFileName,
-			      NULL,
-			      NULL,
-			      "ColorVertexShader",  ////////////
-			      "vs_5_0",
-			      D3D10_SHADER_ENABLE_STRICTNESS,
-			      0,
-			      &VertexShaderBlob,
-			      &ErrorBlob);*/
-  if(FAILED(Result))
-    {
-      if (ErrorBlob)
-	{
-	  OutputDebugStringA((char*)ErrorBlob->GetBufferPointer());
-	  ErrorBlob->Release();
-	}
-      else
-	{
-	  OutputDebugStringA("Could not compile from file");
-	}
-    }
-
+  
   Result = Device->CreateVertexShader(VertexShaderBlob->GetBufferPointer(),
 				      VertexShaderBlob->GetBufferSize(),
 				      NULL,
@@ -123,29 +111,9 @@ static void CreateCube(HWND Window, const LPCWSTR VSFileName, const LPCWSTR PSFi
     {
       OutputDebugStringA("Could not create vertex shader");
     }
-  
-  Result = D3DCompileFromFile(PSFileName,
-			      NULL,
-			      NULL,
-			      "ColorPixelShader",     ////////////
-			      "ps_5_0",
-			      D3D10_SHADER_ENABLE_STRICTNESS,
-			      0,
-			      &PixelShaderBlob,
-			      &ErrorBlob);
-  if(FAILED(Result))
-    {
-      if (ErrorBlob)
-	{
-	  OutputDebugStringA((char*)ErrorBlob->GetBufferPointer());
-	  ErrorBlob->Release();
-	}
-      else
-	{
-	  OutputDebugStringA("Could not compile from file");
-	}
-    }
-  
+
+  PixelShaderBlob = CompileShader(PSFileName, "ColorPixelShader", "ps_5_0");
+
   Result = Device->CreatePixelShader(PixelShaderBlob->GetBufferPointer(),
 				     PixelShaderBlob->GetBufferSize(),
 				     NULL,
@@ -412,7 +380,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
 		      }
 		  }
 		
-		std::vector<XMFLOAT4> vertexColors
+		XMFLOAT4 vertexColors[3]
 		  {
 		    XMFLOAT4(1.f, 0.f, 0.f, 1.f),
 		    XMFLOAT4(0.f, 1.f, 0.f, 1.f),
@@ -547,7 +515,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      
 	      const float half_gravity = 5.f;
 	      static float height = 0.35f;
-	      static float time = 0.0174532925f; // 1.f/60.f;
+	      static float time = 0.0174532925f; 
 	      
 	      height -= (half_gravity * time * time) + (0.0025f); 
 	      if (height < -0.5f)
@@ -560,7 +528,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 		{
 		  rotation += 360.0f;
 		}
-
+	      
 	      Transform CubeTransform;
 	      
 	      CubeTransform.Translation = XMMatrixTranslation(moveX, moveY, 0.f);
