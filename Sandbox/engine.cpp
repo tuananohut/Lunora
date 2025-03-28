@@ -54,6 +54,8 @@ struct Color
   float A;
 };
 
+ID3D11SampleState* TextureSamplerState;
+
 void AssignXMFLOAT4(XMFLOAT4& dest, const XMFLOAT4* src)
 {
   if (src != nullptr)
@@ -101,7 +103,8 @@ static void CreateCube(HWND Window, const LPCWSTR VSFileName, const LPCWSTR PSFi
   ID3DBlob* PixelShaderBlob = nullptr;
   ID3DBlob* ErrorBlob = nullptr;
 
-  VertexShaderBlob = CompileShader(VSFileName, "ColorVertexShader", "vs_5_0");
+  // VertexShaderBlob = CompileShader(VSFileName, "ColorVertexShader", "vs_5_0");
+  VertexShaderBlob = CompileShader(VSFileName, "TextureVertexShader", "vs_5_0");
   
   Result = Device->CreateVertexShader(VertexShaderBlob->GetBufferPointer(),
 				      VertexShaderBlob->GetBufferSize(),
@@ -111,8 +114,9 @@ static void CreateCube(HWND Window, const LPCWSTR VSFileName, const LPCWSTR PSFi
     {
       OutputDebugStringA("Could not create vertex shader");
     }
-
-  PixelShaderBlob = CompileShader(PSFileName, "ColorPixelShader", "ps_5_0");
+  
+  // PixelShaderBlob = CompileShader(PSFileName, "ColorPixelShader", "ps_5_0");
+  PixelShaderBlob = CompileShader(PSFileName, "TexturePixelShader", "ps_5_0");
 
   Result = Device->CreatePixelShader(PixelShaderBlob->GetBufferPointer(),
 				     PixelShaderBlob->GetBufferSize(),
