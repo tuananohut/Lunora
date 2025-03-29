@@ -1,0 +1,208 @@
+#include "DeviceManager.h"
+
+bool DeviceManager::Initialize(HWND Window, int Width, int Height)
+{
+  HRESULT Result;
+  UINT CreateDeviceFlags = 0;
+
+#if defined(DEBUG) || defined(_DEBUG)
+  CreateDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+  
+  D3D_FEATURE_LEVEL FeatureLevel = D3D_FEATURE_LEVEL_11_1;
+
+  IDXGIFactory *DXGIFactory = nullptr;
+  IDXGIAdapter *Adapter = nullptr;
+  IDXGIOutput *Display = nullptr;
+  UINT NumModes = 0, Numerator = 0, Denominator = 0;
+
+  DXGI_MODE_DESC *DisplayModeList;
+  DXGI_ADAPTER_DESC AdapterDesc; 
+
+  Result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void **)&DXGIFactory); 
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("Failed to get DXGI Factory");
+      return false; 
+    }
+
+  Result = DXGIFactory->EnumAdapters(0, &Adapter);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("There is no adapter");
+      return false; 
+    }
+  
+  Result = Adapter->EnumOutputs(0, &Display);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("There is no display");
+      DeleteObject(Adapter);
+      DeleteObject(DXGIFactory);
+      return false; 
+    }
+
+  Result = Display->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &NumModes, NULL);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("GetDisplayModeList did not work");
+      DeleteObject(Display);
+      DeleteObject(Adapter);
+      DeleteObject(DXGIFactory); 
+      return false; 
+    }
+
+  DisplayModeList = new DXGI_MODE_DESC[NumModes];
+  if(!DisplayModeList)
+    {
+      OutputDebugStringA("Could not create DisplayModeList");
+      DeleteObject(Display);
+      DeleteObject(Adapter);
+      DeleteObject(DXGIFactory); 
+      return false; 
+    }
+
+  Result = Display->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &NumModes, DisplayModeList);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("GetDisplayModeList with DisplayModeList did not work");
+      DeleteObjects(DisplayModeList);
+      DeleteObject(Display);
+      DeleteObject(Adapter);
+      DeleteObject(DXGIFactory); 
+      return false; 
+    }
+  
+  for (UINT i = 0;
+       i < NumModes;
+       i++)
+    {
+      if (DisplayModeList[i].Width == (UINT)ScreenWidth)
+	{
+	  if (DisplayModeList[i].Height == (UINT)ScreenHeight)
+	    {
+	      Numerator = DisplayModeList[i].RefreshRate.Numerator;
+	      Denominator = DisplayModeList[i].RefreshRate.Denominator; 
+	    }
+	}
+    }
+
+  Result = Adapter->GetDesc(&AdapterDesc);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("GetDesc did not work");
+      return false; 
+    }
+
+  int VideoCardMemory = (int)(AdapterDesc.DedicatedVideoMemory / 1024 / 1024); 
+
+  delete[] DisplayModeList;
+  DisplayModeList = 0;
+
+  Display->Release();
+  Display = 0;
+
+  DXGIFactory->Release();
+  DXGIFactory = 0;
+  
+  UINT MultiSamplingCount = 4;
+  UINT MultiSamplingQualityLevels = 0;
+  bool MultiSamplingEnabled = false;
+  
+  DXGI_SWAP_CHAIN_DESC SwapChainDesc;
+    
+  ZeroMemory(&SwapChainDesc, sizeof(SwapChainDesc));
+  SwapChainDesc.BufferDesc.Width = ScreenWidth;
+  SwapChainDesc.BufferDesc.Height = ScreenHeight;
+  SwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+  SwapChainDesc.BufferCount = 1;
+  SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+  SwapChainDesc.OutputWindow = Window;
+
+  bool FullScreen = false;
+  
+  if (FullScreen)
+    {
+      SwapChainDesc.Windowed = FALSE;
+    }
+  else
+    {
+      SwapChainDesc.Windowed = TRUE;
+    }
+  
+  bool VSYNC_ENABLED = true;
+
+  if (VSYNC_ENABLED)
+    {
+      SwapChainDesc.BufferDesc.RefreshRate.Numerator = Numerator;
+      SwapChainDesc.BufferDesc.RefreshRate.Denominator = Denominator;
+    }
+  else
+    {
+      SwapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
+      SwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
+    }
+  
+  SwapChainDesc.Flags = 0;
+  
+  if (MultiSamplingEnabled)
+    {
+      SwapChainDesc.SampleDesc.Count = MultiSamplingCount;
+      SwapChainDesc.SampleDesc.Quality = MultiSamplingQualityLevels - 1;
+    }
+  else
+    {
+      SwapChainDesc.SampleDesc.Count = 1;
+      SwapChainDesc.SampleDesc.Quality = 0;
+    }
+  
+  Result = D3D11CreateDeviceAndSwapChain(NULL, 
+					 D3D_DRIVER_TYPE_HARDWARE, 
+					 NULL, 
+					 0, 
+					 &FeatureLevel, 
+					 1,
+					 D3D11_SDK_VERSION, 
+					 &SwapChainDesc,
+					 &SwapChain, 
+					 &Device, 
+					 NULL,
+					 &DeviceContext); 
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("Device and swap chain");
+      return false; 
+    }
+  
+  IDXGIDevice* DXGIDevice = nullptr;
+  Result = Device->QueryInterface(__uuidof(IDXGIDevice), reinterpret_cast<void**>(&DXGIDevice));
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("Failed to get DXGI Device");
+      return false; 
+    }
+  
+  Result = DXGIDevice->GetParent(__uuidof(Adapter), reinterpret_cast<void**>(&Adapter));
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("DXGI Adapter");
+      return false; 
+    }
+   
+  Result = Device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM,
+						 MultiSamplingCount,
+						 &MultiSamplingQualityLevels);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("Multi sample quality levels");
+      return false; 
+    }
+
+  DeleteObjects(DisplayModeList)
+  ReleaseObject(Adapter);
+  ReleaseObject(Display);
+  ReleaseObject(DXGIFactory);
+
+  return true;
+}
