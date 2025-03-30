@@ -423,10 +423,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
       } break;
 
     case WM_DESTROY:
-      {
-	ReleaseObject(RenderTargetView);
-	ReleaseObject(DepthStencilView);
-	
+      {	
 	ReleaseObject(VertexShader);
 	ReleaseObject(PixelShader);
 	ReleaseObject(VertexBuffer);
@@ -484,8 +481,10 @@ int WINAPI WinMain(HINSTANCE Instance,
 	{
 	  DeviceManager DeviceManager;
 	  DeviceManager.Initialize(Window, ScreenWidth, ScreenHeight);
-	  
-	  InitializeDX11(DeviceManager, Window);
+
+	  RenderTargetManager RenderTargetManager;
+	  RenderTargetManager.Initialize(DeviceManager, ScreenWidth, ScreenHeight);
+	  InitializeDX11(DeviceManager, RenderTargetManager, Window);
 	  
 	  CreateCube(DeviceManager, Window, VSFileName, PSFileName);
 
@@ -512,14 +511,16 @@ int WINAPI WinMain(HINSTANCE Instance,
 		{		  
 		  if (Message.message == WM_QUIT)
 		    {
-		      Running = false; 
+		      DeviceManager.Cleanup();
+		      RenderTargetManager.Cleanup();
+		      Running = false;
 		    }
 
 		  TranslateMessage(&Message);
 		  DispatchMessageA(&Message);
 		}
-	      DeviceManager.DeviceContext->ClearRenderTargetView(RenderTargetView, BackgroundColor);
-	      DeviceManager.DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH, 1.f, 0);
+	      DeviceManager.DeviceContext->ClearRenderTargetView(RenderTargetManager.RenderTargetView, BackgroundColor);
+	      DeviceManager.DeviceContext->ClearDepthStencilView(RenderTargetManager.DepthStencilView, D3D11_CLEAR_DEPTH, 1.f, 0);
 	      
 	      const float half_gravity = 5.f;
 	      static float height = 0.35f;

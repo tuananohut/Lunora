@@ -194,3 +194,38 @@ void DeviceManager::Initialize(HWND Window, int Width, int Height)
   ReleaseObject(Display);
   ReleaseObject(DXGIFactory);  
 }
+
+void DeviceManager::SetViewport(int ScreenWidth, int ScreenHeight)
+{
+  D3D11_VIEWPORT Viewport;
+  
+  Viewport.TopLeftX = 0.f;
+  Viewport.TopLeftY = 0.f;
+  Viewport.Width = (float)ScreenWidth;
+  Viewport.Height = (float)ScreenHeight;
+  Viewport.MinDepth = 0.f;
+  Viewport.MaxDepth = 1.f;
+
+  DeviceContext->RSSetViewports(1, &Viewport);
+}
+
+void DeviceManager::Cleanup()
+{
+  if (SwapChain)
+    {
+      SwapChain->Release();
+      SwapChain = nullptr; 
+    }
+
+  if (DeviceContext)
+    {
+      DeviceContext->Release();
+      DeviceContext = nullptr;
+    }
+
+  if (Device)
+    {
+      Device->Release();
+      Device = nullptr; 
+    }
+}

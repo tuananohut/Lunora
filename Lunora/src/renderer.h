@@ -4,6 +4,7 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include "Core/DeviceManager.cpp"
+#include "Core/RenderTargetManager.cpp"
 
 using namespace DirectX;
 
@@ -29,8 +30,6 @@ static XMMATRIX ProjectionMatrix = XMMatrixPerspectiveFovLH
    1000.0f
    );
 
-static ID3D11RenderTargetView* RenderTargetView = nullptr;  
-static ID3D11DepthStencilView* DepthStencilView = nullptr;
 static FLOAT BackgroundColor[4] = {0.141f, 0.137f, 0.365f, 1.f};
 
 // Default colors

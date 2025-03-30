@@ -18,6 +18,7 @@ struct DeviceManager
   IDXGISwapChain* SwapChain = nullptr;
 
   void Initialize(HWND Window, int Width, int Height);
+  void SetViewport(int Width, int Height);
   void Cleanup();
   
   UINT ScreenWidth = 1280; 
