@@ -3,8 +3,10 @@
 
 #include <d3d11.h>
 #include <DirectXMath.h>
+
 #include "Core/DeviceManager.cpp"
 #include "Core/RenderTargetManager.cpp"
+#include "Core/PipelineStateManager.cpp"
 
 using namespace DirectX;
 

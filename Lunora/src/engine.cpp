@@ -481,17 +481,24 @@ int WINAPI WinMain(HINSTANCE Instance,
 	{
 	  DeviceManager DeviceManager;
 	  DeviceManager.Initialize(Window, ScreenWidth, ScreenHeight);
-
+	  
 	  RenderTargetManager RenderTargetManager;
 	  RenderTargetManager.Initialize(DeviceManager, ScreenWidth, ScreenHeight);
-	  InitializeDX11(DeviceManager, RenderTargetManager, Window);
+	  
+	  PipelineStateManager PipelineStateManager; 
+	  PipelineStateManager.Initialize(DeviceManager);
+	  
+	  InitializeDX11(DeviceManager,
+			 RenderTargetManager,
+			 PipelineStateManager,
+			 Window);
 	  
 	  CreateCube(DeviceManager, Window, VSFileName, PSFileName);
-
+	  
 	  WorldMatrix = XMMatrixIdentity();
 	  ViewMatrix = XMMatrixLookAtLH
 	    (
-	     XMVectorSet(0.0f, 0.0f, -10.0f, 1.0f), // -1
+	     XMVectorSet(0.0f, 0.0f, -9.0f, 1.0f), // -1
 	     XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
 	     XMVectorSet(0.0f, 10.0f, 0.0f, 0.0f)
 	     );
@@ -513,6 +520,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 		    {
 		      DeviceManager.Cleanup();
 		      RenderTargetManager.Cleanup();
+		      PipelineStateManager.Cleanup();
 		      Running = false;
 		    }
 
