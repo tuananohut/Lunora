@@ -14,9 +14,14 @@ static ID3D11PixelShader* PixelShader;
 static ID3D11Buffer *VertexBuffer; 
 static ID3D11Buffer *IndexBuffer; 
 static ID3D11Buffer *MatrixBuffer;
+static ID3D11Buffer* LightBuffer;
 static ID3D11InputLayout *Layout;
 
 static RenderManager* Renderer;
+
+const XMFLOAT4 ambientColor = XMFLOAT4(1.f, 0.15f, 0.15f, 1.f);
+const XMFLOAT4 diffuseColor = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+const XMFLOAT3 lightDirection = XMFLOAT3(1.f, 0.f, 0.f); 
 
 struct Transform
 {
@@ -40,10 +45,18 @@ struct MatrixBufferType
   XMMATRIX Projection;
 };
 
+struct LightBufferType
+{
+  XMFLOAT4 ambientColor;
+  XMFLOAT4 diffuseColor;
+  XMFLOAT3 lightDirection;
+  float padding; 
+};
+
 struct VertexBufferType
 {
   XMFLOAT3 position;
-  XMFLOAT4 color; 
+  XMFLOAT3 normal; 
 };
 
 struct Color
@@ -106,7 +119,8 @@ static void CreateCube(DeviceManager& DeviceManager,
   ID3DBlob* PixelShaderBlob = nullptr;
   ID3DBlob* ErrorBlob = nullptr;
   
-  VertexShaderBlob = CompileShader(VSFileName, "ColorVertexShader", "vs_5_0");
+  // VertexShaderBlob = CompileShader(VSFileName, "ColorVertexShader", "vs_5_0");
+  VertexShaderBlob = CompileShader(VSFileName, "LightVertexShader", "vs_5_0");
   //VertexShaderBlob = CompileShader(VSFileName, "TextureVertexShader", "vs_5_0");
   
   Result = DeviceManager.Device->CreateVertexShader(VertexShaderBlob->GetBufferPointer(),
@@ -117,8 +131,9 @@ static void CreateCube(DeviceManager& DeviceManager,
     {
       OutputDebugStringA("Could not create vertex shader");
     }
-  
-  PixelShaderBlob = CompileShader(PSFileName, "ColorPixelShader", "ps_5_0");
+
+  PixelShaderBlob = CompileShader(PSFileName, "LightPixelShader", "ps_5_0");
+  // PixelShaderBlob = CompileShader(PSFileName, "ColorPixelShader", "ps_5_0");
   // PixelShaderBlob = CompileShader(PSFileName, "TexturePixelShader", "ps_5_0");
 
   Result = DeviceManager.Device->CreatePixelShader(PixelShaderBlob->GetBufferPointer(),
@@ -130,12 +145,12 @@ static void CreateCube(DeviceManager& DeviceManager,
       OutputDebugStringA("Could not create pixel shader"); 
     }
 
-  D3D11_INPUT_ELEMENT_DESC PolygonLayout[2] = { Renderer->ColorShader()[0], 
-						Renderer->ColorShader()[1]}; 
+  D3D11_INPUT_ELEMENT_DESC PolygonLayout[2] = { Renderer->LightShader()[0], 
+						Renderer->LightShader()[1]}; 
   int NumElements; 
 
   NumElements = sizeof(PolygonLayout) / sizeof(PolygonLayout[0]);
-
+  
   Result = DeviceManager.Device->CreateInputLayout(PolygonLayout, NumElements,
 				     VertexShaderBlob->GetBufferPointer(),
 				     VertexShaderBlob->GetBufferSize(), &Layout);
@@ -147,7 +162,7 @@ static void CreateCube(DeviceManager& DeviceManager,
   if (VertexShaderBlob) VertexShaderBlob->Release();
   if (PixelShaderBlob) PixelShaderBlob->Release();
   if (ErrorBlob) VertexShaderBlob->Release();  
-
+  
   D3D11_BUFFER_DESC BufferDesc;
   ZeroMemory(&BufferDesc, sizeof(BufferDesc));
   BufferDesc.ByteWidth = sizeof(MatrixBufferType);
@@ -160,10 +175,25 @@ static void CreateCube(DeviceManager& DeviceManager,
   Result = DeviceManager.Device->CreateBuffer(&BufferDesc, nullptr, &MatrixBuffer);
   if (FAILED(Result))
     {
-      OutputDebugStringA("Could not create vertex shader");
+      OutputDebugStringA("Could not create matrix buffer.");
       MatrixBuffer = nullptr;
     }
 
+  D3D11_BUFFER_DESC LightBufferDesc;
+  ZeroMemory(&LightBufferDesc, sizeof(LightBufferDesc));
+  LightBufferDesc.Usage = D3D11_USAGE_DYNAMIC; 
+  LightBufferDesc.ByteWidth = sizeof(LightBufferType);
+  LightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  LightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  LightBufferDesc.MiscFlags = 0;
+  LightBufferDesc.StructureByteStride = 0;
+
+  Result = DeviceManager.Device->CreateBuffer(&LightBufferDesc, nullptr, &LightBuffer);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("Could not create light buffer.");
+      LightBuffer = nullptr; 
+    }
   // Cube Vertex
 
   D3D11_BUFFER_DESC VertexBufferDesc; 
@@ -188,7 +218,7 @@ static void CreateCube(DeviceManager& DeviceManager,
   D3D11_BUFFER_DESC IndexBufferDesc;   
   int IndexCount = 3;
   unsigned long *Indices = new unsigned long[IndexCount];
-
+  
   Indices[0] = 0;
   Indices[1] = 1;
   Indices[2] = 2;
@@ -235,6 +265,7 @@ static void RenderCube(DeviceManager& DeviceManager,
   D3D11_MAPPED_SUBRESOURCE MappedResource; 
   
   MatrixBufferType* MatrixBufferTypePointer;
+  LightBufferType* LightBufferTypePointer;
   unsigned int BufferNumber;
 
   VertexBufferType* VertexBufferTypePointer;
@@ -250,20 +281,20 @@ static void RenderCube(DeviceManager& DeviceManager,
     }
    
   VertexBufferTypePointer = (VertexBufferType*)MappedResource.pData;
-
+  
   // TODO: Automate 
   VertexBufferType vertexBufferType[3]; 
   vertexBufferType[0].position = XMFLOAT3(-2.f, -2.f, 0.f);
   
   // VertexBufferTypePointer[0].position = XMFLOAT3(-2.f, -2.f, 0.f);
   VertexBufferTypePointer[0].position = vertexBufferType[0].position;
-  VertexBufferTypePointer[0].color = VertexColors[1];
+  VertexBufferTypePointer[0].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
 
   VertexBufferTypePointer[1].position = XMFLOAT3(-1.f, 2.f, 0.f);
-  VertexBufferTypePointer[1].color = VertexColors[0]; 
+  VertexBufferTypePointer[1].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
   
   VertexBufferTypePointer[2].position = XMFLOAT3(0.f, -1.f, 0.f);
-  VertexBufferTypePointer[2].color = VertexColors[2]; 
+  VertexBufferTypePointer[2].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
 
   DeviceManager.DeviceContext->Unmap(VertexBuffer, 0);
  
@@ -272,7 +303,7 @@ static void RenderCube(DeviceManager& DeviceManager,
   
   DeviceManager.DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
   
-  //
+  // Matrix Buffer Mapping
   
   Result = DeviceManager.DeviceContext->Map(MatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
   if (FAILED(Result))
@@ -287,8 +318,22 @@ static void RenderCube(DeviceManager& DeviceManager,
   MatrixBufferTypePointer->Projection = ProjectionMatrix;
   
   DeviceManager.DeviceContext->Unmap(MatrixBuffer, 0);
+
+  // Light Buffer Mapping 
+
+  Result = DeviceManager.DeviceContext->Map(LightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
+
+  LightBufferTypePointer = (LightBufferType*)MappedResource.pData;
+
+  LightBufferTypePointer->ambientColor = ambientColor;
+  LightBufferTypePointer->diffuseColor = diffuseColor;
+  LightBufferTypePointer->lightDirection = lightDirection;
+  LightBufferTypePointer->padding = 0.f;
+
+  DeviceManager.DeviceContext->Unmap(LightBuffer, 0);
   
   DeviceManager.DeviceContext->VSSetConstantBuffers(0, 1, &MatrixBuffer); 
+  DeviceManager.DeviceContext->PSSetConstantBuffers(0, 1, &LightBuffer); 
   
   DeviceManager.DeviceContext->IASetInputLayout(Layout);
 
@@ -430,6 +475,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	ReleaseObject(IndexBuffer);
 	ReleaseObject(MatrixBuffer);
 	ReleaseObject(Layout);
+	ReleaseObject(LightBuffer);
 	
 	Running = false;		
       } break;

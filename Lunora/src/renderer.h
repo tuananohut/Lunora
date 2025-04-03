@@ -35,11 +35,12 @@ static XMMATRIX ProjectionMatrix = XMMatrixPerspectiveFovLH
 static FLOAT BackgroundColor[4] = {0.141f, 0.137f, 0.365f, 1.f};
 
 // Default colors
-static LPCWSTR FileNames[2][2] = {{L"../Lunora/assets/color.vs", L"../Lunora/assets/color.ps"},
-				  {L"../Lunora/assets/texture.vs", L"../Lunora/assets/texture.ps"}};
+static LPCWSTR FileNames[3][2] = {{L"../Lunora/assets/color.vs", L"../Lunora/assets/color.ps"},
+				  {L"../Lunora/assets/texture.vs", L"../Lunora/assets/texture.ps"},
+				  {L"../Lunora/assets/light.vs", L"../Lunora/assets/light.ps"}};
 
-static LPCWSTR VSFileName = FileNames[0][0];
-static LPCWSTR PSFileName = FileNames[0][1];
+static LPCWSTR VSFileName = FileNames[2][0];
+static LPCWSTR PSFileName = FileNames[2][1];
 
 static void InitializeDX11(HWND Window);
 static void CreateCube(HWND Window, LPCWSTR VSFilename, LPCWSTR PSFilename);

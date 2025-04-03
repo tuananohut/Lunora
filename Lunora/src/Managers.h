@@ -15,7 +15,7 @@ struct RenderManager
   
   D3D11_INPUT_ELEMENT_DESC (&RenderManager::ColorShader())[2];
   D3D11_INPUT_ELEMENT_DESC (&RenderManager::TextureShader())[2];
-  D3D11_INPUT_ELEMENT_DESC LightShader();
+  D3D11_INPUT_ELEMENT_DESC (&RenderManager::LightShader())[2];
 };
 
 struct PhysicsManager
