@@ -19,7 +19,7 @@ static ID3D11InputLayout *Layout;
 
 static RenderManager* Renderer;
 
-const XMFLOAT4 ambientColor = XMFLOAT4(1.f, 0.15f, 0.15f, 1.f);
+static XMFLOAT4 ambientColor = XMFLOAT4(1.f, 0.15f, 0.15f, 1.f);
 const XMFLOAT4 diffuseColor = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
 const XMFLOAT3 lightDirection = XMFLOAT3(1.f, 0.f, 0.f); 
 
@@ -59,14 +59,6 @@ struct VertexBufferType
   XMFLOAT3 normal; 
 };
 
-struct Color
-{
-  float R;
-  float G;
-  float B;
-  float A;
-};
-
 ID3D11SamplerState* TextureSamplerState;
 
 void AssignXMFLOAT4(XMFLOAT4& dest, const XMFLOAT4* src)
@@ -80,32 +72,9 @@ void AssignXMFLOAT4(XMFLOAT4& dest, const XMFLOAT4* src)
     }
 }
 
-static XMFLOAT4 VertexColors[3]
-  {
-    XMFLOAT4(1.f, 0.f, 0.f, 1.f),
-    XMFLOAT4(0.f, 1.f, 0.f, 1.f),
-    XMFLOAT4(0.f, 0.f, 1.f, 1.f)
-  };
-
-
-static void ChangeColor(const Color& Color)
+static void ChangeColor(const XMFLOAT4& Color)
 {
-  XMFLOAT4 vertexColors[3] =
-    {
-      XMFLOAT4(Color.R, Color.G, Color.B, Color.A),
-      XMFLOAT4(Color.R, Color.G, Color.B, Color.A),
-      XMFLOAT4(Color.R, Color.G, Color.B, Color.A)
-    };
-  
-  for (int i = 0; i < 3; i++)
-    VertexColors[i] = vertexColors[i];
-}
-
-static void ChangeColor(const XMFLOAT4 (&vertexColors)[3])
-{ 
-  VertexColors[0] = vertexColors[0];
-  VertexColors[1] = vertexColors[1];
-  VertexColors[2] = vertexColors[2];
+  ambientColor = Color; 
 }
 
 static void CreateCube(DeviceManager& DeviceManager,
@@ -362,9 +331,9 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	int32_t WasDown = ((LParam & (1 << 30)) != 0);
 	int32_t IsDown = ((LParam & (1 << 31)) == 0);
 	
-	Color Red = {1.f, 0.f, 0.f, 1.f}; 
-	Color Green = {0.f, 1.f, 0.f, 1.f}; 
-	Color Blue = {0.f, 0.f, 1.f, 1.f}; 
+        XMFLOAT4 Red = {1.f, 0.f, 0.f, 1.f}; 
+        XMFLOAT4 Green = {0.f, 1.f, 0.f, 1.f}; 
+        XMFLOAT4 Blue = {0.f, 0.f, 1.f, 1.f}; 
 	
 	if (WasDown != IsDown)
 	  {
@@ -433,14 +402,9 @@ LRESULT CALLBACK WindowProc(HWND Window,
 		      }
 		  }
 		
-		XMFLOAT4 vertexColors[3]
-		  {
-		    XMFLOAT4(1.f, 0.f, 0.f, 1.f),
-		    XMFLOAT4(0.f, 1.f, 0.f, 1.f),
-		    XMFLOAT4(0.f, 0.f, 1.f, 1.f)
-		  };
+		XMFLOAT4 Gray = {0.15f, 0.15f, 0.15f, 1.f};
 		
-		ChangeColor(vertexColors);
+		ChangeColor(Gray);
 	      }
 	    
 	    else if (VKCode == 'Q') {}
