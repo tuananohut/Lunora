@@ -20,7 +20,6 @@ struct Mesh
   ID3D11Buffer* MatrixBuffer;
   ID3D11Buffer *VertexBuffer; 
   ID3D11Buffer *IndexBuffer;
-  ID3D11InputLayout *Layout;
   UINT indexCount;
   UINT stride; 
 };
@@ -30,6 +29,8 @@ struct Material
   ID3D11VertexShader* VertexShader;
   ID3D11PixelShader* PixelShader;
   ID3D11Buffer* LightBuffer;
+  ID3D11InputLayout* Layout;
+  InputLayout* InputLayout; 
 };
 
 static Mesh Mesh;
@@ -125,7 +126,7 @@ static void CreateCube(DeviceManager& DeviceManager,
     {
       OutputDebugStringA("Could not create pixel shader"); 
     }
-
+  /*
   D3D11_INPUT_ELEMENT_DESC PolygonLayout[2] = { Renderer->LightShader()[0], 
 						Renderer->LightShader()[1]}; 
   int NumElements; 
@@ -135,11 +136,15 @@ static void CreateCube(DeviceManager& DeviceManager,
   Result = DeviceManager.Device->CreateInputLayout(PolygonLayout, NumElements,
 						   VertexShaderBlob->GetBufferPointer(),
 						   VertexShaderBlob->GetBufferSize(),
-						   &Mesh.Layout);
+						   &Material.Layout);
   if (FAILED(Result))
     {
       OutputDebugStringA("Could not create layout"); 
     }
+  */
+  InputLayoutManager LayoutManager;
+  LayoutManager.Init();
+  Material.InputLayout = LayoutManager.CreateLayout(DeviceManager.Device, VertexShaderBlob);
   
   if (VertexShaderBlob) VertexShaderBlob->Release();
   if (PixelShaderBlob) PixelShaderBlob->Release();
@@ -317,7 +322,7 @@ static void RenderCube(DeviceManager& DeviceManager,
   DeviceManager.DeviceContext->VSSetConstantBuffers(0, 1, &Mesh.MatrixBuffer); 
   DeviceManager.DeviceContext->PSSetConstantBuffers(0, 1, &Material.LightBuffer); 
   
-  DeviceManager.DeviceContext->IASetInputLayout(Mesh.Layout);
+  DeviceManager.DeviceContext->IASetInputLayout(Material.Layout);
 
   DeviceManager.DeviceContext->VSSetShader(Material.VertexShader, NULL, 0);
   DeviceManager.DeviceContext->PSSetShader(Material.PixelShader, NULL, 0);
@@ -449,10 +454,11 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	ReleaseObject(Material.VertexShader);
 	ReleaseObject(Material.PixelShader);
 	ReleaseObject(Material.LightBuffer);
+	ReleaseObject(Material.Layout);
+	
 	ReleaseObject(Mesh.VertexBuffer);
 	ReleaseObject(Mesh.IndexBuffer);
 	ReleaseObject(Mesh.MatrixBuffer);
-	ReleaseObject(Mesh.Layout);
 	
 	Running = false;		
       } break;
@@ -596,7 +602,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 			 ProjectionMatrix,
 			 Mesh.VertexBuffer,
 			 Mesh.IndexBuffer,
-			 Mesh.Layout);
+			 Material.Layout);
 
 	      Transform CubeTransform2;
 	      CubeTransform2.Translation = XMMatrixTranslation(-1.f, 0.f, 0.f);
@@ -616,7 +622,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 			 ProjectionMatrix,
 			 Mesh.VertexBuffer,
 			 Mesh.IndexBuffer,
-			 Mesh.Layout);
+			 Material.Layout);
 
 	      
 	      DeviceManager.SwapChain->Present(1, 0);
