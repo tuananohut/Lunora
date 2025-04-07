@@ -30,7 +30,6 @@ struct Material
   ID3D11PixelShader* PixelShader;
   ID3D11Buffer* LightBuffer;
   ID3D11InputLayout* Layout;
-  InputLayout* InputLayout; 
 };
 
 static Mesh Mesh;
@@ -126,7 +125,7 @@ static void CreateCube(DeviceManager& DeviceManager,
     {
       OutputDebugStringA("Could not create pixel shader"); 
     }
-  /*
+  
   D3D11_INPUT_ELEMENT_DESC PolygonLayout[2] = { Renderer->LightShader()[0], 
 						Renderer->LightShader()[1]}; 
   int NumElements; 
@@ -141,10 +140,6 @@ static void CreateCube(DeviceManager& DeviceManager,
     {
       OutputDebugStringA("Could not create layout"); 
     }
-  */
-  InputLayoutManager LayoutManager;
-  LayoutManager.Init();
-  Material.InputLayout = LayoutManager.CreateLayout(DeviceManager.Device, VertexShaderBlob);
   
   if (VertexShaderBlob) VertexShaderBlob->Release();
   if (PixelShaderBlob) PixelShaderBlob->Release();
