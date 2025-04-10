@@ -520,12 +520,21 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  CreateCube(DeviceManager, Window, VSFileName, PSFileName);
 	  
 	  WorldMatrix = XMMatrixIdentity();
+
+	  /*
 	  ViewMatrix = XMMatrixLookAtLH
 	    (
 	     XMVectorSet(0.0f, 0.0f, -9.0f, 1.0f), // -1
 	     XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
 	     XMVectorSet(0.0f, 10.0f, 0.0f, 0.0f)
 	     );
+	  */
+	  Camera Camera;
+	  Camera.SetPosition(0.f, 0.f, -10.f);
+	  Camera.Render();
+
+	  Camera.GetViewMatrix(ViewMatrix); 
+	  
 	  ProjectionMatrix = XMMatrixPerspectiveFovLH
 	    (
 	     XM_PIDIV4,

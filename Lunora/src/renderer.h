@@ -8,6 +8,9 @@
 #include "Core/RenderTargetManager.cpp"
 #include "Core/PipelineStateManager.cpp"
 
+#include "Camera.h"
+#include "Camera.cpp"
+
 using namespace DirectX;
 
 #define DeleteObject(object) if ((object) != NULL) { delete object; object = NULL; }
