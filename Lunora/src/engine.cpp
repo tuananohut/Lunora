@@ -10,6 +10,7 @@ using namespace std;
 static bool Running;
 
 static RenderManager* Renderer;
+static Camera Camera;
 
 static XMFLOAT4 ambientColor = XMFLOAT4(1.f, 0.15f, 0.15f, 1.f);
 const XMFLOAT4 diffuseColor = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
@@ -47,6 +48,7 @@ struct Transform
 
 static float rotation = 0.f; 
 
+// For triangles
 static float moveX = 0.f; 
 static float moveY = 0.f;
 	
@@ -354,6 +356,8 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	      {
 		if(IsDown)
 		  {
+		    Camera.m_positionZ += 0.5f;
+		    Camera.m_positionX += 0.5f; 
 		    if (moveY >= 3.5f)
 		      {
 			moveY = 3.f;
@@ -371,6 +375,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	      {
 		if (IsDown)
 		  {
+		    Camera.m_positionY += 0.5f;
 		    if (moveX <= -3.5f)
 		      {
 			moveX = -3.f; 
@@ -388,6 +393,9 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	      {
 		if (IsDown)
 		  {
+		    Camera.m_positionZ -= 0.5f;
+		    Camera.m_positionX -= 0.5f; 
+		    
 		    if (moveY <= -3.5f)
 		      {
 			moveY = -3.f; 
@@ -405,6 +413,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	      {
 		if (IsDown)
 		  {
+		    Camera.m_positionY -= 0.5f;
 		    if (moveX >= 3.5f)
 		      {
 			moveX = 3.f;
@@ -529,12 +538,10 @@ int WINAPI WinMain(HINSTANCE Instance,
 	     XMVectorSet(0.0f, 10.0f, 0.0f, 0.0f)
 	     );
 	  */
-	  Camera Camera;
-	  Camera.SetPosition(0.f, 0.f, -10.f);
-	  Camera.Render();
-
-	  Camera.GetViewMatrix(ViewMatrix); 
-	  
+	  Camera.m_positionX = 0.f;
+	  Camera.m_positionY = 0.f;
+	  Camera.m_positionZ = -10.f;
+	  	  
 	  ProjectionMatrix = XMMatrixPerspectiveFovLH
 	    (
 	     XM_PIDIV4,
@@ -562,6 +569,9 @@ int WINAPI WinMain(HINSTANCE Instance,
 		}
 	      DeviceManager.DeviceContext->ClearRenderTargetView(RenderTargetManager.RenderTargetView, BackgroundColor);
 	      DeviceManager.DeviceContext->ClearDepthStencilView(RenderTargetManager.DepthStencilView, D3D11_CLEAR_DEPTH, 1.f, 0);
+
+	      Camera.Render();
+	      Camera.GetViewMatrix(ViewMatrix); 
 	      
 	      const float half_gravity = 5.f;
 	      static float height = 0.35f;
