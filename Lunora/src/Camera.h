@@ -21,7 +21,7 @@ struct Camera
 
   void Render();
   void GetViewMatrix(XMMATRIX&);
-
+  
   float m_positionX, m_positionY, m_positionZ;
   float m_rotationX, m_rotationY, m_rotationZ;
   float focal_length; 
