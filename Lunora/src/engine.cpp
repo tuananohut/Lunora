@@ -4,6 +4,7 @@
 #include "managers.cpp"
 #include "resource.h"
 #include "renderer.cpp"
+#include "ShaderSystem.cpp"
 
 using namespace std;
 
@@ -16,26 +17,6 @@ static XMFLOAT4 ambientColor = XMFLOAT4(1.f, 0.15f, 0.15f, 1.f);
 const XMFLOAT4 diffuseColor = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
 const XMFLOAT3 lightDirection = XMFLOAT3(1.f, 0.f, 0.f); 
 
-struct Mesh
-{
-  ID3D11Buffer* MatrixBuffer;
-  ID3D11Buffer *VertexBuffer; 
-  ID3D11Buffer *IndexBuffer;
-  UINT indexCount;
-  UINT stride; 
-};
-
-struct Material
-{
-  ID3D11VertexShader* VertexShader;
-  ID3D11PixelShader* PixelShader;
-  ID3D11Buffer* LightBuffer;
-  ID3D11InputLayout* Layout;
-};
-
-static Mesh Mesh;
-static Material Material; 
-
 struct Transform
 {
   XMMATRIX Translation;
@@ -47,10 +28,6 @@ struct Transform
 };
 
 static float rotation = 0.f; 
-
-// For triangles
-static float moveX = 0.f; 
-static float moveY = 0.f;
 	
 struct MatrixBufferType
 {
@@ -93,11 +70,14 @@ static void ChangeColor(const XMFLOAT4& Color)
 
 static void CreateCube(DeviceManager& DeviceManager,
 		       HWND Window,
-		       const LPCWSTR VSFileName,
-		       const LPCWSTR PSFileName)
+		       ShaderData& Shader,
+		       MeshData& Mesh,
+		       const LPCWSTR VSFilename,
+		       const LPCWSTR PSFilename)
 {
-  HRESULT Result; 
-
+  HRESULT Result;
+  
+  /*
   ID3DBlob* VertexShaderBlob = nullptr;
   ID3DBlob* PixelShaderBlob = nullptr;
   ID3DBlob* ErrorBlob = nullptr;
@@ -146,6 +126,14 @@ static void CreateCube(DeviceManager& DeviceManager,
   if (VertexShaderBlob) VertexShaderBlob->Release();
   if (PixelShaderBlob) PixelShaderBlob->Release();
   if (ErrorBlob) VertexShaderBlob->Release();  
+  */
+
+  bool result;
+  
+  if (!LoadShader(DeviceManager.Device, VSFilename, PSFilename, &Shader, Renderer))
+    {
+      OutputDebugStringA("Could not load shader!");
+    }
   
   D3D11_BUFFER_DESC BufferDesc;
   ZeroMemory(&BufferDesc, sizeof(BufferDesc));
@@ -172,11 +160,11 @@ static void CreateCube(DeviceManager& DeviceManager,
   LightBufferDesc.MiscFlags = 0;
   LightBufferDesc.StructureByteStride = 0;
 
-  Result = DeviceManager.Device->CreateBuffer(&LightBufferDesc, nullptr, &Material.LightBuffer);
+  Result = DeviceManager.Device->CreateBuffer(&LightBufferDesc, nullptr, &Shader.LightBuffer);
   if (FAILED(Result))
     {
       OutputDebugStringA("Could not create light buffer.");
-      Material.LightBuffer = nullptr; 
+      Shader.LightBuffer = nullptr; 
     }
   // Cube Vertex
 
@@ -231,16 +219,11 @@ static void CreateCube(DeviceManager& DeviceManager,
 }
 
 static void RenderCube(DeviceManager& DeviceManager, 
-		       ID3D11VertexShader *VertexShader,
-		       ID3D11PixelShader *PixelShader,
-		       int IndexCount,
-		       ID3D11Buffer *MatrixBuffer,
+		       ShaderData& Shader,
+		       MeshData& Mesh,
 		       XMMATRIX WorldMatrix,
 		       XMMATRIX ViewMatrix,
-		       XMMATRIX ProjectionMatrix,
-		       ID3D11Buffer *VertexBuffer,
-		       ID3D11Buffer *IndexBuffer,
-		       ID3D11InputLayout *Layout)
+		       XMMATRIX ProjectionMatrix)
 {
   HRESULT Result;
   unsigned int stride = sizeof(VertexBufferType);
@@ -258,7 +241,7 @@ static void RenderCube(DeviceManager& DeviceManager,
   ViewMatrix = XMMatrixTranspose(ViewMatrix);
   ProjectionMatrix = XMMatrixTranspose(ProjectionMatrix);
 
-  Result = DeviceManager.DeviceContext->Map(VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
+  Result = DeviceManager.DeviceContext->Map(Mesh.VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
   if (FAILED(Result))
     {
       OutputDebugStringA("Could not map vertex buffer");
@@ -280,16 +263,19 @@ static void RenderCube(DeviceManager& DeviceManager,
   VertexBufferTypePointer[2].position = XMFLOAT3(0.f, -1.f, 0.f);
   VertexBufferTypePointer[2].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
 
-  DeviceManager.DeviceContext->Unmap(VertexBuffer, 0);
+  DeviceManager.DeviceContext->Unmap(Mesh.VertexBuffer, 0);
  
-  DeviceManager.DeviceContext->IASetVertexBuffers(0, 1, &VertexBuffer, &stride, &offset);
-  DeviceManager.DeviceContext->IASetIndexBuffer(IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+  DeviceManager.DeviceContext->IASetVertexBuffers(0, 1, &Mesh.VertexBuffer, &stride, &offset);
+  DeviceManager.DeviceContext->IASetIndexBuffer(Mesh.IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
   
-  DeviceManager.DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+  auto triangle_list = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+  auto triangle_strip = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+  
+  DeviceManager.DeviceContext->IASetPrimitiveTopology(triangle_strip);
   
   // Matrix Buffer Mapping
   
-  Result = DeviceManager.DeviceContext->Map(MatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
+  Result = DeviceManager.DeviceContext->Map(Mesh.MatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
   if (FAILED(Result))
     {
       OutputDebugStringA("Could not map matrix buffer");
@@ -301,11 +287,11 @@ static void RenderCube(DeviceManager& DeviceManager,
   MatrixBufferTypePointer->View = ViewMatrix;
   MatrixBufferTypePointer->Projection = ProjectionMatrix;
   
-  DeviceManager.DeviceContext->Unmap(MatrixBuffer, 0);
+  DeviceManager.DeviceContext->Unmap(Mesh.MatrixBuffer, 0);
 
   // Light Buffer Mapping 
 
-  Result = DeviceManager.DeviceContext->Map(Material.LightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
+  Result = DeviceManager.DeviceContext->Map(Shader.LightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
 
   LightBufferTypePointer = (LightBufferType*)MappedResource.pData;
 
@@ -314,18 +300,49 @@ static void RenderCube(DeviceManager& DeviceManager,
   LightBufferTypePointer->lightDirection = lightDirection;
   LightBufferTypePointer->padding = 0.f;
 
-  DeviceManager.DeviceContext->Unmap(Material.LightBuffer, 0);
+  DeviceManager.DeviceContext->Unmap(Shader.LightBuffer, 0);
   
   DeviceManager.DeviceContext->VSSetConstantBuffers(0, 1, &Mesh.MatrixBuffer); 
-  DeviceManager.DeviceContext->PSSetConstantBuffers(0, 1, &Material.LightBuffer); 
-  
-  DeviceManager.DeviceContext->IASetInputLayout(Material.Layout);
+  DeviceManager.DeviceContext->PSSetConstantBuffers(0, 1, &Shader.LightBuffer); 
 
+  UseShader(DeviceManager.DeviceContext, &Shader);
+  /*
+  DeviceManager.DeviceContext->IASetInputLayout(Material.Layout);
   DeviceManager.DeviceContext->VSSetShader(Material.VertexShader, NULL, 0);
   DeviceManager.DeviceContext->PSSetShader(Material.PixelShader, NULL, 0);
-  
-  DeviceManager.DeviceContext->DrawIndexed(IndexCount, 0, 0);
+  */
+  DeviceManager.DeviceContext->DrawIndexed(Mesh.indexCount, 0, 0);
 }
+
+static bool KeyW;
+static bool KeyA;
+static bool KeyD;
+static bool KeyS;
+
+void UpdateInput()
+{
+    if (KeyW)
+      {
+        Camera.m_positionZ += 0.1f;
+        ChangeColor(XMFLOAT4{1.f, 0.f, 0.f, 1.f}); 
+    }
+    if (KeyA)
+    {
+        Camera.m_positionX += 0.1f;
+        ChangeColor(XMFLOAT4{0.f, 1.f, 0.f, 1.f}); 
+    }
+    if (KeyS)
+    {
+        Camera.m_positionZ -= 0.1f;
+        ChangeColor(XMFLOAT4{0.f, 0.f, 1.f, 1.f}); 
+    }
+    if (KeyD)
+    {
+        Camera.m_positionX -= 0.1f;
+        ChangeColor(XMFLOAT4{0.15f, 0.15f, 0.15f, 1.f});
+    }
+}
+
 
 LRESULT CALLBACK WindowProc(HWND Window, 
                             UINT Message, 
@@ -345,99 +362,25 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	uint32_t VKCode = WParam;
 	int32_t WasDown = ((LParam & (1 << 30)) != 0);
 	int32_t IsDown = ((LParam & (1 << 31)) == 0);
-	
-        XMFLOAT4 Red = {1.f, 0.f, 0.f, 1.f}; 
-        XMFLOAT4 Green = {0.f, 1.f, 0.f, 1.f}; 
-        XMFLOAT4 Blue = {0.f, 0.f, 1.f, 1.f}; 
-	
-	if (WasDown != IsDown)
+
+	switch(VKCode)
 	  {
-	    if (VKCode == 'W')
-	      {
-		if(IsDown)
-		  {
-		    Camera.m_positionZ += 0.5f;
-		    Camera.m_positionX += 0.5f; 
-		    if (moveY >= 3.5f)
-		      {
-			moveY = 3.f;
-		      }
-		    else
-		      {
-			moveY += 1.f;
-		      }
-		  }
-		
-		ChangeColor(Red);
-	      }
-
-	    else if (VKCode == 'A')
-	      {
-		if (IsDown)
-		  {
-		    Camera.m_positionY += 0.5f;
-		    if (moveX <= -3.5f)
-		      {
-			moveX = -3.f; 
-		      }
-		    else
-		      {
-			moveX -= 1.f;
-		      }
-		  }
-
-		ChangeColor(Green);
-	      }
-	    
-	    else if (VKCode == 'S')
-	      {
-		if (IsDown)
-		  {
-		    Camera.m_positionZ -= 0.5f;
-		    Camera.m_positionX -= 0.5f; 
-		    
-		    if (moveY <= -3.5f)
-		      {
-			moveY = -3.f; 
-		      }
-		    else
-		      {
-			moveY -= 1.f;
-		      }
-		  }
-		
-		ChangeColor(Blue);
-	      }
-	    
-	    else if (VKCode == 'D')
-	      {
-		if (IsDown)
-		  {
-		    Camera.m_positionY -= 0.5f;
-		    if (moveX >= 3.5f)
-		      {
-			moveX = 3.f;
-		      }
-		    else
-		      {
-			moveX += 1.f; 
-		      }
-		  }
-		
-		XMFLOAT4 Gray = {0.15f, 0.15f, 0.15f, 1.f};
-		
-		ChangeColor(Gray);
-	      }
-	    
-	    else if (VKCode == 'Q') {}
-	    else if (VKCode == 'E') {}
-	    else if (VKCode == VK_UP) {}
-	    else if (VKCode == VK_LEFT) {}
-	    else if (VKCode == VK_DOWN) {}
-	    else if (VKCode == VK_RIGHT) {}
-	    else if (VKCode == VK_ESCAPE) {}
-	    else if (VKCode == VK_SPACE) {}
-	  
+	  case 'W':
+	    {
+	      KeyW = IsDown;
+	    } break;
+	  case 'A':
+	    {
+	      KeyA = IsDown;
+	    } break;
+	  case 'S':
+	    {
+	      KeyS = IsDown;
+	    } break;
+	  case 'D':
+	    {
+	      KeyD = IsDown;
+	    } break; 
 	  }
 	
 	int32_t AltKeyWasDown = (LParam & (1 << 29));
@@ -454,16 +397,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
       } break;
 
     case WM_DESTROY:
-      {	
-	ReleaseObject(Material.VertexShader);
-	ReleaseObject(Material.PixelShader);
-	ReleaseObject(Material.LightBuffer);
-	ReleaseObject(Material.Layout);
-	
-	ReleaseObject(Mesh.VertexBuffer);
-	ReleaseObject(Mesh.IndexBuffer);
-	ReleaseObject(Mesh.MatrixBuffer);
-	
+      {			
 	Running = false;		
       } break;
       
@@ -490,7 +424,7 @@ int WINAPI WinMain(HINSTANCE Instance,
   wc.hIcon = LoadIcon(Instance, MAKEINTRESOURCE(IDI_ICON1));;
   wc.hCursor = LoadCursor(NULL, IDC_ARROW);
   wc.lpszClassName = "Lunora";
-
+  
   HRESULT Result; 
   
   if (RegisterClassExA(&wc))
@@ -520,13 +454,19 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  
 	  PipelineStateManager PipelineStateManager; 
 	  PipelineStateManager.Initialize(DeviceManager);
+
+	  static ShaderData Shader;
+
+	  static MeshData Mesh;
+
+	  Mesh.indexCount = 3;
 	  
 	  InitializeDX11(DeviceManager,
 			 RenderTargetManager,
 			 PipelineStateManager,
 			 Window);
 	  
-	  CreateCube(DeviceManager, Window, VSFileName, PSFileName);
+	  CreateCube(DeviceManager, Window, Shader, Mesh, VSFileName, PSFileName);
 	  
 	  WorldMatrix = XMMatrixIdentity();
 
@@ -558,18 +498,32 @@ int WINAPI WinMain(HINSTANCE Instance,
 		{		  
 		  if (Message.message == WM_QUIT)
 		    {
+		      ReleaseObject(Shader.VertexShader);
+		      ReleaseObject(Shader.PixelShader);
+		      ReleaseObject(Shader.LightBuffer);
+		      ReleaseObject(Shader.InputLayout);
+		      
+		      ReleaseObject(Mesh.VertexBuffer);
+		      ReleaseObject(Mesh.IndexBuffer);
+		      ReleaseObject(Mesh.MatrixBuffer);
+
+		      // ReleaseShader(Shader*);
+		      
 		      DeviceManager.Cleanup();
 		      RenderTargetManager.Cleanup();
-		      PipelineStateManager.Cleanup();
+		      PipelineStateManager.Cleanup();	     
+		      
 		      Running = false;
 		    }
-
+		  
 		  TranslateMessage(&Message);
 		  DispatchMessageA(&Message);
 		}
 	      DeviceManager.DeviceContext->ClearRenderTargetView(RenderTargetManager.RenderTargetView, BackgroundColor);
 	      DeviceManager.DeviceContext->ClearDepthStencilView(RenderTargetManager.DepthStencilView, D3D11_CLEAR_DEPTH, 1.f, 0);
 
+	      UpdateInput();
+	      
 	      Camera.Render();
 	      Camera.GetViewMatrix(ViewMatrix); 
 	      
@@ -591,8 +545,6 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      
 	      Transform CubeTransform;
 	      
-	      CubeTransform.Translation = XMMatrixTranslation(moveX, moveY, 0.f);
-
 	      CubeTransform.RotationMatrixX = XMMatrixRotationX(rotation);
 	      CubeTransform.RotationMatrixY = XMMatrixRotationY(rotation);
 	      CubeTransform.RotationMatrixZ = XMMatrixRotationZ(rotation);
@@ -602,21 +554,16 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	      CubeTransform.RotationMatrix = XMMatrixRotationX(rotation);
 	      
-	      XMMATRIX TranslationAndRotation = XMMatrixMultiply(CubeTransform.RotationMatrix, CubeTransform.Translation);
+	      XMMATRIX TranslationAndRotation = CubeTransform.RotationMatrix;
 	      
 	      WorldMatrix = TranslationAndRotation; 
 	      
 	      RenderCube(DeviceManager,
-			 Material.VertexShader,
-			 Material.PixelShader,
-			 3,
-			 Mesh.MatrixBuffer,
+			 Shader,
+			 Mesh,
 			 WorldMatrix,
 			 ViewMatrix,
-			 ProjectionMatrix,
-			 Mesh.VertexBuffer,
-			 Mesh.IndexBuffer,
-			 Material.Layout);
+			 ProjectionMatrix);
 
 	      Transform CubeTransform2;
 	      CubeTransform2.Translation = XMMatrixTranslation(-1.f, 0.f, 0.f);
@@ -627,18 +574,12 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      WorldMatrix = CubeTransform2.RotationMatrix;
 			      
 	      RenderCube(DeviceManager,
-			 Material.VertexShader,
-			 Material.PixelShader,
-			 3,
-			 Mesh.MatrixBuffer,
+			 Shader,
+			 Mesh,
 			 WorldMatrix,
 			 ViewMatrix,
-			 ProjectionMatrix,
-			 Mesh.VertexBuffer,
-			 Mesh.IndexBuffer,
-			 Material.Layout);
+			 ProjectionMatrix);
 
-	      
 	      DeviceManager.SwapChain->Present(1, 0);
 	    } 
 	}
