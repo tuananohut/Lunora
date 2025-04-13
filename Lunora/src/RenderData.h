@@ -3,15 +3,23 @@
 
 #include <d3d11.h>
 
-struct ShaderData
-{  
+struct ShaderGPUData
+{
   ID3D11VertexShader* VertexShader;
   ID3D11PixelShader* PixelShader;
+  ID3D11InputLayout* InputLayout;
   ID3D11Buffer* LightBuffer;
-  ID3D11InputLayout* InputLayout;   
 };
 
-struct MeshData
+struct ShaderData
+{  
+  ShaderGPUData* ShaderArray;
+  UINT* EntityIDs;
+  UINT Count;
+  UINT Capacity; 
+};
+
+struct MeshGPUData
 {
   ID3D11Buffer* MatrixBuffer;
   ID3D11Buffer *VertexBuffer; 
@@ -20,14 +28,28 @@ struct MeshData
   UINT stride; 
 };
 
+struct MeshData
+{
+  MeshGPUData* MeshArray;
+  UINT* EntityIDs;
+  UINT Count;
+  UINT Capacity; 
+};
+
 struct CameraData {};
+
+enum InputKey
+  {
+    KEY_W,
+    KEY_A,
+    KEY_S,
+    KEY_D,
+    KEY_COUNT
+  };
 
 struct InputKeyData
 {
-  bool W;
-  bool A;
-  bool S;
-  bool D;
+  bool Keys[KEY_COUNT]; 
 };
 
 #endif

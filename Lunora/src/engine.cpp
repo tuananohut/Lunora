@@ -76,58 +76,6 @@ static void CreateCube(DeviceManager& DeviceManager,
 		       const LPCWSTR PSFilename)
 {
   HRESULT Result;
-  
-  /*
-  ID3DBlob* VertexShaderBlob = nullptr;
-  ID3DBlob* PixelShaderBlob = nullptr;
-  ID3DBlob* ErrorBlob = nullptr;
-  
-  // VertexShaderBlob = CompileShader(VSFileName, "ColorVertexShader", "vs_5_0");
-  VertexShaderBlob = CompileShader(VSFileName, "LightVertexShader", "vs_5_0");
-  //VertexShaderBlob = CompileShader(VSFileName, "TextureVertexShader", "vs_5_0");
-  
-  Result = DeviceManager.Device->CreateVertexShader(VertexShaderBlob->GetBufferPointer(),
-						    VertexShaderBlob->GetBufferSize(),
-						    NULL,
-						    &Material.VertexShader);
-  if(FAILED(Result))
-    {
-      OutputDebugStringA("Could not create vertex shader");
-    }
-
-  PixelShaderBlob = CompileShader(PSFileName, "LightPixelShader", "ps_5_0");
-  // PixelShaderBlob = CompileShader(PSFileName, "ColorPixelShader", "ps_5_0");
-  // PixelShaderBlob = CompileShader(PSFileName, "TexturePixelShader", "ps_5_0");
-
-  Result = DeviceManager.Device->CreatePixelShader(PixelShaderBlob->GetBufferPointer(),
-						   PixelShaderBlob->GetBufferSize(),
-						   NULL,
-						   &Material.PixelShader);
-  if(FAILED(Result))
-    {
-      OutputDebugStringA("Could not create pixel shader"); 
-    }
-  
-  D3D11_INPUT_ELEMENT_DESC PolygonLayout[2] = { Renderer->LightShader()[0], 
-						Renderer->LightShader()[1]}; 
-  int NumElements; 
-
-  NumElements = sizeof(PolygonLayout) / sizeof(PolygonLayout[0]);
-  
-  Result = DeviceManager.Device->CreateInputLayout(PolygonLayout, NumElements,
-						   VertexShaderBlob->GetBufferPointer(),
-						   VertexShaderBlob->GetBufferSize(),
-						   &Material.Layout);
-  if (FAILED(Result))
-    {
-      OutputDebugStringA("Could not create layout"); 
-    }
-  
-  if (VertexShaderBlob) VertexShaderBlob->Release();
-  if (PixelShaderBlob) PixelShaderBlob->Release();
-  if (ErrorBlob) VertexShaderBlob->Release();  
-  */
-
   bool result;
   
   if (!LoadShader(DeviceManager.Device, VSFilename, PSFilename, &Shader, Renderer))
