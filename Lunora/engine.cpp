@@ -4,7 +4,7 @@
 #include "managers.cpp"
 #include "resource.h"
 #include "renderer.cpp"
-#include "ShaderSystem.cpp"
+#include "Renderer/Shader/ShaderSystem.cpp"
 
 using namespace std;
 
@@ -71,14 +71,15 @@ static void ChangeColor(const XMFLOAT4& Color)
 static void CreateCube(DeviceManager& DeviceManager,
 		       HWND Window,
 		       ShaderData& Shader,
-		       MeshData& Mesh,
+		       MeshGPUData& Mesh,
 		       const LPCWSTR VSFilename,
-		       const LPCWSTR PSFilename)
+		       const LPCWSTR PSFilename,
+		       UINT entityID)
 {
   HRESULT Result;
   bool result;
   
-  if (!LoadShader(DeviceManager.Device, VSFilename, PSFilename, &Shader, Renderer))
+  if (!LoadShader(DeviceManager.Device, VSFilename, PSFilename, &Shader, Renderer, entityID))
     {
       OutputDebugStringA("Could not load shader!");
     }

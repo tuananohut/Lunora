@@ -4,12 +4,12 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 
-#include "Core/DeviceManager.cpp"
-#include "Core/RenderTargetManager.cpp"
-#include "Core/PipelineStateManager.cpp"
+#include "Core/Device/DeviceManager.cpp"
+#include "Core/Pipeline/PipelineStateManager.cpp"
+#include "Core/Resource/RenderTargetManager.cpp"
 
-#include "Camera.h"
-#include "Camera.cpp"
+#include "Camera/Camera.h"
+#include "Camera/Camera.cpp"
 
 using namespace DirectX;
 

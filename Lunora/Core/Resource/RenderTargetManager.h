@@ -1,8 +1,6 @@
 #ifndef RENDERTARGETMANAGER_H
 #define RENDERTARGETMANAGER_H
 
-#include "DeviceManager.h"
-
 struct RenderTargetManager
 {
   ID3D11RenderTargetView* RenderTargetView = nullptr;

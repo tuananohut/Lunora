@@ -3,7 +3,6 @@
 
 #include <d3d11.h>
 #include <DirectXMath.h>
-#include "../src/renderer.h"
 
 using namespace DirectX;
 
