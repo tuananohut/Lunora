@@ -70,7 +70,7 @@ static void ChangeColor(const XMFLOAT4& Color)
 
 static void CreateCube(DeviceManager& DeviceManager,
 		       HWND Window,
-		       ShaderData& Shader,
+		       ShaderData& shaderData,
 		       MeshGPUData& Mesh,
 		       const LPCWSTR VSFilename,
 		       const LPCWSTR PSFilename,
@@ -78,11 +78,17 @@ static void CreateCube(DeviceManager& DeviceManager,
 {
   HRESULT Result;
   bool result;
-  
-  if (!LoadShader(DeviceManager.Device, VSFilename, PSFilename, &Shader, Renderer, entityID))
+
+  if (!LoadShader(DeviceManager.Device, VSFilename, PSFilename, &shaderData, Renderer, entityID))
     {
       OutputDebugStringA("Could not load shader!");
     }
+
+  
+  UINT index = shaderData.Count++;
+
+  ShaderGPUData* gpuShader = &shaderData.ShaderArray[index];
+  shaderData.EntityIDs[index] = entityID;
   
   D3D11_BUFFER_DESC BufferDesc;
   ZeroMemory(&BufferDesc, sizeof(BufferDesc));
@@ -109,11 +115,11 @@ static void CreateCube(DeviceManager& DeviceManager,
   LightBufferDesc.MiscFlags = 0;
   LightBufferDesc.StructureByteStride = 0;
 
-  Result = DeviceManager.Device->CreateBuffer(&LightBufferDesc, nullptr, &Shader.LightBuffer);
+  Result = DeviceManager.Device->CreateBuffer(&LightBufferDesc, nullptr, &gpuShader[index].LightBuffer);
   if (FAILED(Result))
     {
       OutputDebugStringA("Could not create light buffer.");
-      Shader.LightBuffer = nullptr; 
+      gpuShader[index].LightBuffer = nullptr; 
     }
   // Cube Vertex
 
@@ -168,8 +174,8 @@ static void CreateCube(DeviceManager& DeviceManager,
 }
 
 static void RenderCube(DeviceManager& DeviceManager, 
-		       ShaderData& Shader,
-		       MeshData& Mesh,
+		       ShaderData& shaderData,
+		       MeshGPUData& Mesh,
 		       XMMATRIX WorldMatrix,
 		       XMMATRIX ViewMatrix,
 		       XMMATRIX ProjectionMatrix)
@@ -186,6 +192,10 @@ static void RenderCube(DeviceManager& DeviceManager,
 
   VertexBufferType* VertexBufferTypePointer;
 
+  UINT index = shaderData.Count++;
+
+  ShaderGPUData* gpuShader = &shaderData.ShaderArray[index];
+  
   WorldMatrix = XMMatrixTranspose(WorldMatrix);
   ViewMatrix = XMMatrixTranspose(ViewMatrix);
   ProjectionMatrix = XMMatrixTranspose(ProjectionMatrix);
@@ -240,7 +250,7 @@ static void RenderCube(DeviceManager& DeviceManager,
 
   // Light Buffer Mapping 
 
-  Result = DeviceManager.DeviceContext->Map(Shader.LightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
+  Result = DeviceManager.DeviceContext->Map(gpuShader[index].LightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
 
   LightBufferTypePointer = (LightBufferType*)MappedResource.pData;
 
@@ -249,17 +259,12 @@ static void RenderCube(DeviceManager& DeviceManager,
   LightBufferTypePointer->lightDirection = lightDirection;
   LightBufferTypePointer->padding = 0.f;
 
-  DeviceManager.DeviceContext->Unmap(Shader.LightBuffer, 0);
+  DeviceManager.DeviceContext->Unmap(gpuShader[index].LightBuffer, 0);
   
   DeviceManager.DeviceContext->VSSetConstantBuffers(0, 1, &Mesh.MatrixBuffer); 
-  DeviceManager.DeviceContext->PSSetConstantBuffers(0, 1, &Shader.LightBuffer); 
-
-  UseShader(DeviceManager.DeviceContext, &Shader);
-  /*
-  DeviceManager.DeviceContext->IASetInputLayout(Material.Layout);
-  DeviceManager.DeviceContext->VSSetShader(Material.VertexShader, NULL, 0);
-  DeviceManager.DeviceContext->PSSetShader(Material.PixelShader, NULL, 0);
-  */
+  DeviceManager.DeviceContext->PSSetConstantBuffers(0, 1, &gpuShader[index].LightBuffer); 
+  UseShader(DeviceManager.DeviceContext, &gpuShader[index]);
+  
   DeviceManager.DeviceContext->DrawIndexed(Mesh.indexCount, 0, 0);
 }
 
@@ -414,8 +419,10 @@ int WINAPI WinMain(HINSTANCE Instance,
 			 RenderTargetManager,
 			 PipelineStateManager,
 			 Window);
+
+	  ShaderData shaderData; 
 	  
-	  CreateCube(DeviceManager, Window, Shader, Mesh, VSFileName, PSFileName);
+	  CreateCube(DeviceManager, Window, shaderData, Mesh, VSFileName, PSFileName);
 	  
 	  WorldMatrix = XMMatrixIdentity();
 
