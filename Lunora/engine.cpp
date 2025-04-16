@@ -175,6 +175,7 @@ static void CreateCube(DeviceManager& DeviceManager,
 
 static void RenderCube(DeviceManager& DeviceManager, 
 		       ShaderData& shaderData,
+		       UINT entityID, 
 		       MeshGPUData& Mesh,
 		       XMMATRIX WorldMatrix,
 		       XMMATRIX ViewMatrix,
@@ -195,6 +196,7 @@ static void RenderCube(DeviceManager& DeviceManager,
   UINT index = shaderData.Count++;
 
   ShaderGPUData* gpuShader = &shaderData.ShaderArray[index];
+  shaderData.EntityIDs[index] = entityID; 
   
   WorldMatrix = XMMatrixTranspose(WorldMatrix);
   ViewMatrix = XMMatrixTranspose(ViewMatrix);
@@ -263,7 +265,7 @@ static void RenderCube(DeviceManager& DeviceManager,
   
   DeviceManager.DeviceContext->VSSetConstantBuffers(0, 1, &Mesh.MatrixBuffer); 
   DeviceManager.DeviceContext->PSSetConstantBuffers(0, 1, &gpuShader[index].LightBuffer); 
-  UseShader(DeviceManager.DeviceContext, &gpuShader[index]);
+  UseShader(DeviceManager.DeviceContext, &shaderData, entityID);
   
   DeviceManager.DeviceContext->DrawIndexed(Mesh.indexCount, 0, 0);
 }
@@ -409,9 +411,11 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  PipelineStateManager PipelineStateManager; 
 	  PipelineStateManager.Initialize(DeviceManager);
 
-	  static ShaderData Shader;
-
-	  static MeshData Mesh;
+	  
+	  static ShaderData shaderData;
+	  UINT entityID  = 0;
+	  
+	  static MeshGPUData Mesh;
 
 	  Mesh.indexCount = 3;
 	  
@@ -419,10 +423,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 			 RenderTargetManager,
 			 PipelineStateManager,
 			 Window);
-
-	  ShaderData shaderData; 
 	  
-	  CreateCube(DeviceManager, Window, shaderData, Mesh, VSFileName, PSFileName);
+	  CreateCube(DeviceManager, Window, shaderData, Mesh, VSFileName, PSFileName, entityID);
 	  
 	  WorldMatrix = XMMatrixIdentity();
 
@@ -445,7 +447,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	     0.1f,
 	     1000.0f
 	     );
-	  
+	 
 	  Running = true;
 	  while(Running)
 	    {
@@ -454,10 +456,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 		{		  
 		  if (Message.message == WM_QUIT)
 		    {
-		      ReleaseObject(Shader.VertexShader);
-		      ReleaseObject(Shader.PixelShader);
-		      ReleaseObject(Shader.LightBuffer);
-		      ReleaseObject(Shader.InputLayout);
+		     
 		      
 		      ReleaseObject(Mesh.VertexBuffer);
 		      ReleaseObject(Mesh.IndexBuffer);
@@ -515,7 +514,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      WorldMatrix = TranslationAndRotation; 
 	      
 	      RenderCube(DeviceManager,
-			 Shader,
+			 shaderData,
+			 entityID,
 			 Mesh,
 			 WorldMatrix,
 			 ViewMatrix,
@@ -530,7 +530,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      WorldMatrix = CubeTransform2.RotationMatrix;
 			      
 	      RenderCube(DeviceManager,
-			 Shader,
+			 shaderData,
+			 entityID,
 			 Mesh,
 			 WorldMatrix,
 			 ViewMatrix,
