@@ -86,9 +86,9 @@ static void CreateCube(DeviceManager& DeviceManager,
 
   
   UINT index = shaderData.Count++;
-
   ShaderGPUData* gpuShader = &shaderData.ShaderArray[index];
   shaderData.EntityIDs[index] = entityID;
+  gpuShader->LightBuffer = nullptr;
   
   D3D11_BUFFER_DESC BufferDesc;
   ZeroMemory(&BufferDesc, sizeof(BufferDesc));
@@ -193,9 +193,26 @@ static void RenderCube(DeviceManager& DeviceManager,
 
   VertexBufferType* VertexBufferTypePointer;
 
-  UINT index = shaderData.Count++;
+  UINT index = -1;
+  
+  for (UINT i = 0; i < shaderData.Count; i++)
+    {
+      if (shaderData.EntityIDs[i] == entityID)
+	{
+	  index = i;
+	  break;  
+	}
+    }
+
+  if (index == -1)
+    {
+      OutputDebugStringA("RenderCube: Could not find shader for entity ID!\n");
+      return;
+    }
 
   ShaderGPUData* gpuShader = &shaderData.ShaderArray[index];
+
+  
   shaderData.EntityIDs[index] = entityID; 
   
   WorldMatrix = XMMatrixTranspose(WorldMatrix);
@@ -250,7 +267,13 @@ static void RenderCube(DeviceManager& DeviceManager,
   
   DeviceManager.DeviceContext->Unmap(Mesh.MatrixBuffer, 0);
 
-  // Light Buffer Mapping 
+  // Light Buffer Mapping
+
+  if (!gpuShader[index].LightBuffer)
+    {
+      OutputDebugStringA("LightBuffer is null before Map! Was it created?\n");
+      return;
+    }
 
   Result = DeviceManager.DeviceContext->Map(gpuShader[index].LightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
 
@@ -414,6 +437,11 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  
 	  static ShaderData shaderData;
 	  UINT entityID  = 0;
+
+	  shaderData.Capacity = 100;
+	  shaderData.Count = 0;
+	  shaderData.ShaderArray = new ShaderGPUData[shaderData.Capacity];
+	  shaderData.EntityIDs = new UINT[shaderData.Capacity];
 	  
 	  static MeshGPUData Mesh;
 
