@@ -123,6 +123,8 @@ void UseShader(ID3D11DeviceContext* DeviceContext,
   DeviceContext->IASetInputLayout(Shader->InputLayout);
   DeviceContext->VSSetShader(Shader->VertexShader, nullptr, 0);
   DeviceContext->PSSetShader(Shader->PixelShader, nullptr, 0);
+
+  OutputDebugStringA("Shader bound for entity: X\n");
 }
 
 void ReleaseShader(ShaderData* ShaderData, UINT entityID)

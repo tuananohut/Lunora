@@ -70,8 +70,8 @@ static void ChangeColor(const XMFLOAT4& Color)
 
 static void CreateCube(DeviceManager& DeviceManager,
 		       HWND Window,
-		       ShaderData& shaderData,
-		       MeshGPUData& Mesh,
+		       ShaderData* shaderData,
+		       MeshGPUData* Mesh,
 		       const LPCWSTR VSFilename,
 		       const LPCWSTR PSFilename,
 		       UINT entityID)
@@ -79,15 +79,15 @@ static void CreateCube(DeviceManager& DeviceManager,
   HRESULT Result;
   bool result;
 
-  if (!LoadShader(DeviceManager.Device, VSFilename, PSFilename, &shaderData, Renderer, entityID))
+  if (!LoadShader(DeviceManager.Device, VSFilename, PSFilename, shaderData, Renderer, entityID))
     {
       OutputDebugStringA("Could not load shader!");
     }
 
   
-  UINT index = shaderData.Count++;
-  ShaderGPUData* gpuShader = &shaderData.ShaderArray[index];
-  shaderData.EntityIDs[index] = entityID;
+  UINT index = shaderData->Count++;
+  ShaderGPUData* gpuShader = &shaderData->ShaderArray[index];
+  shaderData->EntityIDs[index] = entityID;
   gpuShader->LightBuffer = nullptr;
   
   D3D11_BUFFER_DESC BufferDesc;
@@ -99,11 +99,11 @@ static void CreateCube(DeviceManager& DeviceManager,
   BufferDesc.MiscFlags = 0;
   BufferDesc.StructureByteStride = 0;
   
-  Result = DeviceManager.Device->CreateBuffer(&BufferDesc, nullptr, &Mesh.MatrixBuffer);
-  if (FAILED(Result))
+  Result = DeviceManager.Device->CreateBuffer(&BufferDesc, nullptr, &Mesh->MatrixBuffer);
+  if(FAILED(Result))
     {
       OutputDebugStringA("Could not create matrix buffer.");
-      Mesh.MatrixBuffer = nullptr;
+      Mesh->MatrixBuffer = nullptr;
     }
 
   D3D11_BUFFER_DESC LightBufferDesc;
@@ -115,14 +115,18 @@ static void CreateCube(DeviceManager& DeviceManager,
   LightBufferDesc.MiscFlags = 0;
   LightBufferDesc.StructureByteStride = 0;
 
-  Result = DeviceManager.Device->CreateBuffer(&LightBufferDesc, nullptr, &gpuShader[index].LightBuffer);
+  Result = DeviceManager.Device->CreateBuffer(&LightBufferDesc, nullptr, &gpuShader->LightBuffer);
   if (FAILED(Result))
     {
       OutputDebugStringA("Could not create light buffer.");
-      gpuShader[index].LightBuffer = nullptr; 
+      gpuShader->LightBuffer = nullptr; 
     }
+  else
+    {
+      OutputDebugStringA("Light buffer created successfully.\n");
+    }
+  
   // Cube Vertex
-
   D3D11_BUFFER_DESC VertexBufferDesc; 
   int VertexCount = 3;
 
@@ -134,7 +138,7 @@ static void CreateCube(DeviceManager& DeviceManager,
   VertexBufferDesc.MiscFlags = 0;
   VertexBufferDesc.StructureByteStride = 0;
   
-  Result = DeviceManager.Device->CreateBuffer(&VertexBufferDesc, nullptr, &Mesh.VertexBuffer);
+  Result = DeviceManager.Device->CreateBuffer(&VertexBufferDesc, nullptr, &Mesh->VertexBuffer);
   if (FAILED(Result))
     {
       OutputDebugStringA("Could not create vertex buffer");
@@ -163,7 +167,7 @@ static void CreateCube(DeviceManager& DeviceManager,
   IndexData.SysMemPitch = 0;
   IndexData.SysMemSlicePitch = 0;
   
-  Result = DeviceManager.Device->CreateBuffer(&IndexBufferDesc, &IndexData, &Mesh.IndexBuffer);
+  Result = DeviceManager.Device->CreateBuffer(&IndexBufferDesc, &IndexData, &Mesh->IndexBuffer);
   if (FAILED(Result))
     {
       OutputDebugStringA("Could not create index buffer");
@@ -174,9 +178,9 @@ static void CreateCube(DeviceManager& DeviceManager,
 }
 
 static void RenderCube(DeviceManager& DeviceManager, 
-		       ShaderData& shaderData,
+		       ShaderData* shaderData,
 		       UINT entityID, 
-		       MeshGPUData& Mesh,
+		       MeshGPUData* Mesh,
 		       XMMATRIX WorldMatrix,
 		       XMMATRIX ViewMatrix,
 		       XMMATRIX ProjectionMatrix)
@@ -195,9 +199,9 @@ static void RenderCube(DeviceManager& DeviceManager,
 
   UINT index = -1;
   
-  for (UINT i = 0; i < shaderData.Count; i++)
+  for (UINT i = 0; i < shaderData->Count; i++)
     {
-      if (shaderData.EntityIDs[i] == entityID)
+      if (shaderData->EntityIDs[i] == entityID)
 	{
 	  index = i;
 	  break;  
@@ -210,16 +214,15 @@ static void RenderCube(DeviceManager& DeviceManager,
       return;
     }
 
-  ShaderGPUData* gpuShader = &shaderData.ShaderArray[index];
-
+  ShaderGPUData* gpuShader = &shaderData->ShaderArray[index];
   
-  shaderData.EntityIDs[index] = entityID; 
+  shaderData->EntityIDs[index] = entityID; 
   
   WorldMatrix = XMMatrixTranspose(WorldMatrix);
   ViewMatrix = XMMatrixTranspose(ViewMatrix);
   ProjectionMatrix = XMMatrixTranspose(ProjectionMatrix);
 
-  Result = DeviceManager.DeviceContext->Map(Mesh.VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
+  Result = DeviceManager.DeviceContext->Map(Mesh->VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
   if (FAILED(Result))
     {
       OutputDebugStringA("Could not map vertex buffer");
@@ -241,19 +244,19 @@ static void RenderCube(DeviceManager& DeviceManager,
   VertexBufferTypePointer[2].position = XMFLOAT3(0.f, -1.f, 0.f);
   VertexBufferTypePointer[2].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
 
-  DeviceManager.DeviceContext->Unmap(Mesh.VertexBuffer, 0);
+  DeviceManager.DeviceContext->Unmap(Mesh->VertexBuffer, 0);
  
-  DeviceManager.DeviceContext->IASetVertexBuffers(0, 1, &Mesh.VertexBuffer, &stride, &offset);
-  DeviceManager.DeviceContext->IASetIndexBuffer(Mesh.IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+  DeviceManager.DeviceContext->IASetVertexBuffers(0, 1, &Mesh->VertexBuffer, &stride, &offset);
+  DeviceManager.DeviceContext->IASetIndexBuffer(Mesh->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
   
   auto triangle_list = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
   auto triangle_strip = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
   
-  DeviceManager.DeviceContext->IASetPrimitiveTopology(triangle_strip);
+  DeviceManager.DeviceContext->IASetPrimitiveTopology(triangle_list);
   
   // Matrix Buffer Mapping
   
-  Result = DeviceManager.DeviceContext->Map(Mesh.MatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
+  Result = DeviceManager.DeviceContext->Map(Mesh->MatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
   if (FAILED(Result))
     {
       OutputDebugStringA("Could not map matrix buffer");
@@ -265,17 +268,16 @@ static void RenderCube(DeviceManager& DeviceManager,
   MatrixBufferTypePointer->View = ViewMatrix;
   MatrixBufferTypePointer->Projection = ProjectionMatrix;
   
-  DeviceManager.DeviceContext->Unmap(Mesh.MatrixBuffer, 0);
+  DeviceManager.DeviceContext->Unmap(Mesh->MatrixBuffer, 0);
 
   // Light Buffer Mapping
-
-  if (!gpuShader[index].LightBuffer)
+  if (!gpuShader->LightBuffer)
     {
       OutputDebugStringA("LightBuffer is null before Map! Was it created?\n");
-      return;
+      // return;
     }
-
-  Result = DeviceManager.DeviceContext->Map(gpuShader[index].LightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
+  
+  Result = DeviceManager.DeviceContext->Map(gpuShader->LightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
 
   LightBufferTypePointer = (LightBufferType*)MappedResource.pData;
 
@@ -284,13 +286,13 @@ static void RenderCube(DeviceManager& DeviceManager,
   LightBufferTypePointer->lightDirection = lightDirection;
   LightBufferTypePointer->padding = 0.f;
 
-  DeviceManager.DeviceContext->Unmap(gpuShader[index].LightBuffer, 0);
+  DeviceManager.DeviceContext->Unmap(gpuShader->LightBuffer, 0);
   
-  DeviceManager.DeviceContext->VSSetConstantBuffers(0, 1, &Mesh.MatrixBuffer); 
-  DeviceManager.DeviceContext->PSSetConstantBuffers(0, 1, &gpuShader[index].LightBuffer); 
-  UseShader(DeviceManager.DeviceContext, &shaderData, entityID);
+  DeviceManager.DeviceContext->VSSetConstantBuffers(0, 1, &Mesh->MatrixBuffer); 
+  DeviceManager.DeviceContext->PSSetConstantBuffers(0, 1, &gpuShader->LightBuffer); 
+  UseShader(DeviceManager.DeviceContext, shaderData, entityID);
   
-  DeviceManager.DeviceContext->DrawIndexed(Mesh.indexCount, 0, 0);
+  DeviceManager.DeviceContext->DrawIndexed(Mesh->indexCount, 0, 0);
 }
 
 static bool KeyW;
@@ -452,7 +454,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 			 PipelineStateManager,
 			 Window);
 	  
-	  CreateCube(DeviceManager, Window, shaderData, Mesh, VSFileName, PSFileName, entityID);
+	  CreateCube(DeviceManager, Window, &shaderData, &Mesh, VSFileName, PSFileName, entityID);
 	  
 	  WorldMatrix = XMMatrixIdentity();
 
@@ -542,9 +544,9 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      WorldMatrix = TranslationAndRotation; 
 	      
 	      RenderCube(DeviceManager,
-			 shaderData,
+			 &shaderData,
 			 entityID,
-			 Mesh,
+			 &Mesh,
 			 WorldMatrix,
 			 ViewMatrix,
 			 ProjectionMatrix);
@@ -558,9 +560,9 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      WorldMatrix = CubeTransform2.RotationMatrix;
 			      
 	      RenderCube(DeviceManager,
-			 shaderData,
+			 &shaderData,
 			 entityID,
-			 Mesh,
+			 &Mesh,
 			 WorldMatrix,
 			 ViewMatrix,
 			 ProjectionMatrix);
