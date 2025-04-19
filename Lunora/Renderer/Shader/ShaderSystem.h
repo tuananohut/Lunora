@@ -8,14 +8,12 @@
 bool LoadShader(ID3D11Device* Device,
 		const wchar_t* vsPath,
 		const wchar_t* psPath,
-		ShaderData* outShader,
-		RenderManager* Renderer,
-		UINT entityID);
+		ShaderGPUData* Shader,
+		RenderManager* Renderer);
 
 void UseShader(ID3D11DeviceContext* DeviceContext,
-	       const ShaderData* Shader,
-	       UINT entityID);
+	       const ShaderGPUData* Shader);
 
-void ReleaseShader(ShaderData* Shader, UINT entityID);
+void ReleaseShader(ShaderGPUData* Shader);
 
 #endif

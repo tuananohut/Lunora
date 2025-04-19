@@ -11,29 +11,13 @@ struct ShaderGPUData
   ID3D11Buffer* LightBuffer;
 };
 
-struct ShaderData
-{  
-  ShaderGPUData* ShaderArray;
-  UINT* EntityIDs;
-  UINT Count;
-  UINT Capacity; 
-};
-
 struct MeshGPUData
 {
   ID3D11Buffer* MatrixBuffer;
   ID3D11Buffer *VertexBuffer; 
   ID3D11Buffer *IndexBuffer;
-  UINT indexCount;
+  int indexCount;
   UINT stride; 
-};
-
-struct MeshData
-{
-  MeshGPUData* MeshArray;
-  UINT* EntityIDs;
-  UINT Count;
-  UINT Capacity; 
 };
 
 struct CameraData {};

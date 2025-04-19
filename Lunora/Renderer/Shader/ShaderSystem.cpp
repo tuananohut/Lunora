@@ -35,31 +35,12 @@ static bool CompileShader(const wchar_t* filename,
   return true;
 }
 
-static int FindShaderIndex(const ShaderData* data, UINT entityID)
-{
-  for (UINT i = 0; i < data->Count; ++i)
-    {
-      if (data->EntityIDs[i] == entityID)
-	{
-	  return i; 
-	}
-    }
-
-  return -1;
-}
-
 bool LoadShader(ID3D11Device* Device,
 		const wchar_t* vsPath,
 		const wchar_t* psPath,
-		ShaderData* shaderData,
-		RenderManager* Renderer,
-		UINT entityID)
-{
-  if (shaderData->Count >= shaderData->Capacity)
-    {
-      return false; 
-    }
-  
+		ShaderGPUData* Shader,
+		RenderManager* Renderer)
+{  
   ID3DBlob* vsBlob = nullptr;
   ID3DBlob* psBlob = nullptr;
 
@@ -73,15 +54,10 @@ bool LoadShader(ID3D11Device* Device,
       return false;
     }
 
-  UINT index = shaderData->Count++;
-
-  ShaderGPUData* gpuShader = &shaderData->ShaderArray[index];
-  shaderData->EntityIDs[index] = entityID;
-  
   HRESULT result = Device->CreateVertexShader(vsBlob->GetBufferPointer(),
 					      vsBlob->GetBufferSize(),
 					      nullptr,
-					      &gpuShader->VertexShader);
+					      &Shader->VertexShader);
   if (FAILED(result))
     {
       return false; 
@@ -90,7 +66,7 @@ bool LoadShader(ID3D11Device* Device,
   result = Device->CreatePixelShader(psBlob->GetBufferPointer(),
 				     psBlob->GetBufferSize(),
 				     nullptr,
-				     &gpuShader->PixelShader);
+				     &Shader->PixelShader);
   if (FAILED(result))
     {
       return false; 
@@ -102,7 +78,7 @@ bool LoadShader(ID3D11Device* Device,
   result = Device->CreateInputLayout(PolygonLayout,
 				     2,
 				     vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
-				     &gpuShader->InputLayout);
+				     &Shader->InputLayout);
 
   vsBlob->Release();
   psBlob->Release();
@@ -111,30 +87,15 @@ bool LoadShader(ID3D11Device* Device,
 }
 
 void UseShader(ID3D11DeviceContext* DeviceContext,
-	       const ShaderData* ShaderData,
-	       UINT entityID)
-{
-  int index = FindShaderIndex(ShaderData, entityID);
-  if (index == -1)
-    return; 
-  
-  const ShaderGPUData* Shader = &ShaderData->ShaderArray[index];
-  
+	       const ShaderGPUData* Shader)
+{ 
   DeviceContext->IASetInputLayout(Shader->InputLayout);
   DeviceContext->VSSetShader(Shader->VertexShader, nullptr, 0);
   DeviceContext->PSSetShader(Shader->PixelShader, nullptr, 0);
-
-  OutputDebugStringA("Shader bound for entity: X\n");
 }
 
-void ReleaseShader(ShaderData* ShaderData, UINT entityID)
-{
-  int index = FindShaderIndex(ShaderData, entityID);
-  if (index == -1)
-    return; 
-
-  ShaderGPUData* Shader = &ShaderData->ShaderArray[index]; 
-  
+void ReleaseShader(ShaderGPUData* Shader)
+{  
   if (Shader->VertexShader)
     {
       Shader->VertexShader->Release();
@@ -152,36 +113,4 @@ void ReleaseShader(ShaderData* ShaderData, UINT entityID)
       Shader->InputLayout->Release();
       Shader->InputLayout = nullptr; 
     }
-
-  ShaderData->Count--;
-  ShaderData->ShaderArray[index] = ShaderData->ShaderArray[ShaderData->Count];
-  ShaderData->EntityIDs[index] = ShaderData->EntityIDs[ShaderData->Count];
-}
-
-void ReleaseAllShaders(ShaderData* ShaderData)
-{
-  for (UINT i = 0; i < ShaderData->Count; ++i)
-    {
-      ShaderGPUData* Shader = &ShaderData->ShaderArray[i];
-
-      if (Shader->VertexShader)
-	{
-	  Shader->VertexShader->Release();
-	  Shader->VertexShader = nullptr; 
-	}
-      
-      if (Shader->PixelShader)
-	{
-	  Shader->PixelShader->Release();
-	  Shader->PixelShader = nullptr; 
-	}
-
-      if (Shader->InputLayout)
-	{
-	  Shader->InputLayout->Release();
-	  Shader->InputLayout = nullptr; 
-	}
-    }
-
-  ShaderData->Count = 0; 
 }
