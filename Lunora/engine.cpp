@@ -408,10 +408,12 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  
 	  PipelineStateManager PipelineStateManager; 
 	  PipelineStateManager.Initialize(DeviceManager);
-
+	  
 	  static ShaderGPUData Shader;
 	  
 	  static MeshGPUData Mesh;
+
+	  Renderer->InitializeLayouts();
 
 	  Mesh.indexCount = 3;
 	  

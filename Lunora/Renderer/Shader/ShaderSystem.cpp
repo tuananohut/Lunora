@@ -71,11 +71,10 @@ bool LoadShader(ID3D11Device* Device,
     {
       return false; 
     }
-
-  D3D11_INPUT_ELEMENT_DESC PolygonLayout[2] = { Renderer->LightShader()[0], 
-						Renderer->LightShader()[1]}; 
   
-  result = Device->CreateInputLayout(PolygonLayout,
+  D3D11_INPUT_ELEMENT_DESC* layout = Renderer->GetLayout(ShaderLayoutType::Light);
+  
+  result = Device->CreateInputLayout(layout,
 				     2,
 				     vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
 				     &Shader->InputLayout);

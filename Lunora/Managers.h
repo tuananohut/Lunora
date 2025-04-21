@@ -8,18 +8,25 @@
 
 using namespace DirectX;
 
+enum struct ShaderLayoutType
+  {
+    Color,
+    Texture,
+    Light
+  };
+
 struct RenderManager
 {
   RenderManager();
   ~RenderManager();
 
   void InitializeLayouts();
-  D3D11_INPUT_ELEMENT_DESC* GetLayout();
+  D3D11_INPUT_ELEMENT_DESC* GetLayout(ShaderLayoutType type);
   unsigned int GetLayoutElementCount(ShaderLayoutType type);
-
+  
   static D3D11_INPUT_ELEMENT_DESC ColorLayout[2];
   static D3D11_INPUT_ELEMENT_DESC TextureLayout[2];
-  static D3D11_INPUT_ELEMENT_DESC LightLayout[2]
+  static D3D11_INPUT_ELEMENT_DESC LightLayout[2];
   static bool layoutsInitialized;   
 };
 
