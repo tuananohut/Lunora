@@ -17,16 +17,6 @@ static XMFLOAT4 ambientColor = XMFLOAT4(1.f, 0.15f, 0.15f, 1.f);
 const XMFLOAT4 diffuseColor = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
 const XMFLOAT3 lightDirection = XMFLOAT3(1.f, 0.f, 0.f); 
 
-struct Transform
-{
-  XMMATRIX Translation;
-  XMMATRIX RotationMatrixX;
-  XMMATRIX RotationMatrixY;
-  XMMATRIX RotationMatrixZ;
-  XMMATRIX RotationMatrix;
-  XMMATRIX Scale; 
-};
-
 static float rotation = 0.f; 
 	
 struct MatrixBufferType
@@ -175,7 +165,6 @@ static void CreateCube(DeviceManager& DeviceManager,
 static void RenderCube(DeviceManager& DeviceManager, 
 		       ShaderGPUData* Shader, 
 		       MeshGPUData* Mesh,
-		       XMMATRIX WorldMatrix,
 		       XMMATRIX ViewMatrix,
 		       XMMATRIX ProjectionMatrix)
 {
@@ -190,6 +179,12 @@ static void RenderCube(DeviceManager& DeviceManager,
   unsigned int BufferNumber;
 
   VertexBufferType* VertexBufferTypePointer;
+
+  Transform& WorldMatrix = Mesh->Transform; 
+
+
+
+  // WorldMatrix = TransformSystem::Compose(Mesh.Transform);
   
   WorldMatrix = XMMatrixTranspose(WorldMatrix);
   ViewMatrix = XMMatrixTranspose(ViewMatrix);
@@ -494,45 +489,24 @@ int WINAPI WinMain(HINSTANCE Instance,
 		{
 		  rotation += 360.0f;
 		}
-	      
-	      Transform CubeTransform;
-	      
-	      CubeTransform.RotationMatrixX = XMMatrixRotationX(rotation);
-	      CubeTransform.RotationMatrixY = XMMatrixRotationY(rotation);
-	      CubeTransform.RotationMatrixZ = XMMatrixRotationZ(rotation);
 
-	      CubeTransform.RotationMatrix = XMMatrixMultiply(CubeTransform.RotationMatrixX, CubeTransform.RotationMatrixY);
-	      CubeTransform.RotationMatrix = XMMatrixMultiply(CubeTransform.RotationMatrix, CubeTransform.RotationMatrixZ);
+	      Mesh.Transform = TransformSystem::Identity();
 
-	      CubeTransform.RotationMatrix = XMMatrixRotationX(rotation);
-	      
-	      XMMATRIX TranslationAndRotation = CubeTransform.RotationMatrix;
-	      
-	      WorldMatrix = TranslationAndRotation; 
+	      WorldMatrix.Translation = XMMatrixTranslation(0.0f, height, 0.0f);
+	      WorldMatrix.RotationMatrixX = XMMatrixRotationX(rotation);
+	      WorldMatrix.RotationMatrixY = XMMatrixRotationY(rotation);
+	      WorldMatrix.RotationMatrixZ = XMMatrixRotationZ(rotation);
+
+	      WorldMatrix.Transform.RotationMatrix =
+		WorldMatrix.Transform.RotationMatrixX *
+		WorldMatrix.Transform.RotationMatrixY *
+		WorldMatrix.Transform.RotationMatrixZ;
 	      
 	      RenderCube(DeviceManager,
 			 &Shader,
 			 &Mesh,
-			 WorldMatrix,
 			 ViewMatrix,
 			 ProjectionMatrix);
-
-	      Transform CubeTransform2;
-	      CubeTransform2.Translation = XMMatrixTranslation(-1.f, 0.f, 0.f);
-	      CubeTransform2.RotationMatrixX = XMMatrixRotationX(rotation);
-
-	      CubeTransform2.RotationMatrix = XMMatrixMultiply(CubeTransform2.Translation, CubeTransform2.RotationMatrixX); 
-
-	      WorldMatrix = CubeTransform2.RotationMatrix;
-			      
-	      RenderCube(DeviceManager,
-			 &Shader,
-			 &Mesh,
-			 WorldMatrix,
-			 ViewMatrix,
-			 ProjectionMatrix);
-
-	      DeviceManager.SwapChain->Present(1, 0);
 	    } 
 	}
     }

@@ -11,6 +11,9 @@
 #include "Camera/Camera.h"
 #include "Camera/Camera.cpp"
 
+#include "Renderer/Transform/Transform.h"
+#include "Renderer/Transform/TransformSystem.h"
+
 using namespace DirectX;
 
 #define DeleteObject(object) if ((object) != NULL) { delete object; object = NULL; }
@@ -19,6 +22,13 @@ using namespace DirectX;
 
 const UINT ScreenWidth = 1280;
 const UINT ScreenHeight = 720;
+
+static XMMATRIX GetWorldMatrix(const Transform& T)
+{
+  XMMATRIX world = T.Scale * T.RotationMatrix * T.Translation;
+
+  return world; 
+} 
 
 static XMMATRIX WorldMatrix = XMMatrixIdentity();
 static XMMATRIX ViewMatrix = XMMatrixLookAtLH

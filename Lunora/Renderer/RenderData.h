@@ -3,6 +3,8 @@
 
 #include <d3d11.h>
 
+#include "Transform/Transform.h"
+
 struct ShaderGPUData
 {
   ID3D11VertexShader* VertexShader;
@@ -17,7 +19,9 @@ struct MeshGPUData
   ID3D11Buffer *VertexBuffer; 
   ID3D11Buffer *IndexBuffer;
   int indexCount;
-  UINT stride; 
+  UINT stride;
+
+  Transform Transform;  
 };
 
 struct CameraData {};
