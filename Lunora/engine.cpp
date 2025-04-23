@@ -165,6 +165,7 @@ static void CreateCube(DeviceManager& DeviceManager,
 static void RenderCube(DeviceManager& DeviceManager, 
 		       ShaderGPUData* Shader, 
 		       MeshGPUData* Mesh,
+		       XMMATRIX WorldMatrix,
 		       XMMATRIX ViewMatrix,
 		       XMMATRIX ProjectionMatrix)
 {
@@ -180,11 +181,8 @@ static void RenderCube(DeviceManager& DeviceManager,
 
   VertexBufferType* VertexBufferTypePointer;
 
-  Transform& WorldMatrix = Mesh->Transform; 
-
-
-
-  // WorldMatrix = TransformSystem::Compose(Mesh.Transform);
+  // XMMATRIX WorldMatrix = TransformSystem::Compose(Mesh->Transform);
+  // XMMATRIX WorldMatrix = XMMatrixIdentity(); 
   
   WorldMatrix = XMMatrixTranspose(WorldMatrix);
   ViewMatrix = XMMatrixTranspose(ViewMatrix);
@@ -216,7 +214,7 @@ static void RenderCube(DeviceManager& DeviceManager,
  
   DeviceManager.DeviceContext->IASetVertexBuffers(0, 1, &Mesh->VertexBuffer, &stride, &offset);
   DeviceManager.DeviceContext->IASetIndexBuffer(Mesh->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-  
+   
   auto triangle_list = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
   auto triangle_strip = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
   
@@ -242,7 +240,6 @@ static void RenderCube(DeviceManager& DeviceManager,
   if (!Shader->LightBuffer)
     {
       OutputDebugStringA("LightBuffer is null before Map! Was it created?\n");
-      // return;
     }
   
   Result = DeviceManager.DeviceContext->Map(Shader->LightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
@@ -491,22 +488,27 @@ int WINAPI WinMain(HINSTANCE Instance,
 		}
 
 	      Mesh.Transform = TransformSystem::Identity();
+	     
+	      Mesh.Transform.Translation = XMMatrixTranslation(0.0f, height, 0.0f);
+	      Mesh.Transform.RotationMatrixX = XMMatrixRotationX(rotation);
+	      Mesh.Transform.RotationMatrixY = XMMatrixRotationY(rotation);
+	      Mesh.Transform.RotationMatrixZ = XMMatrixRotationZ(rotation);
+	      
+	      Mesh.Transform.RotationMatrix =
+	        Mesh.Transform.RotationMatrixX *
+	        Mesh.Transform.RotationMatrixY *
+	        Mesh.Transform.RotationMatrixZ;
 
-	      WorldMatrix.Translation = XMMatrixTranslation(0.0f, height, 0.0f);
-	      WorldMatrix.RotationMatrixX = XMMatrixRotationX(rotation);
-	      WorldMatrix.RotationMatrixY = XMMatrixRotationY(rotation);
-	      WorldMatrix.RotationMatrixZ = XMMatrixRotationZ(rotation);
-
-	      WorldMatrix.Transform.RotationMatrix =
-		WorldMatrix.Transform.RotationMatrixX *
-		WorldMatrix.Transform.RotationMatrixY *
-		WorldMatrix.Transform.RotationMatrixZ;
+	      WorldMatrix = TransformSystem::Compose(Mesh.Transform);
 	      
 	      RenderCube(DeviceManager,
 			 &Shader,
 			 &Mesh,
+			 WorldMatrix, 
 			 ViewMatrix,
 			 ProjectionMatrix);
+
+	      DeviceManager.SwapChain->Present(1, 0);
 	    } 
 	}
     }
