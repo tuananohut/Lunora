@@ -11,8 +11,11 @@
 #include "Camera/Camera.h"
 #include "Camera/Camera.cpp"
 
+#include "Renderer/Render.cpp"
 #include "Renderer/Transform/Transform.h"
 #include "Renderer/Transform/TransformSystem.h"
+
+#include "Scene/Scene.cpp"
 
 using namespace DirectX;
 

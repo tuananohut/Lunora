@@ -13,10 +13,6 @@ static bool Running;
 static RenderManager* Renderer;
 static Camera Camera;
 
-static XMFLOAT4 ambientColor = XMFLOAT4(1.f, 0.15f, 0.15f, 1.f);
-const XMFLOAT4 diffuseColor = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
-const XMFLOAT3 lightDirection = XMFLOAT3(1.f, 0.f, 0.f); 
-
 static float rotation = 0.f; 
 	
 struct MatrixBufferType
@@ -128,7 +124,24 @@ static void CreateCube(DeviceManager& DeviceManager,
     {
       OutputDebugStringA("Could not create vertex buffer");
     }
-  
+
+  VertexBufferType Vertices[3];
+  Vertices[0].position = XMFLOAT3(-2.f, -2.f, 0.f);
+  Vertices[0].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
+
+  Vertices[1].position = XMFLOAT3(-1.f, 2.f, 0.f);
+  Vertices[1].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
+
+  Vertices[2].position = XMFLOAT3(0.f, -1.f, 0.f);
+  Vertices[2].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
+
+  D3D11_SUBRESOURCE_DATA VertexData;
+  VertexData.pSysMem = Vertices;
+  VertexData.SysMemPitch = 0;
+  VertexData.SysMemSlicePitch = 0;
+
+  Result = DeviceManager.Device->CreateBuffer(&VertexBufferDesc, &VertexData, &Mesh->VertexBuffer);
+
   // Cube Index
 
   D3D11_BUFFER_DESC IndexBufferDesc;   
@@ -187,30 +200,6 @@ static void RenderCube(DeviceManager& DeviceManager,
   WorldMatrix = XMMatrixTranspose(WorldMatrix);
   ViewMatrix = XMMatrixTranspose(ViewMatrix);
   ProjectionMatrix = XMMatrixTranspose(ProjectionMatrix);
-
-  Result = DeviceManager.DeviceContext->Map(Mesh->VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
-  if (FAILED(Result))
-    {
-      OutputDebugStringA("Could not map vertex buffer");
-    }
-   
-  VertexBufferTypePointer = (VertexBufferType*)MappedResource.pData;
-  
-  // TODO: Automate 
-  VertexBufferType vertexBufferType[3]; 
-  vertexBufferType[0].position = XMFLOAT3(-2.f, -2.f, 0.f);
-  
-  // VertexBufferTypePointer[0].position = XMFLOAT3(-2.f, -2.f, 0.f);
-  VertexBufferTypePointer[0].position = vertexBufferType[0].position;
-  VertexBufferTypePointer[0].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
-
-  VertexBufferTypePointer[1].position = XMFLOAT3(-1.f, 2.f, 0.f);
-  VertexBufferTypePointer[1].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
-  
-  VertexBufferTypePointer[2].position = XMFLOAT3(0.f, -1.f, 0.f);
-  VertexBufferTypePointer[2].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
-
-  DeviceManager.DeviceContext->Unmap(Mesh->VertexBuffer, 0);
  
   DeviceManager.DeviceContext->IASetVertexBuffers(0, 1, &Mesh->VertexBuffer, &stride, &offset);
   DeviceManager.DeviceContext->IASetIndexBuffer(Mesh->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
@@ -401,12 +390,11 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  PipelineStateManager PipelineStateManager; 
 	  PipelineStateManager.Initialize(DeviceManager);
 	  
-	  static ShaderGPUData Shader;
-	  
-	  static MeshGPUData Mesh;
-
+	  static ShaderGPUData Shader;	  
 	  Renderer->InitializeLayouts();
 
+	  static Scene Scene;
+	  MeshGPUData Mesh;
 	  Mesh.indexCount = 3;
 	  
 	  InitializeDX11(DeviceManager,
@@ -416,6 +404,9 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  
 	  CreateCube(DeviceManager, Window, &Shader, &Mesh,
 		     VSFileName, PSFileName);
+
+	  Mesh.Transform = TransformSystem::Identity();
+	  AddMesh(&Scene.Meshes, &Mesh); 
 	  
 	  WorldMatrix = XMMatrixIdentity();
 
@@ -447,6 +438,14 @@ int WINAPI WinMain(HINSTANCE Instance,
 		{		  
 		  if (Message.message == WM_QUIT)
 		    {
+		      for (int i = 0; i < Scene.Meshes.Count; ++i)
+			{
+			  auto* m = Scene.Meshes.Meshes[i];
+			  ReleaseObject(m->VertexBuffer);
+			  ReleaseObject(m->IndexBuffer);
+			  ReleaseObject(m->MatrixBuffer);
+			}
+		      
 		      ReleaseObject(Mesh.VertexBuffer);
 		      ReleaseObject(Mesh.IndexBuffer);
 		      ReleaseObject(Mesh.MatrixBuffer);
@@ -463,6 +462,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 		  TranslateMessage(&Message);
 		  DispatchMessageA(&Message);
 		}
+	      
 	      DeviceManager.DeviceContext->ClearRenderTargetView(RenderTargetManager.RenderTargetView, BackgroundColor);
 	      DeviceManager.DeviceContext->ClearDepthStencilView(RenderTargetManager.DepthStencilView, D3D11_CLEAR_DEPTH, 1.f, 0);
 
@@ -471,43 +471,40 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      Camera.Render();
 	      Camera.GetViewMatrix(ViewMatrix); 
 	      
+	      static float rotation = 0.f;
 	      const float half_gravity = 5.f;
 	      static float height = 0.35f;
-	      static float time = 0.0174532925f; 
-	      
-	      height -= (half_gravity * time * time) + (0.0025f); 
+	      static float time = 0.0174532925f;
+
+	      height -= (half_gravity * time * time) + (0.0025f);
 	      if (height < -0.5f)
-		{
-		  height = 0.5f;
-		}
-	      
+		height = 0.5f;
+
 	      rotation -= 0.0174532925f * 2.f;
-	      if(rotation < 0.0f)
+	      if (rotation < 0.0f)
+		rotation += 360.0f;
+	      
+	      if (Scene.Meshes.Count > 0)
 		{
-		  rotation += 360.0f;
+		  auto* animatedMesh = Scene.Meshes.Meshes[0];
+		  animatedMesh->Transform = TransformSystem::Identity();
+		  animatedMesh->Transform.Translation = XMMatrixTranslation(0.0f, height, 0.0f);
+		  animatedMesh->Transform.RotationMatrixX = XMMatrixRotationX(rotation);
+		  animatedMesh->Transform.RotationMatrixY = XMMatrixRotationY(rotation);
+		  animatedMesh->Transform.RotationMatrixZ = XMMatrixRotationZ(rotation);
+
+		  animatedMesh->Transform.RotationMatrix =
+		    animatedMesh->Transform.RotationMatrixX *
+		    animatedMesh->Transform.RotationMatrixY *
+		    animatedMesh->Transform.RotationMatrixZ;
 		}
-
-	      Mesh.Transform = TransformSystem::Identity();
-	     
-	      Mesh.Transform.Translation = XMMatrixTranslation(0.0f, height, 0.0f);
-	      Mesh.Transform.RotationMatrixX = XMMatrixRotationX(rotation);
-	      Mesh.Transform.RotationMatrixY = XMMatrixRotationY(rotation);
-	      Mesh.Transform.RotationMatrixZ = XMMatrixRotationZ(rotation);
 	      
-	      Mesh.Transform.RotationMatrix =
-	        Mesh.Transform.RotationMatrixX *
-	        Mesh.Transform.RotationMatrixY *
-	        Mesh.Transform.RotationMatrixZ;
-
-	      WorldMatrix = TransformSystem::Compose(Mesh.Transform);
+	      RenderScene(DeviceManager,
+			  &Shader,
+			  &Scene,
+			  ViewMatrix,
+			  ProjectionMatrix);
 	      
-	      RenderCube(DeviceManager,
-			 &Shader,
-			 &Mesh,
-			 WorldMatrix, 
-			 ViewMatrix,
-			 ProjectionMatrix);
-
 	      DeviceManager.SwapChain->Present(1, 0);
 	    } 
 	}

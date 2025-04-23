@@ -16,11 +16,11 @@ struct ShaderGPUData
 struct MeshGPUData
 {
   ID3D11Buffer* MatrixBuffer;
-  ID3D11Buffer *VertexBuffer; 
-  ID3D11Buffer *IndexBuffer;
+  ID3D11Buffer* VertexBuffer; 
+  ID3D11Buffer* IndexBuffer;
   int indexCount;
   UINT stride;
-
+ 
   Transform Transform;  
 };
 
