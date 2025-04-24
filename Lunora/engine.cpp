@@ -193,9 +193,6 @@ static void RenderCube(DeviceManager& DeviceManager,
   unsigned int BufferNumber;
 
   VertexBufferType* VertexBufferTypePointer;
-
-  // XMMATRIX WorldMatrix = TransformSystem::Compose(Mesh->Transform);
-  // XMMATRIX WorldMatrix = XMMatrixIdentity(); 
   
   WorldMatrix = XMMatrixTranspose(WorldMatrix);
   ViewMatrix = XMMatrixTranspose(ViewMatrix);
@@ -410,14 +407,6 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  
 	  WorldMatrix = XMMatrixIdentity();
 
-	  /*
-	  ViewMatrix = XMMatrixLookAtLH
-	    (
-	     XMVectorSet(0.0f, 0.0f, -9.0f, 1.0f), // -1
-	     XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
-	     XMVectorSet(0.0f, 10.0f, 0.0f, 0.0f)
-	     );
-	  */
 	  Camera.m_positionX = 0.f;
 	  Camera.m_positionY = 0.f;
 	  Camera.m_positionZ = -10.f;
@@ -487,6 +476,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      if (Scene.Meshes.Count > 0)
 		{
 		  auto* animatedMesh = Scene.Meshes.Meshes[0];
+   
 		  animatedMesh->Transform = TransformSystem::Identity();
 		  animatedMesh->Transform.Translation = XMMatrixTranslation(0.0f, height, 0.0f);
 		  animatedMesh->Transform.RotationMatrixX = XMMatrixRotationX(rotation);
