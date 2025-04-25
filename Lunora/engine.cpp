@@ -113,7 +113,7 @@ static void CreateCube(DeviceManager& DeviceManager,
 
   ZeroMemory(&VertexBufferDesc, sizeof(VertexBufferDesc));
   VertexBufferDesc.ByteWidth = sizeof(VertexBufferType) * VertexCount;
-  VertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC ;
+  VertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
   VertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
   VertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
   VertexBufferDesc.MiscFlags = 0;
