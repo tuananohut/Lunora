@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "renderer.cpp"
 #include "Renderer/Shader/ShaderSystem.cpp"
+#include "Renderer/Mesh/MeshBuilder.cpp"
 
 using namespace std;
 

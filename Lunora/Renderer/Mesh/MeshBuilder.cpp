@@ -13,8 +13,8 @@ void BuildMesh(DeviceManager& DeviceManager,
 {
     assert(Mesh && vertices && indices);
 
-    mesh->indexCount = (unsigned int)indexCount;
-    mesh->stride = sizeof(Vertex);
+    Mesh->indexCount = (unsigned int)indexCount;
+    Mesh->stride = sizeof(Vertex);
 
     // Vertex buffer
     D3D11_BUFFER_DESC VertexBufferDesc;
@@ -29,18 +29,18 @@ void BuildMesh(DeviceManager& DeviceManager,
     D3D11_SUBRESOURCE_DATA vbData{};
     vbData.pSysMem = vertices;
 
-    HRESULT Result = DeviceManager.Device->CreateBuffer(&vbDesc, &vbData, &Mesh->VertexBuffer);
+    HRESULT Result = DeviceManager.Device->CreateBuffer(&VertexBufferDesc, &vbData, &Mesh->VertexBuffer);
     assert(SUCCEEDED(Result));
 
     // Index buffer
     D3D11_BUFFER_DESC ibDesc{};
-    ibDesc.ByteWidth = UINT(sizeof(unsigned long) * indCount);
+    ibDesc.ByteWidth = UINT(sizeof(unsigned long) * indexCount);
     ibDesc.Usage = D3D11_USAGE_DEFAULT;
     ibDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
     ibDesc.CPUAccessFlags = 0;
 
     D3D11_SUBRESOURCE_DATA ibData{};
-    ibData.pSysMem = inds;
+    ibData.pSysMem = indices;
     
     Result = devMgr.Device->CreateBuffer(&ibDesc, &ibData, &Mesh->IndexBuffer);
     assert(SUCCEEDED(Result));
@@ -54,4 +54,41 @@ void BuildMesh(DeviceManager& DeviceManager,
     {
       OutputDebugStringA("Could not load shader!");
     }
+
+    D3D11_BUFFER_DESC BufferDesc;
+    ZeroMemory(&BufferDesc, sizeof(BufferDesc));
+    BufferDesc.ByteWidth = sizeof(MatrixBufferType);
+    BufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    BufferDesc.MiscFlags = 0;
+    BufferDesc.StructureByteStride = 0;
+  
+    Result = DeviceManager.Device->CreateBuffer(&BufferDesc, nullptr, &Mesh->MatrixBuffer);
+    if(FAILED(Result))
+      {
+	OutputDebugStringA("Could not create matrix buffer.");
+	Mesh->MatrixBuffer = nullptr;
+      }
+
+    D3D11_BUFFER_DESC LightBufferDesc;
+    ZeroMemory(&LightBufferDesc, sizeof(LightBufferDesc));
+    LightBufferDesc.Usage = D3D11_USAGE_DYNAMIC; 
+    LightBufferDesc.ByteWidth = sizeof(LightBufferType);
+    LightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    LightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    LightBufferDesc.MiscFlags = 0;
+    LightBufferDesc.StructureByteStride = 0;
+
+    Result = DeviceManager.Device->CreateBuffer(&LightBufferDesc, nullptr, &Shader->LightBuffer);
+    if (FAILED(Result))
+      {
+	OutputDebugStringA("Could not create light buffer.");
+	Shader->LightBuffer = nullptr; 
+      }
+    else
+      {
+	OutputDebugStringA("Light buffer created successfully.\n");
+      }
+
 }

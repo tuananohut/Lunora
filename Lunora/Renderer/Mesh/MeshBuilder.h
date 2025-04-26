@@ -1,7 +1,7 @@
 #ifndef MESH_BUILDER_H
 #define MESH_BUILDER_H
 
-#include "../Renderer/RenderData.h"
+#include "../RenderData.h"
 
 struct Vertex
 {
