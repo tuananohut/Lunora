@@ -10,7 +10,11 @@ struct Vertex
 };
 
 void BuildMesh(DeviceManager& DeviceManager,
-               MeshGPUData* mesh,
+	       RenderManager* Renderer,
+               MeshGPUData* Mesh,
+	       ShaderGPUData* Shader,
                const Vertex* vertices, size_t vertexCount,
-               const unsigned long* indices, size_t indexCount);
+               const unsigned long* indices, size_t indexCount,
+	       const LPCWSTR VSFilename,
+	       const LPCWSTR PSFilename);
 #endif

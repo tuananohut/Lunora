@@ -6,6 +6,7 @@
 #include "renderer.cpp"
 #include "Renderer/Shader/ShaderSystem.cpp"
 #include "Renderer/Mesh/MeshBuilder.cpp"
+#include "Renderer/Mesh/MeshFactory.cpp"
 
 using namespace std;
 
@@ -16,21 +17,6 @@ static Camera Camera;
 
 static float rotation = 0.f; 
 	
-struct MatrixBufferType
-{
-  XMMATRIX World;
-  XMMATRIX View;
-  XMMATRIX Projection;
-};
-
-struct LightBufferType
-{
-  XMFLOAT4 ambientColor;
-  XMFLOAT4 diffuseColor;
-  XMFLOAT3 lightDirection;
-  float padding; 
-};
-
 struct VertexBufferType
 {
   XMFLOAT3 position;
@@ -403,8 +389,16 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  CreateCube(DeviceManager, Window, &Shader, &Mesh,
 		     VSFileName, PSFileName);
 
+	  MeshGPUData Quad;
+	  CreateUnitQuad(DeviceManager,
+			 Mesh,
+			 Shader); 
+	  
 	  Mesh.Transform = TransformSystem::Identity();
-	  AddMesh(&Scene.Meshes, &Mesh); 
+	  AddMesh(&Scene.Meshes, &Mesh);
+
+	  Quad.Transform = TransformSystem::Identity();
+	  AddMesh(&Scene.Meshes, &Quad); 
 	  
 	  WorldMatrix = XMMatrixIdentity();
 

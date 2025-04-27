@@ -3,7 +3,25 @@
 #include <cassert>
 #include <d3dcompiler.h>
 
+#include "../../Managers.h"
+
+struct MatrixBufferType
+{
+  XMMATRIX World;
+  XMMATRIX View;
+  XMMATRIX Projection;
+};
+
+struct LightBufferType
+{
+  XMFLOAT4 ambientColor;
+  XMFLOAT4 diffuseColor;
+  XMFLOAT3 lightDirection;
+  float padding; 
+};
+
 void BuildMesh(DeviceManager& DeviceManager,
+	       RenderManager* Renderer,
                MeshGPUData* Mesh,
 	       ShaderGPUData* Shader,
                const Vertex* vertices, size_t vertexCount,
@@ -42,7 +60,7 @@ void BuildMesh(DeviceManager& DeviceManager,
     D3D11_SUBRESOURCE_DATA ibData{};
     ibData.pSysMem = indices;
     
-    Result = devMgr.Device->CreateBuffer(&ibDesc, &ibData, &Mesh->IndexBuffer);
+    Result = DeviceManager.Device->CreateBuffer(&ibDesc, &ibData, &Mesh->IndexBuffer);
     assert(SUCCEEDED(Result));
 
     // !!!!!!!!!!!!!!!!!!!! TODO !!!!!!!!!!!!!!!!!!!!!

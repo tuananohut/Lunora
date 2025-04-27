@@ -19,8 +19,8 @@ void CreateUnitCube(DeviceManager& DeviceManager,
 }
 
 void CreateUnitQuad(DeviceManager& DeviceManager,
-		    MeshGPUData* Mesh,
-		    ShaderGPUData* Shader)
+		    MeshGPUData& Mesh,
+		    ShaderGPUData& Shader)
 {
     Vertex vertices[4] =
       {
