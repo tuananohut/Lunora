@@ -14,23 +14,30 @@ void CreateUnitCube(DeviceManager& DeviceManager,
       {
 
       };
-
-    BuildMesh(DeviceManager, Mesh, vertices, 24, indices, 36);
+    
+    // BuildMesh(DeviceManager, Mesh, vertices, 24, indices, 36);
 }
 
 void CreateUnitQuad(DeviceManager& DeviceManager,
+		    RenderManager* Renderer, 
 		    MeshGPUData& Mesh,
-		    ShaderGPUData& Shader)
+		    ShaderGPUData& Shader,
+		    const LPCWSTR VSFilename,
+		    const LPCWSTR PSFilename)
 {
-    Vertex vertices[4] =
+  const Vertex vertices[4] =
       {
 	{{-0.5f,-0.5f,0},{0,0,1},{0,1}},
 	{{-0.5f, 0.5f,0},{0,0,1},{0,0}},
 	{{ 0.5f,-0.5f,0},{0,0,1},{1,1}},
 	{{ 0.5f, 0.5f,0},{0,0,1},{1,0}}
       };
-    
-    unsigned long indices[6] = {0,1,2, 2,1,3};
+  
+  const unsigned long indices[6] = {0,1,2, 2,1,3};
 
-    BuildMesh(DeviceManager, Mesh, vertices, 4, indices, 6);
+  BuildMesh(DeviceManager, Renderer,
+	    &Mesh, &Shader,
+	    vertices, 4,
+	    indices, 6,
+	    VSFilename, PSFilename);
 }
