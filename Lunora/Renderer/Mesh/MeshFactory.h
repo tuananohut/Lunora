@@ -7,8 +7,11 @@ void CreateUnitCube(DeviceManager& devMgr,
                     MeshGPUData* outMesh,
                     ShaderGPUData* shader);
 
-void CreateUnitQuad(DeviceManager& devMgr,
-                    MeshGPUData& outMesh,
-                    ShaderGPUData& shader);
+void CreateUnitQuad(DeviceManager& DeviceManager,
+		    RenderManager* Renderer,
+                    MeshGPUData& Quad,
+                    ShaderGPUData& Shader,
+		    const LPCWSTR VSFilename,
+		    const LPCWSTR PSFilename);
 
 #endif

@@ -19,11 +19,11 @@ void CreateUnitCube(DeviceManager& DeviceManager,
 }
 
 void CreateUnitQuad(DeviceManager& DeviceManager,
-		    RenderManager* Renderer, 
-		    MeshGPUData& Mesh,
-		    ShaderGPUData& Shader,
-		    const LPCWSTR VSFilename,
-		    const LPCWSTR PSFilename)
+                    RenderManager* Renderer,  
+                    MeshGPUData& Quad,
+                    ShaderGPUData& Shader,
+                    const LPCWSTR VSFilename,
+                    const LPCWSTR PSFilename)
 {
   const Vertex vertices[4] =
       {
@@ -32,12 +32,10 @@ void CreateUnitQuad(DeviceManager& DeviceManager,
 	{{ 0.5f,-0.5f,0},{0,0,1},{1,1}},
 	{{ 0.5f, 0.5f,0},{0,0,1},{1,0}}
       };
-  
+
   const unsigned long indices[6] = {0,1,2, 2,1,3};
 
-  BuildMesh(DeviceManager, Renderer,
-	    &Mesh, &Shader,
-	    vertices, 4,
-	    indices, 6,
-	    VSFilename, PSFilename);
+  // Pass Renderer as a single pointer, not a pointer to a pointer
+  BuildMesh(DeviceManager, Renderer, Quad, Shader, vertices, 4, indices, 6, VSFilename, PSFilename);
 }
+

@@ -391,8 +391,11 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	  MeshGPUData Quad;
 	  CreateUnitQuad(DeviceManager,
-			 Mesh,
-			 Shader); 
+			 &Renderer,
+			 Quad,
+			 Shader,
+			 VSFileName,
+			 PSFileName); 
 	  
 	  Mesh.Transform = TransformSystem::Identity();
 	  AddMesh(&Scene.Meshes, &Mesh);
