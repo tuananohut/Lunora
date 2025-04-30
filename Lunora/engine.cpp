@@ -170,7 +170,8 @@ static void RenderCube(DeviceManager& DeviceManager,
 		       XMMATRIX ProjectionMatrix)
 {
   HRESULT Result;
-  unsigned int stride = sizeof(VertexBufferType);
+  // unsigned int stride = sizeof(VertexBufferType);
+  unsigned int stride = sizeof(Vertex);
   unsigned int offset = 0;
   
   D3D11_MAPPED_SUBRESOURCE MappedResource; 
@@ -360,7 +361,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 				    NULL,       
 				    Instance,  
 				    NULL);
-
+      
       
   
       if (Window)
@@ -391,7 +392,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	  MeshGPUData Quad;
 	  CreateUnitQuad(DeviceManager,
-			 &Renderer,
+			 Renderer,
 			 Quad,
 			 Shader,
 			 VSFileName,
