@@ -389,11 +389,19 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  
 	  CreateCube(DeviceManager, Window, &Shader, &Mesh,
 		     VSFileName, PSFileName);
-
+	  /*
 	  MeshGPUData Quad;
 	  CreateUnitQuad(DeviceManager,
 			 Renderer,
 			 Quad,
+			 Shader,
+			 VSFileName,
+			 PSFileName);
+	  */
+	  MeshGPUData Cube;
+	  CreateUnitCube(DeviceManager,
+			 Renderer,
+			 Cube,
 			 Shader,
 			 VSFileName,
 			 PSFileName); 
@@ -401,8 +409,11 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  Mesh.Transform = TransformSystem::Identity();
 	  AddMesh(&Scene.Meshes, &Mesh);
 
-	  Quad.Transform = TransformSystem::Identity();
-	  AddMesh(&Scene.Meshes, &Quad); 
+	  // Quad.Transform = TransformSystem::Identity();
+	  // AddMesh(&Scene.Meshes, &Quad);
+
+	  Cube.Transform = TransformSystem::Identity();
+	  AddMesh(&Scene.Meshes, &Cube); 
 	  
 	  WorldMatrix = XMMatrixIdentity();
 
@@ -474,7 +485,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      
 	      if (Scene.Meshes.Count > 0)
 		{
-		  auto* animatedMesh = Scene.Meshes.Meshes[0];
+		  auto* animatedMesh = Scene.Meshes.Meshes[1];
    
 		  animatedMesh->Transform = TransformSystem::Identity();
 		  animatedMesh->Transform.Translation = XMMatrixTranslation(0.0f, height, 0.0f);

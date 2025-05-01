@@ -3,9 +3,12 @@
 
 #include "../RenderData.h" 
 
-void CreateUnitCube(DeviceManager& devMgr,
-                    MeshGPUData* outMesh,
-                    ShaderGPUData* shader);
+void CreateUnitCube(DeviceManager& DeviceManager,
+		    RenderManager* Renderer,
+		    MeshGPUData& Cube,
+		    ShaderGPUData& Shader,
+		    const LPCWSTR VSFilename,
+		    const LPCWSTR PSFilename);
 
 void CreateUnitQuad(DeviceManager& DeviceManager,
 		    RenderManager* Renderer,
