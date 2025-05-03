@@ -26,6 +26,12 @@ using namespace DirectX;
 const UINT ScreenWidth = 1280;
 const UINT ScreenHeight = 720;
 
+struct VertexBufferType
+{
+  XMFLOAT3 position;
+  XMFLOAT3 normal; 
+};
+
 static XMMATRIX GetWorldMatrix(const Transform& T)
 {
   XMMATRIX world = T.Scale * T.RotationMatrix * T.Translation;

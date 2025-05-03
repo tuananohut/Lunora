@@ -7,6 +7,7 @@
 #include "Renderer/Shader/ShaderSystem.cpp"
 #include "Renderer/Mesh/MeshBuilder.cpp"
 #include "Renderer/Mesh/MeshFactory.cpp"
+#include "LoadGLTF.cpp"
 
 using namespace std;
 
@@ -17,11 +18,6 @@ static Camera Camera;
 
 static float rotation = 0.f; 
 	
-struct VertexBufferType
-{
-  XMFLOAT3 position;
-  XMFLOAT3 normal; 
-};
 
 ID3D11SamplerState* TextureSamplerState;
 
@@ -413,8 +409,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  // AddMesh(&Scene.Meshes, &Quad);
 
 	  Cube.Transform = TransformSystem::Identity();
-	  AddMesh(&Scene.Meshes, &Cube); 
-	  
+	  AddMesh(&Scene.Meshes, &Cube);
+	  	  
 	  WorldMatrix = XMMatrixIdentity();
 
 	  Camera.m_positionX = 0.f;
