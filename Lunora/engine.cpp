@@ -401,6 +401,15 @@ int WINAPI WinMain(HINSTANCE Instance,
 			 Shader,
 			 VSFileName,
 			 PSFileName); 
+
+	  std::string filepath = "Assets/Scenes/trial_scene.glb";
+	  MeshGPUData Scene;
+	  if (!LoadGLTF(filepath, Scene, Shader, VSFileName, PSFileName))
+	    {
+	      return false; 
+	    }
+	  Scene.Transform = TransformSystem::Identity();
+	  AddMesh(&Scene.Meshes, &Scene);
 	  
 	  Mesh.Transform = TransformSystem::Identity();
 	  AddMesh(&Scene.Meshes, &Mesh);
@@ -408,8 +417,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  // Quad.Transform = TransformSystem::Identity();
 	  // AddMesh(&Scene.Meshes, &Quad);
 
-	  Cube.Transform = TransformSystem::Identity();
-	  AddMesh(&Scene.Meshes, &Cube);
+	  // Cube.Transform = TransformSystem::Identity();
+	  // AddMesh(&Scene.Meshes, &Cube);
 	  	  
 	  WorldMatrix = XMMatrixIdentity();
 

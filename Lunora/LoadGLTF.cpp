@@ -9,7 +9,7 @@ bool LoadGLTF(const std::string& filepath,
 	      MeshGPUData& meshData,
 	      ShaderGPUData& shaderData,
 	      DeviceManager& deviceManager,
-	      RenderManager& renderer)
+	      RenderManager* renderer)
 {
   
   tinygltf::TinyGLTF loader; 
@@ -32,9 +32,11 @@ bool LoadGLTF(const std::string& filepath,
     {
       for (const auto& primitive: mesh.primitives)
 	{
-	  VertexBufferType vertices[1000];
-	  unsigned long indices[1000];
-
+	  const VertexBufferType vertices[1000] = {};
+	  const unsigned long indices[1000] = {};
+	  size_t vertexCount = 0;
+	  size_t indexCount = 0; 
+	  
  	  const auto& positionAccessor = model.accessors[primitive.attributes.find("POSITION")->second];
 	  const auto& positionBufferView = model.bufferViews[positionAccessor.bufferView];
 	  const auto& positionBuffer = model.buffers[positionBufferView.buffer];
@@ -44,8 +46,20 @@ bool LoadGLTF(const std::string& filepath,
 	    {
 	      VertexBufferType vertex;
 	      vertex.position = XMFLOAT3(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
-	      vertices[i] = vertex; 
+	      vertices[vertexCount++] = vertex; 
 	    }
+	  
+	  const auto& normalAccessor = model.accessors[primitive.attributes.find("NORMAL")->second];
+	  const auto& normalBufferView = model.bufferViews[normalAccessor.bufferView];
+	  const auto& normalBuffer = model.buffers[normalBufferView.buffer];
+	  const float* normals = reinterpret_cast<const float*>(&normalBuffer.data[normalBufferView.byteOffset]);
+
+	  size_t normalIndex = 0;
+	  for (size_t i = 0; i < normalAccessor.count; i++)
+            {
+	      vertices[normalIndex].normal = XMFLOAT3(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]);
+	      normalIndex++;
+            }
 
 	  const auto& indexAccessor = model.accessors[primitive.indices];
 	  const auto& indexBufferView = model.bufferViews[indexAccessor.bufferView];
@@ -54,10 +68,10 @@ bool LoadGLTF(const std::string& filepath,
 
 	  for (size_t i = 0; i < indexAccessor.count; i++)
 	    {
-	      indices[i] = static_cast<unsigned long>(idx[i]);
+	      indices[indexCount++] = static_cast<unsigned long>(idx[i]);
 	    }
 
-	  BuildMesh(deviceManager, renderer, meshData, shaderData, vertices.data(), vertices.size(), indices.data(), indices.size(), VSFilename, PSFilename); 
+	  BuildMesh(deviceManager, renderer, meshData, shaderData, vertices, vertexCount, indices, indexCount, VSFileName, PSFileName); 
 	}
     }
 
