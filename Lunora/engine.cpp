@@ -490,7 +490,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      
 	      if (Scene.Meshes.Count > 0)
 		{
-		  auto* animatedMesh = Scene.Meshes.Meshes[1];
+		  auto* animatedMesh = Scene.Meshes.Meshes[0];
    
 		  animatedMesh->Transform = TransformSystem::Identity();
 		  animatedMesh->Transform.Translation = XMMatrixTranslation(0.0f, height, 0.0f);

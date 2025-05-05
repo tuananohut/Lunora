@@ -32,8 +32,8 @@ bool LoadGLTF(const std::string& filepath,
     {
       for (const auto& primitive: mesh.primitives)
 	{
-	  const VertexBufferType vertices[1000] = {};
-	  const unsigned long indices[1000] = {};
+	  VertexBufferType vertices[1000] = {};
+	  unsigned long indices[1000] = {};
 	  size_t vertexCount = 0;
 	  size_t indexCount = 0; 
 	  
