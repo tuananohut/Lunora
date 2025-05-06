@@ -18,13 +18,4 @@ void BuildMesh(DeviceManager& DeviceManager,
 	       const LPCWSTR VSFilename,
 	       const LPCWSTR PSFilename);
 
-void BuildMesh(DeviceManager& DeviceManager,
-	       RenderManager* Renderer,
-               MeshGPUData* Mesh,
-	       ShaderGPUData* Shader,
-               Vertex* vertices, size_t vertexCount,
-               unsigned long* indices, size_t indexCount,
-	       const LPCWSTR VSFilename,
-	       const LPCWSTR PSFilename);
-
 #endif

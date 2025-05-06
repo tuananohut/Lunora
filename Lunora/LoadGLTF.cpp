@@ -6,12 +6,11 @@
 #include "../external/tiny_gltf.h"
 
 bool LoadGLTF(const std::string& filepath,
-	      MeshGPUData& meshData,
-	      ShaderGPUData& shaderData,
+	      MeshGPUData* meshData,
+	      ShaderGPUData* shaderData,
 	      DeviceManager& deviceManager,
 	      RenderManager* renderer)
-{
-  
+{  
   tinygltf::TinyGLTF loader; 
   tinygltf::Model model;
   
@@ -71,7 +70,7 @@ bool LoadGLTF(const std::string& filepath,
 	      indices[indexCount++] = static_cast<unsigned long>(idx[i]);
 	    }
 
-	  BuildMesh(deviceManager, renderer, meshData, shaderData, vertices, vertexCount, indices, indexCount, VSFileName, PSFileName); 
+	  BuildMesh(deviceManager, renderer, meshData, shaderData, reinterpret_cast<const VertexBufferType*>(vertices), vertexCount, indices, indexCount, VSFileName, PSFileName); 
 	}
     }
 

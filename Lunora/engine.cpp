@@ -403,13 +403,13 @@ int WINAPI WinMain(HINSTANCE Instance,
 			 PSFileName); 
 
 	  std::string filepath = "Assets/Scenes/trial_scene.glb";
-	  MeshGPUData Scene;
-	  if (!LoadGLTF(filepath, Scene, Shader, VSFileName, PSFileName))
+	  MeshGPUData TrialScene;
+	  if (!LoadGLTF(filepath, &TrialScene, &Shader, DeviceManager, Renderer))
 	    {
 	      return false; 
 	    }
-	  Scene.Transform = TransformSystem::Identity();
-	  AddMesh(&Scene.Meshes, &Scene);
+	  TrialScene.Transform = TransformSystem::Identity();
+	  AddMesh(&Scene.Meshes, &TrialScene);
 	  
 	  Mesh.Transform = TransformSystem::Identity();
 	  AddMesh(&Scene.Meshes, &Mesh);
