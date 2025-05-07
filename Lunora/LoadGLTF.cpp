@@ -6,8 +6,8 @@
 #include "../external/tiny_gltf.h"
 
 bool LoadGLTF(const std::string& filepath,
-	      MeshGPUData* meshData,
-	      ShaderGPUData* shaderData,
+	      MeshGPUData& meshData,
+	      ShaderGPUData& shaderData,
 	      DeviceManager& deviceManager,
 	      RenderManager* renderer)
 {  
@@ -19,12 +19,14 @@ bool LoadGLTF(const std::string& filepath,
   bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, filepath);
   if (!ret)
     {
-      return false; 
+      OutputDebugStringA("Load Binary From File!");
+      // return false; 
     }
 
   if (!warn.empty())
     {
-      return false; 
+      OutputDebugStringA("Warn empty!"); 
+      // return false; 
     }
 
   for (const auto& mesh: model.meshes)

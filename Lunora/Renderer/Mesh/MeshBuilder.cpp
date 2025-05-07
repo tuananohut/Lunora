@@ -24,7 +24,7 @@ void BuildMesh(DeviceManager& DeviceManager,
                RenderManager* Renderer,
                MeshGPUData& Mesh,  
                ShaderGPUData& Shader,
-               const Vertex* vertices, size_t vertexCount,
+               const VertexBufferType* vertices, size_t vertexCount,
                const unsigned long* indices, size_t indexCount,
                const LPCWSTR VSFilename,
                const LPCWSTR PSFilename)
@@ -32,7 +32,7 @@ void BuildMesh(DeviceManager& DeviceManager,
     assert(Mesh.VertexBuffer == nullptr && Mesh.IndexBuffer == nullptr && vertices != nullptr && indices != nullptr);
 
     Mesh.indexCount = static_cast<unsigned int>(indexCount);
-    Mesh.stride = sizeof(Vertex);
+    Mesh.stride = sizeof(VertexBufferType);
 
     // Vertex buffer
     D3D11_BUFFER_DESC VertexBufferDesc{};

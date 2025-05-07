@@ -16,8 +16,7 @@ static bool Running;
 static RenderManager* Renderer;
 static Camera Camera;
 
-static float rotation = 0.f; 
-	
+static float rotation = 0.f; 	
 
 ID3D11SamplerState* TextureSamplerState;
 
@@ -404,9 +403,10 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	  std::string filepath = "Assets/Scenes/trial_scene.glb";
 	  MeshGPUData TrialScene;
-	  if (!LoadGLTF(filepath, &TrialScene, &Shader, DeviceManager, Renderer))
+	  if (!LoadGLTF(filepath, TrialScene, Shader, DeviceManager, Renderer))
 	    {
-	      return false; 
+	      MessageBoxA(Window, "Could not load scene!", "Error!", MB_ICONWARNING);
+	      // return false; 
 	    }
 	  TrialScene.Transform = TransformSystem::Identity();
 	  AddMesh(&Scene.Meshes, &TrialScene);

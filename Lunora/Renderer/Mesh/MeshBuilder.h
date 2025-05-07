@@ -11,9 +11,9 @@ struct Vertex
 
 void BuildMesh(DeviceManager& DeviceManager,
 	       RenderManager* Renderer,
-               MeshGPUData* Mesh,
-	       ShaderGPUData* Shader,
-               const Vertex* vertices, size_t vertexCount,
+               MeshGPUData& Mesh,
+	       ShaderGPUData& Shader,
+               const VertexBufferType* vertices, size_t vertexCount,
                const unsigned long* indices, size_t indexCount,
 	       const LPCWSTR VSFilename,
 	       const LPCWSTR PSFilename);
