@@ -29,14 +29,23 @@ void BuildMesh(DeviceManager& DeviceManager,
                const LPCWSTR VSFilename,
                const LPCWSTR PSFilename)
 {
-    assert(Mesh.VertexBuffer == nullptr && Mesh.IndexBuffer == nullptr && vertices != nullptr && indices != nullptr);
+  if (Mesh.VertexBuffer != nullptr)
+    OutputDebugStringA("Mesh.VertexBuffer is already initialized!\n");
+  if (Mesh.IndexBuffer != nullptr)
+    OutputDebugStringA("Mesh.IndexBuffer is already initialized!\n");
+  if (vertices == nullptr)
+    OutputDebugStringA("vertices is null!\n");
+  if (indices == nullptr)
+    OutputDebugStringA("indices is null!\n");
+
+  // assert(Mesh.VertexBuffer == nullptr && Mesh.IndexBuffer == nullptr && vertices != nullptr && indices != nullptr);
 
     Mesh.indexCount = static_cast<unsigned int>(indexCount);
     Mesh.stride = sizeof(VertexBufferType);
 
     // Vertex buffer
     D3D11_BUFFER_DESC VertexBufferDesc{};
-    VertexBufferDesc.ByteWidth = UINT(sizeof(Vertex) * vertexCount);
+    VertexBufferDesc.ByteWidth = UINT(sizeof(VertexBufferType) * vertexCount);
     VertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
     VertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     VertexBufferDesc.CPUAccessFlags = 0;

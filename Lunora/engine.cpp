@@ -401,7 +401,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 			 VSFileName,
 			 PSFileName); 
 
-	  std::string filepath = "Assets/Scenes/trial_scene.glb";
+	  std::string filepath = "../Lunora/Assets/Scenes/trial_scene.glb";
 	  MeshGPUData TrialScene;
 	  if (!LoadGLTF(filepath, TrialScene, Shader, DeviceManager, Renderer))
 	    {
