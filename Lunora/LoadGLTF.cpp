@@ -72,7 +72,7 @@ bool LoadGLTF(const std::string& filepath,
 	      indices[indexCount++] = static_cast<unsigned long>(idx[i]);
 	    }
 
-	  BuildMesh(deviceManager, renderer, meshData, shaderData, reinterpret_cast<const VertexBufferType*>(vertices), vertexCount, indices, indexCount, VSFileName, PSFileName); 
+	  BuildMesh(deviceManager, renderer, meshData, shaderData, vertexCount, indexCount, VSFileName, PSFileName); 
 	}
     }
 
