@@ -29,16 +29,7 @@ void BuildMesh(DeviceManager& DeviceManager,
                const LPCWSTR VSFilename,
                const LPCWSTR PSFilename)
 {
-  if (Mesh.VertexBuffer != nullptr)
-    OutputDebugStringA("Mesh.VertexBuffer is already initialized!\n");
-  if (Mesh.IndexBuffer != nullptr)
-    OutputDebugStringA("Mesh.IndexBuffer is already initialized!\n");
-  if (vertices == nullptr)
-    OutputDebugStringA("vertices is null!\n");
-  if (indices == nullptr)
-    OutputDebugStringA("indices is null!\n");
-
-  assert(Mesh.VertexBuffer == nullptr && Mesh.IndexBuffer == nullptr && vertices != nullptr && indices != nullptr);
+  // assert(Mesh.VertexBuffer == nullptr && Mesh.IndexBuffer == nullptr && vertices != nullptr && indices != nullptr);
 
   Mesh.indexCount = static_cast<unsigned int>(indexCount);
   Mesh.stride = sizeof(VertexBufferType);

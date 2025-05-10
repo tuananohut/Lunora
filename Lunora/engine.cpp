@@ -165,8 +165,8 @@ static void RenderCube(DeviceManager& DeviceManager,
 		       XMMATRIX ProjectionMatrix)
 {
   HRESULT Result;
-  // unsigned int stride = sizeof(VertexBufferType);
-  unsigned int stride = sizeof(Vertex);
+  unsigned int stride = sizeof(VertexBufferType);
+  // unsigned int stride = sizeof(Vertex);
   unsigned int offset = 0;
   
   D3D11_MAPPED_SUBRESOURCE MappedResource; 
@@ -187,7 +187,7 @@ static void RenderCube(DeviceManager& DeviceManager,
   auto triangle_list = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
   auto triangle_strip = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
   
-  DeviceManager.DeviceContext->IASetPrimitiveTopology(triangle_list);
+  DeviceManager.DeviceContext->IASetPrimitiveTopology(triangle_strip);
   
   // Matrix Buffer Mapping
   
@@ -400,7 +400,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 			 Shader,
 			 VSFileName,
 			 PSFileName); 
-
+	  
 	  std::string filepath = "../Lunora/Assets/Scenes/trial_scene.glb";
 	  MeshGPUData TrialScene;
 	  if (!LoadGLTF(filepath, TrialScene, Shader, DeviceManager, Renderer))
@@ -411,9 +411,9 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  TrialScene.Transform = TransformSystem::Identity();
 	  AddMesh(&Scene.Meshes, &TrialScene);
 	  
-	  Mesh.Transform = TransformSystem::Identity();
-	  AddMesh(&Scene.Meshes, &Mesh);
-
+	  // Mesh.Transform = TransformSystem::Identity();
+	  // AddMesh(&Scene.Meshes, &Mesh);
+	  
 	  // Quad.Transform = TransformSystem::Identity();
 	  // AddMesh(&Scene.Meshes, &Quad);
 
