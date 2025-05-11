@@ -166,7 +166,6 @@ static void RenderCube(DeviceManager& DeviceManager,
 {
   HRESULT Result;
   unsigned int stride = sizeof(VertexBufferType);
-  // unsigned int stride = sizeof(Vertex);
   unsigned int offset = 0;
   
   D3D11_MAPPED_SUBRESOURCE MappedResource; 
@@ -187,7 +186,7 @@ static void RenderCube(DeviceManager& DeviceManager,
   auto triangle_list = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
   auto triangle_strip = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
   
-  DeviceManager.DeviceContext->IASetPrimitiveTopology(triangle_strip);
+  DeviceManager.DeviceContext->IASetPrimitiveTopology(triangle_list);
   
   // Matrix Buffer Mapping
   
@@ -392,7 +391,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 			 Shader,
 			 VSFileName,
 			 PSFileName);
-	  */
+	  
+
 	  MeshGPUData Cube;
 	  CreateUnitCube(DeviceManager,
 			 Renderer,
@@ -400,7 +400,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 			 Shader,
 			 VSFileName,
 			 PSFileName); 
-	  
+	  */
 	  std::string filepath = "../Lunora/Assets/Scenes/trial_scene.glb";
 	  MeshGPUData TrialScene;
 	  if (!LoadGLTF(filepath, TrialScene, Shader, DeviceManager, Renderer))
@@ -494,14 +494,16 @@ int WINAPI WinMain(HINSTANCE Instance,
    
 		  animatedMesh->Transform = TransformSystem::Identity();
 		  animatedMesh->Transform.Translation = XMMatrixTranslation(0.0f, height, 0.0f);
+		  
 		  animatedMesh->Transform.RotationMatrixX = XMMatrixRotationX(rotation);
 		  animatedMesh->Transform.RotationMatrixY = XMMatrixRotationY(rotation);
 		  animatedMesh->Transform.RotationMatrixZ = XMMatrixRotationZ(rotation);
-
+		  
 		  animatedMesh->Transform.RotationMatrix =
 		    animatedMesh->Transform.RotationMatrixX *
 		    animatedMesh->Transform.RotationMatrixY *
 		    animatedMesh->Transform.RotationMatrixZ;
+		  
 		}
 	      
 	      RenderScene(DeviceManager,
