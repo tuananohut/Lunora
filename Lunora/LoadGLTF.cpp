@@ -131,7 +131,7 @@ void ProcessNode(const tinygltf::Model& model,
             const float* positions = reinterpret_cast<const float*>(&posBuffer.data[posView.byteOffset]);
 
             for (size_t i = 0; i < posAccessor.count; i++)
-            {
+	      {
                 VertexBufferType vertex;
                 vertex.position = XMFLOAT3(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
 
@@ -162,7 +162,7 @@ void ProcessNode(const tinygltf::Model& model,
             {
                 indices[indexCount++] = static_cast<unsigned long>(idx[i]);
             }
-
+	    
             BuildMesh(deviceManager, renderer, meshData, shaderData, vertices, vertexCount, indices, indexCount, VSFileName, PSFileName);
         }
     }
