@@ -6,7 +6,11 @@
 #include "../external/tiny_gltf.h"
 
 
-void ProcessNode(const tinygltf::Model& model,
+void ProcessNode(DeviceManager& deviceManager,
+		 RenderManager* renderer,
+		 MeshGPUData& meshData,
+		 ShaderGPUData& shaderData,
+		 const tinygltf::Model& model,
                  const tinygltf::Node& node,
                  XMMATRIX parentTransform);
 
@@ -37,7 +41,13 @@ bool LoadGLTF(const std::string& filepath,
   const auto& scene = model.scenes[model.defaultScene];
   for (int nodeIndex: scene.nodes)
     {
-      ProcessNode(model, model.nodes[nodeIndex], XMMatrixIdentity()); 
+      ProcessNode(deviceManager,
+		  renderer,
+		  meshData,
+		  shaderData,
+		  model,
+		  model.nodes[nodeIndex],
+		  XMMatrixIdentity()); 
     }
   
   for (const auto& mesh: model.meshes)
@@ -90,85 +100,96 @@ bool LoadGLTF(const std::string& filepath,
   return true; 
 }
 
-void ProcessNode(const tinygltf::Model& model,
+
+void ProcessNode(DeviceManager& deviceManager,
+		 RenderManager* renderer,
+		 MeshGPUData& meshData,
+		 ShaderGPUData& shaderData,
+		 const tinygltf::Model& model,
                  const tinygltf::Node& node,
                  XMMATRIX parentTransform)
 {
-    XMMATRIX localTransform = XMMatrixIdentity();
+  XMMATRIX localTransform = XMMatrixIdentity();
 
-    if (!node.matrix.empty())
+  if (!node.matrix.empty())
     {
-        localTransform = XMMATRIX(
-            node.matrix[0], node.matrix[1], node.matrix[2], node.matrix[3],
-            node.matrix[4], node.matrix[5], node.matrix[6], node.matrix[7],
-            node.matrix[8], node.matrix[9], node.matrix[10], node.matrix[11],
-            node.matrix[12], node.matrix[13], node.matrix[14], node.matrix[15]
-        );
+      localTransform = XMMATRIX(
+				node.matrix[0], node.matrix[1], node.matrix[2], node.matrix[3],
+				node.matrix[4], node.matrix[5], node.matrix[6], node.matrix[7],
+				node.matrix[8], node.matrix[9], node.matrix[10], node.matrix[11],
+				node.matrix[12], node.matrix[13], node.matrix[14], node.matrix[15]
+				);
     }
-    else
+  else
     {
-        XMMATRIX t = XMMatrixTranslation(node.translation[0], node.translation[1], node.translation[2]);
-        XMMATRIX r = XMMatrixRotationQuaternion(XMLoadFloat4((XMFLOAT4*)&node.rotation[0]));
-        XMMATRIX s = XMMatrixScaling(node.scale[0], node.scale[1], node.scale[2]);
-        localTransform = s * r * t;
+      XMMATRIX t = XMMatrixTranslation(node.translation[0], node.translation[1], node.translation[2]);
+      XMMATRIX r = XMMatrixRotationQuaternion(XMLoadFloat4((XMFLOAT4*)&node.rotation[0]));
+      XMMATRIX s = XMMatrixScaling(node.scale[0], node.scale[1], node.scale[2]);
+      localTransform = s * r * t;
     }
 
-    XMMATRIX globalTransform = localTransform * parentTransform;
+  XMMATRIX globalTransform = localTransform * parentTransform;
 
-    if (node.mesh >= 0)
+  if (node.mesh >= 0)
     {
-        const auto& mesh = model.meshes[node.mesh];
-        for (const auto& primitive : mesh.primitives)
+      const auto& mesh = model.meshes[node.mesh];
+      for (const auto& primitive : mesh.primitives)
         {
-            VertexBufferType vertices[1000] = {};
-            unsigned long indices[1000] = {};
-            size_t vertexCount = 0;
-            size_t indexCount = 0;
+	  VertexBufferType vertices[1000] = {};
+	  unsigned long indices[1000] = {};
+	  size_t vertexCount = 0;
+	  size_t indexCount = 0;
 
-            const auto& posAccessor = model.accessors[primitive.attributes.at("POSITION")];
-            const auto& posView = model.bufferViews[posAccessor.bufferView];
-            const auto& posBuffer = model.buffers[posView.buffer];
-            const float* positions = reinterpret_cast<const float*>(&posBuffer.data[posView.byteOffset]);
+	  const auto& posAccessor = model.accessors[primitive.attributes.at("POSITION")];
+	  const auto& posView = model.bufferViews[posAccessor.bufferView];
+	  const auto& posBuffer = model.buffers[posView.buffer];
+	  const float* positions = reinterpret_cast<const float*>(&posBuffer.data[posView.byteOffset]);
 
-            for (size_t i = 0; i < posAccessor.count; i++)
-	      {
-                VertexBufferType vertex;
-                vertex.position = XMFLOAT3(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
+	  for (size_t i = 0; i < posAccessor.count; i++)
+	    {
+	      VertexBufferType vertex;
+	      vertex.position = XMFLOAT3(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
 
-                // Apply transform
-                XMVECTOR p = XMLoadFloat3(&vertex.position);
-                p = XMVector3Transform(p, globalTransform);
-                XMStoreFloat3(&vertex.position, p);
+	      // Apply transform
+	      XMVECTOR p = XMLoadFloat3(&vertex.position);
+	      p = XMVector3Transform(p, globalTransform);
+	      XMStoreFloat3(&vertex.position, p);
 
-                vertices[vertexCount++] = vertex;
+	      vertices[vertexCount++] = vertex;
             }
 
-            const auto& normAccessor = model.accessors[primitive.attributes.at("NORMAL")];
-            const auto& normView = model.bufferViews[normAccessor.bufferView];
-            const auto& normBuffer = model.buffers[normView.buffer];
-            const float* normals = reinterpret_cast<const float*>(&normBuffer.data[normView.byteOffset]);
+	  const auto& normAccessor = model.accessors[primitive.attributes.at("NORMAL")];
+	  const auto& normView = model.bufferViews[normAccessor.bufferView];
+	  const auto& normBuffer = model.buffers[normView.buffer];
+	  const float* normals = reinterpret_cast<const float*>(&normBuffer.data[normView.byteOffset]);
 
-            for (size_t i = 0; i < normAccessor.count; i++)
+	  for (size_t i = 0; i < normAccessor.count; i++)
             {
-                vertices[i].normal = XMFLOAT3(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]);
+	      vertices[i].normal = XMFLOAT3(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]);
             }
 
-            const auto& indexAccessor = model.accessors[primitive.indices];
-            const auto& indexView = model.bufferViews[indexAccessor.bufferView];
-            const auto& indexBuffer = model.buffers[indexView.buffer];
-            const unsigned short* idx = reinterpret_cast<const unsigned short*>(&indexBuffer.data[indexView.byteOffset]);
+	  const auto& indexAccessor = model.accessors[primitive.indices];
+	  const auto& indexView = model.bufferViews[indexAccessor.bufferView];
+	  const auto& indexBuffer = model.buffers[indexView.buffer];
+	  const unsigned short* idx = reinterpret_cast<const unsigned short*>(&indexBuffer.data[indexView.byteOffset]);
 
-            for (size_t i = 0; i < indexAccessor.count; i++)
+	  for (size_t i = 0; i < indexAccessor.count; i++)
             {
-                indices[indexCount++] = static_cast<unsigned long>(idx[i]);
+	      indices[indexCount++] = static_cast<unsigned long>(idx[i]);
             }
 	    
-            BuildMesh(deviceManager, renderer, meshData, shaderData, vertices, vertexCount, indices, indexCount, VSFileName, PSFileName);
+	  BuildMesh(deviceManager, renderer, meshData, shaderData, reinterpret_cast<const VertexBufferType*>(vertices), vertexCount, indices, indexCount, VSFileName, PSFileName);
         }
     }
 
-    for (int childIndex : node.children)
+  for (int childIndex : node.children)
     {
-        ProcessNode(model, model.nodes[childIndex], globalTransform);
+      ProcessNode(deviceManager,
+		  renderer,
+		  meshData,
+		  shaderData,
+		  model,
+		  model.nodes[childIndex],
+		  globalTransform);
     }
 }
