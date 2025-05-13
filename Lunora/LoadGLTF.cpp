@@ -50,53 +50,6 @@ bool LoadGLTF(const std::string& filepath,
 		  XMMatrixIdentity()); 
     }
   
-  for (const auto& mesh: model.meshes)
-    {
-      for (const auto& primitive: mesh.primitives)
-	{
-	  VertexBufferType vertices[1000] = {};
-	  unsigned long indices[1000] = {};
-	  size_t vertexCount = 0;
-	  size_t indexCount = 0; 
-	  
- 	  const auto& positionAccessor = model.accessors[primitive.attributes.find("POSITION")->second];
-	  const auto& positionBufferView = model.bufferViews[positionAccessor.bufferView];
-	  const auto& positionBuffer = model.buffers[positionBufferView.buffer];
-	  const float* positions = reinterpret_cast<const float*>(&positionBuffer.data[positionBufferView.byteOffset]);
-
-	  for (size_t i = 0; i < positionAccessor.count; i++)
-	    {
-	      VertexBufferType vertex;
-	      vertex.position = XMFLOAT3(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
-	      vertices[vertexCount++] = vertex; 
-	    }
-	  
-	  const auto& normalAccessor = model.accessors[primitive.attributes.find("NORMAL")->second];
-	  const auto& normalBufferView = model.bufferViews[normalAccessor.bufferView];
-	  const auto& normalBuffer = model.buffers[normalBufferView.buffer];
-	  const float* normals = reinterpret_cast<const float*>(&normalBuffer.data[normalBufferView.byteOffset]);
-
-	  size_t normalIndex = 0;
-	  for (size_t i = 0; i < normalAccessor.count; i++)
-            {
-	      vertices[normalIndex].normal = XMFLOAT3(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]);
-	      normalIndex++;
-            }
-
-	  const auto& indexAccessor = model.accessors[primitive.indices];
-	  const auto& indexBufferView = model.bufferViews[indexAccessor.bufferView];
-	  const auto& indexBuffer = model.buffers[indexBufferView.buffer];
-	  const unsigned short* idx = reinterpret_cast<const unsigned short*>(&indexBuffer.data[indexBufferView.byteOffset]);
-
-	  for (size_t i = 0; i < indexAccessor.count; i++)
-	    {
-	      indices[indexCount++] = static_cast<unsigned long>(idx[i]);
-	    }
-	  
-	  BuildMesh(deviceManager, renderer, meshData, shaderData, reinterpret_cast<const VertexBufferType*>(vertices), vertexCount, indices, indexCount, VSFileName, PSFileName);
-	}
-    }
-
   return true; 
 }
 
@@ -135,51 +88,77 @@ void ProcessNode(DeviceManager& deviceManager,
       const auto& mesh = model.meshes[node.mesh];
       for (const auto& primitive : mesh.primitives)
         {
-	  VertexBufferType vertices[1000] = {};
-	  unsigned long indices[1000] = {};
-	  size_t vertexCount = 0;
-	  size_t indexCount = 0;
-
 	  const auto& posAccessor = model.accessors[primitive.attributes.at("POSITION")];
+	  const auto& indexAccessor = model.accessors[primitive.indices];
+
+	  size_t vertexCount = posAccessor.count;
+	  size_t indexCount = indexAccessor.count;
+
+	  VertexBufferType* vertices = new VertexBufferType[vertexCount];
+	  unsigned long* indices = new unsigned long[indexCount];
+
 	  const auto& posView = model.bufferViews[posAccessor.bufferView];
 	  const auto& posBuffer = model.buffers[posView.buffer];
 	  const float* positions = reinterpret_cast<const float*>(&posBuffer.data[posView.byteOffset]);
+	  
+	  VertexBufferType* vertices = new VertexBufferType[vertexCount];
 
-	  for (size_t i = 0; i < posAccessor.count; i++)
+	  for (size_t i = 0; i < vertexCount; i++)
 	    {
-	      VertexBufferType vertex;
-	      vertex.position = XMFLOAT3(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
+	      XMFLOAT3 pos = XMFLOAT3(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
 
-	      // Apply transform
-	      XMVECTOR p = XMLoadFloat3(&vertex.position);
+	      XMVECTOR p = XMLoadFloat3(&pos);
 	      p = XMVector3Transform(p, globalTransform);
-	      XMStoreFloat3(&vertex.position, p);
+	      XMStoreFloat3(&vertices[i].position, p);
+	    }
 
-	      vertices[vertexCount++] = vertex;
-            }
+	  // Normal verisi varsa oku
+	  if (primitive.attributes.find("NORMAL") != primitive.attributes.end())
+	    {
+	      const auto& normAccessor = model.accessors[primitive.attributes.at("NORMAL")];
+	      const auto& normView = model.bufferViews[normAccessor.bufferView];
+	      const auto& normBuffer = model.buffers[normView.buffer];
+	      const float* normals = reinterpret_cast<const float*>(&normBuffer.data[normView.byteOffset]);
 
-	  const auto& normAccessor = model.accessors[primitive.attributes.at("NORMAL")];
-	  const auto& normView = model.bufferViews[normAccessor.bufferView];
-	  const auto& normBuffer = model.buffers[normView.buffer];
-	  const float* normals = reinterpret_cast<const float*>(&normBuffer.data[normView.byteOffset]);
-
-	  for (size_t i = 0; i < normAccessor.count; i++)
-            {
-	      vertices[i].normal = XMFLOAT3(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]);
-            }
+	      for (size_t i = 0; i < normAccessor.count && i < vertexCount; i++)
+		{
+		  vertices[i].normal = XMFLOAT3(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]);
+		}
+	    }
 
 	  const auto& indexAccessor = model.accessors[primitive.indices];
 	  const auto& indexView = model.bufferViews[indexAccessor.bufferView];
 	  const auto& indexBuffer = model.buffers[indexView.buffer];
-	  const unsigned short* idx = reinterpret_cast<const unsigned short*>(&indexBuffer.data[indexView.byteOffset]);
 
-	  for (size_t i = 0; i < indexAccessor.count; i++)
-            {
-	      indices[indexCount++] = static_cast<unsigned long>(idx[i]);
-            }
-	    
-	  BuildMesh(deviceManager, renderer, meshData, shaderData, reinterpret_cast<const VertexBufferType*>(vertices), vertexCount, indices, indexCount, VSFileName, PSFileName);
-        }
+	  const size_t indexCount = indexAccessor.count;
+
+	  if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
+	    {
+	      const unsigned short* idx = reinterpret_cast<const unsigned short*>(&indexBuffer.data[indexView.byteOffset]);
+	      for (size_t i = 0; i < indexCount; i++)
+		indices[i] = static_cast<unsigned long>(idx[i]);
+	    }
+	  else if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
+	    {
+	      const unsigned int* idx = reinterpret_cast<const unsigned int*>(&indexBuffer.data[indexView.byteOffset]);
+	      for (size_t i = 0; i < indexCount; i++)
+		indices[i] = static_cast<unsigned long>(idx[i]);
+	    }
+	  else
+	    {
+	      OutputDebugStringA("Unsupported index component type.\n");
+	      delete[] vertices;
+	      continue;
+	    }
+
+	  BuildMesh(deviceManager, renderer, meshData, shaderData,
+		    vertices, vertexCount,
+		    indices, indexCount,
+		    VSFileName, PSFileName);
+
+	  delete[] vertices;
+	  delete[] indices;
+	}
     }
 
   for (int childIndex : node.children)
