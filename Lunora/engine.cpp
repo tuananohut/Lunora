@@ -7,7 +7,6 @@
 #include "Renderer/Shader/ShaderSystem.cpp"
 #include "Renderer/Mesh/MeshBuilder.cpp"
 #include "Renderer/Mesh/MeshFactory.cpp"
-#include "LoadGLTF.cpp"
 
 using namespace std;
 
@@ -383,7 +382,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  
 	  CreateCube(DeviceManager, Window, &Shader, &Mesh,
 		     VSFileName, PSFileName);
-	  /*
+	  
 	  MeshGPUData Quad;
 	  CreateUnitQuad(DeviceManager,
 			 Renderer,
@@ -400,7 +399,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 			 Shader,
 			 VSFileName,
 			 PSFileName); 
-	  */
+	  /*
 	  std::string filepath = "../Lunora/Assets/Scenes/trial_scene.glb";
 	  MeshGPUData TrialScene;
 	  if (!LoadGLTF(filepath, TrialScene, Shader, DeviceManager, Renderer))
@@ -410,15 +409,16 @@ int WINAPI WinMain(HINSTANCE Instance,
 	    }
 	  TrialScene.Transform = TransformSystem::Identity();
 	  AddMesh(&Scene.Meshes, &TrialScene);
+	  */
 	  
-	  // Mesh.Transform = TransformSystem::Identity();
-	  // AddMesh(&Scene.Meshes, &Mesh);
+	  Mesh.Transform = TransformSystem::Identity();
+	  AddMesh(&Scene.Meshes, &Mesh);
 	  
-	  // Quad.Transform = TransformSystem::Identity();
-	  // AddMesh(&Scene.Meshes, &Quad);
+	  Quad.Transform = TransformSystem::Identity();
+	  AddMesh(&Scene.Meshes, &Quad);
 
-	  // Cube.Transform = TransformSystem::Identity();
-	  // AddMesh(&Scene.Meshes, &Cube);
+	  Cube.Transform = TransformSystem::Identity();
+	  AddMesh(&Scene.Meshes, &Cube);
 	  	  
 	  WorldMatrix = XMMatrixIdentity();
 
