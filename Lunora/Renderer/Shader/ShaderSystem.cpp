@@ -49,7 +49,7 @@ bool LoadShader(ID3D11Device* Device,
       return false; 
     }
 
-  if (!CompileShader(psPath, "LightPixelShader", "ps_5_0", &psBlob))
+  if (!CompileShader(psPath, "GoochPixelShader", "ps_5_0", &psBlob))
     {
       return false;
     }

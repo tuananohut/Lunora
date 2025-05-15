@@ -37,3 +37,21 @@ float4 LightPixelShader(PixelInputType input): SV_TARGET
 
     return color; 
 }
+
+float4 GoochPixelShader(PixelInputType input): SV_TARGET
+{
+    float3 normal = normalize(input.normal);
+    float3 lightDir = normalize(-lightDirection); 
+
+    float NdotL = dot(normal, lightDir);
+    float t = (NdotL + 1.0f) * 0.5f;x
+
+    float3 coolColor = float3(0.2f, 0.2f, 0.8f);
+    float3 warmColor = float3(1.0f, 0.9f, 0.6f);
+
+    float3 goochColor = lerp(coolColor, warmColor, t);
+    
+    goochColor += ambientColor.rgb * 0.2f;
+
+    return float4(saturate(goochColor), 1.0f);
+}
