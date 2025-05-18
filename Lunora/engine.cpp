@@ -7,6 +7,8 @@
 #include "Renderer/Shader/ShaderSystem.cpp"
 #include "Renderer/Mesh/MeshBuilder.cpp"
 #include "Renderer/Mesh/MeshFactory.cpp"
+#include "HeightMapGenerator.cpp"
+#include "TerrainMeshBuilder.cpp"
 
 using namespace std;
 
@@ -398,7 +400,15 @@ int WINAPI WinMain(HINSTANCE Instance,
 			 Cube,
 			 Shader,
 			 VSFileName,
-			 PSFileName); 
+			 PSFileName);
+
+	  std::vector<float> heightMap = HeightMapGenerator::Generate(256, 256, 32.f);
+
+	  std::vector<TerrainVertex> vertices;
+	  std::vector<unsigned int> indices;
+
+	  TerrainMeshBuilder::BuildMesh(heightMap, 256, 256, 1.f, vertices, indices);
+	  
 	  /*
 	  std::string filepath = "../Lunora/Assets/Scenes/trial_scene.glb";
 	  MeshGPUData TrialScene;
