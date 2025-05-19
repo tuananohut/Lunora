@@ -29,7 +29,11 @@ struct TerrainMeshBuilder
 			std::vector<TerrainVertex>& outVertices,
 			std::vector<unsigned int>& outIndices);
 
-  TerrainMesh Build(ID3D11Device* device, const TerrainVertex& data); 
+  TerrainMesh Build(ID3D11Device* device,
+		    const std::vector<float>& heightMap,
+		    int width,
+		    int height,
+		    float spacing); 
 };
 
 

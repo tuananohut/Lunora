@@ -42,13 +42,17 @@ void TerrainMeshBuilder::BuildMesh(const std::vector<float>& heightMap,
     }
 }
 
-TerrainMesh TerrainMeshBuilder::Build(ID3D11Device* device, const TerrainVertex& data)
+TerrainMesh TerrainMeshBuilder::Build(ID3D11Device* device,
+                                      const std::vector<float>& heightMap,
+                                      int width,
+                                      int height,
+                                      float spacing)
 {
   std::vector<TerrainVertex> vertices;
   std::vector<unsigned int> indices;
-  
-  BuildMesh(data.heightMap, data.width, data.height, data.spacing, vertices, indices);
-  
+
+  BuildMesh(heightMap, width, height, spacing, vertices, indices);
+
   TerrainMesh mesh;
   mesh.vertexCount = static_cast<UINT>(vertices.size());
   mesh.indexCount  = static_cast<UINT>(indices.size());
@@ -62,7 +66,7 @@ TerrainMesh TerrainMeshBuilder::Build(ID3D11Device* device, const TerrainVertex&
   vinitData.pSysMem = vertices.data();
 
   device->CreateBuffer(&vbd, &vinitData, &mesh.vertexBuffer);
-   
+
   D3D11_BUFFER_DESC ibd = {};
   ibd.Usage = D3D11_USAGE_DEFAULT;
   ibd.ByteWidth = static_cast<UINT>(sizeof(unsigned int) * indices.size());

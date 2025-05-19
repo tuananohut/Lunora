@@ -407,25 +407,14 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  std::vector<TerrainVertex> vertices;
 	  std::vector<unsigned int> indices;
 
-	  TerrainMeshBuilder::BuildMesh(heightMap, 256, 256, 1.f, vertices, indices);
+	  auto terrain = TerrainMeshBuilder::BuildMesh(heightMap, 256, 256, 1.f, vertices, indices);
 	  
-	  /*
-	  std::string filepath = "../Lunora/Assets/Scenes/trial_scene.glb";
-	  MeshGPUData TrialScene;
-	  if (!LoadGLTF(filepath, TrialScene, Shader, DeviceManager, Renderer))
-	    {
-	      MessageBoxA(Window, "Could not load scene!", "Error!", MB_ICONWARNING);
-	      // return false; 
-	    }
-	  TrialScene.Transform = TransformSystem::Identity();
-	  AddMesh(&Scene.Meshes, &TrialScene);
-	  */
 	  
 	  Mesh.Transform = TransformSystem::Identity();
 	  AddMesh(&Scene.Meshes, &Mesh);
 	  
-	  Quad.Transform = TransformSystem::Identity();
-	  AddMesh(&Scene.Meshes, &Quad);
+	  // Quad.Transform = TransformSystem::Identity();
+	  // AddMesh(&Scene.Meshes, &Quad);
 
 	  Cube.Transform = TransformSystem::Identity();
 	  AddMesh(&Scene.Meshes, &Cube);
