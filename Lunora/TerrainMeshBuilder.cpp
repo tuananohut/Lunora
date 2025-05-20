@@ -80,3 +80,41 @@ TerrainMesh TerrainMeshBuilder::Build(ID3D11Device* device,
   return mesh;
 }
 
+bool TerrainRenderer::InitializeShader(ID3D11Device* device)
+{
+    ID3DBlob* vertexShaderBlob = nullptr;
+    ID3DBlob* pixelShaderBlob = nullptr;
+
+    /**/
+    HRESULT hr = D3DCompileFromFile(L"TerrainVS.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &vertexShaderBlob, nullptr);
+    if (FAILED(hr)) return false;
+
+    /**/
+    hr = D3DCompileFromFile(L"TerrainPS.hlsl", nullptr, nullptr, "main", "ps_5_0", 0, 0, &pixelShaderBlob, nullptr);
+    if (FAILED(hr)) return false;
+
+    hr = device->CreateVertexShader(vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), nullptr, &vertexShader);
+    if (FAILED(hr)) return false;
+
+    hr = device->CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(), nullptr, &pixelShader);
+    if (FAILED(hr)) return false;
+
+    D3D11_INPUT_ELEMENT_DESC layout[] =
+    {
+      { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(TerrainVertex, position), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+      { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, offsetof(TerrainVertex, uv),       D3D11_INPUT_PER_VERTEX_DATA, 0 }
+    };
+
+    UINT numElements = ARRAYSIZE(layout);
+
+    hr = device->CreateInputLayout(layout, numElements, vertexShaderBlob->GetBufferPointer(),
+                                   vertexShaderBlob->GetBufferSize(), &inputLayout);
+    if (FAILED(hr))
+      return false;
+
+    vertexShaderBlob->Release();
+    pixelShaderBlob->Release();
+
+    return true;
+}
+

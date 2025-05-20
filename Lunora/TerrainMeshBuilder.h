@@ -33,7 +33,9 @@ struct TerrainMeshBuilder
 		    const std::vector<float>& heightMap,
 		    int width,
 		    int height,
-		    float spacing); 
+		    float spacing);
+
+  bool InitializeShader(ID3D11Device* device);
 };
 
 
