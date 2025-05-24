@@ -33,4 +33,67 @@ bool Application::Initialize(HINSTANCE instance,
       MessageBox(window, L"Could not initialize the input object.", L"Error", MB_OK | MB_ICONERROR);
       return false; 
     }
+
+  m_Direct3D = new D3D;
+  if (!m_Direct3D)
+    {
+      return false; 
+    }
+
+  result = m_Direct3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, window, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+  if (!result)
+    {
+      MessageBox(window, L"Could not initialize Direct3D.", L"Error", MB_OK | MB_ICONERROR);
+      return false; 
+    }
+
+  m_ShaderManager = new ShaderManager;
+  if (!m_ShaderManager)
+    {
+      return false; 
+    }
+
+  result = m_ShaderManager->Initialize(m_Direct3D->GetDevice(), window);
+  if (!result)
+    {
+      MessageBox(window, L"Could not initialize the shader manager object.", L"Error", MB_OK | MB_ICONERROR);
+      return false; 
+    }
+
+  m_Timer = new Timer;
+  if (!m_Timer)
+    {
+      return false; 
+    }
+
+  result = m_Timer->Initialize();
+  if (!result)
+    {
+      MessageBox(window, L"Could not initialize the timer object.", L"Error", MB_OK | MB_ICONERROR);
+      return false; 
+    }
+
+  m_Fps = new Fps;
+  if (!m_Fps)
+    {
+      return false; 
+    }
+
+  m_Fps->Initialize();
+
+  m_Zone = new Zone;
+  if (!m_Zone)
+    {
+      return false; 
+    }
+
+  result = m_Zone->Initialize(m_Direct3D, window, screenWidth, screenHeight, SCREEN_DEPTH);
+  if (!result)
+    {
+      MessageBox(window, L"Could not initialize the zone object.", L"Error", MB_OK | MB_ICONERROR);
+      return false; 
+    }
+  
+  return true; 
 }
+
