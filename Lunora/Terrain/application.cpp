@@ -30,7 +30,7 @@ bool Application::Initialize(HINSTANCE instance,
   result = m_Input->Initialize(instance, window, screenWidth, screenHeight);
   if (!result)
     {
-      MessageBox(window, L"Could not initialize the input object.", L"Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(window, "Could not initialize the input object.", "Error", MB_OK | MB_ICONERROR);
       return false; 
     }
 
@@ -43,7 +43,7 @@ bool Application::Initialize(HINSTANCE instance,
   result = m_Direct3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, window, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
   if (!result)
     {
-      MessageBox(window, L"Could not initialize Direct3D.", L"Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(window, "Could not initialize Direct3D.", "Error", MB_OK | MB_ICONERROR);
       return false; 
     }
 
@@ -56,7 +56,7 @@ bool Application::Initialize(HINSTANCE instance,
   result = m_ShaderManager->Initialize(m_Direct3D->GetDevice(), window);
   if (!result)
     {
-      MessageBox(window, L"Could not initialize the shader manager object.", L"Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(window, "Could not initialize the shader manager object.", "Error", MB_OK | MB_ICONERROR);
       return false; 
     }
 
@@ -69,7 +69,7 @@ bool Application::Initialize(HINSTANCE instance,
   result = m_Timer->Initialize();
   if (!result)
     {
-      MessageBox(window, L"Could not initialize the timer object.", L"Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(window, "Could not initialize the timer object.", "Error", MB_OK | MB_ICONERROR);
       return false; 
     }
 
@@ -90,10 +90,79 @@ bool Application::Initialize(HINSTANCE instance,
   result = m_Zone->Initialize(m_Direct3D, window, screenWidth, screenHeight, SCREEN_DEPTH);
   if (!result)
     {
-      MessageBox(window, L"Could not initialize the zone object.", L"Error", MB_OK | MB_ICONERROR);
+      MessageBox(window, "Could not initialize the zone object.", "Error", MB_OK | MB_ICONERROR);
       return false; 
     }
   
   return true; 
 }
 
+void Application::Shutdown()
+{
+  if (m_Zone)
+    {
+      m_Zone->Shutdown();
+      delete m_Zone;
+      m_Zone = nullptr; 
+    }
+
+  if (m_Fps)
+    {
+      delete m_Fps;
+      m_Fps = nullptr; 
+    }
+
+  if (m_Timer)
+    {
+      delete m_Timer;
+      m_Timer = nullptr; 
+    }
+
+  if (m_ShaderManager)
+    {
+      m_ShaderManager->Shutdown();
+      delete m_ShaderManager;
+      m_ShaderManager = nullptr; 
+    }
+
+  if (m_Direct3D)
+    {
+      m_Direct3D->Shutdown();
+      delete m_Direct3D;
+      m_Direct3D = nullptr; 
+    }
+
+  if (m_Input)
+    {
+      m_Input->Shutdown();
+      delete m_Input;
+      m_Input = nullptr; 
+    }
+}
+
+bool Application::Frame()
+{
+  bool result;
+
+  m_Fps->Frame();
+  m_Timer->Frame();
+  
+  result = m_Input->Frame;
+  if (!result)
+    {
+      return false; 
+    }
+
+  if (m_Input->IsEscapePressed() == true)
+    {
+      return false; 
+    }
+  
+  result = m_Zone->Frame(m_Direct3D, m_Input, m_ShaderManager, m_Timer->GetTime(), m_Fps->GetFps());
+  if (!result)
+    {
+      return false;
+    }
+
+  return result;
+}
