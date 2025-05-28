@@ -26,3 +26,5 @@ class UserInterface
   int m_previousFps;
   int m_previousPosition[6];
 };
+
+#endif
