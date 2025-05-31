@@ -90,7 +90,7 @@ bool Application::Initialize(HINSTANCE instance,
   result = m_Zone->Initialize(m_Direct3D, window, screenWidth, screenHeight, SCREEN_DEPTH);
   if (!result)
     {
-      MessageBox(window, "Could not initialize the zone object.", "Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(window, "Could not initialize the zone object.", "Error", MB_OK | MB_ICONERROR);
       return false; 
     }
   
