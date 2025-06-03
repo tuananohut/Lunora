@@ -147,7 +147,7 @@ bool Application::Frame()
   m_Fps->Frame();
   m_Timer->Frame();
   
-  result = m_Input->Frame;
+  result = m_Input->Frame();
   if (!result)
     {
       return false; 

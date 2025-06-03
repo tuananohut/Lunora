@@ -84,6 +84,9 @@ bool Input::Initialize(HINSTANCE hInstance,
       return false;
     }
 
+  m_F1_released = true;
+  m_F2_released = true; 
+
   return true;
 }
 
@@ -209,7 +212,7 @@ bool Input::IsEscapePressed()
   return false;
 }
 
-bool Input::IsLeftArrowPressed()
+bool Input::IsLeftPressed()
 {
   if (m_keyboardState[DIK_LEFT] & 0x80)
     {
@@ -219,7 +222,7 @@ bool Input::IsLeftArrowPressed()
   return false;
 }
 
-bool Input::IsRightArrowPressed()
+bool Input::IsRightPressed()
 {
   if (m_keyboardState[DIK_RIGHT] & 0x80)
     {
@@ -229,7 +232,7 @@ bool Input::IsRightArrowPressed()
   return false;
 }
 
-bool Input::IsUpArrowPressed()
+bool Input::IsUpPressed()
 {
   if (m_keyboardState[DIK_UP] & 0x80)
     {
@@ -239,7 +242,7 @@ bool Input::IsUpArrowPressed()
   return false;
 }
 
-bool Input::IsDownArrowPressed()
+bool Input::IsDownPressed()
 {
   if (m_keyboardState[DIK_DOWN] & 0x80)
     {
@@ -265,12 +268,78 @@ bool Input::IsMousePressed()
   return false;
 }
 
-bool Input::IsBPressed()
+bool Input::IsAPressed()
 {
-  if (m_keyboardState[DIK_B] & 0x80)
+  if (m_keyboardState[DIK_A] & 0x80)
     {
       return true;
     }
 
   return false;
+}
+
+bool Input::IsZPressed()
+{
+  if (m_keyboardState[DIK_Z] & 0x80)
+    {
+      return true;
+    }
+
+  return false;
+}
+
+bool Input::IsPgUpPressed()
+{
+  if (m_keyboardState[DIK_PGUP] & 0x80)
+    {
+      return true;
+    }
+
+  return false;
+}
+
+bool Input::IsPgDownPressed()
+{
+  if (m_keyboardState[DIK_PGDN] & 0x80)
+    {
+      return true;
+    }
+
+  return false;
+}
+
+bool Input::IsF1Toggled()
+{
+  if (m_keyboardState[DIK_F1] & 0x80)
+    {
+      if (m_F1_released)
+	{
+	  m_F1_released = false;
+	  return true; 
+	}
+    }
+  else
+    {
+      m_F1_released = true; 
+    }
+
+  return true; 
+}
+
+bool Input::IsF2Toggled()
+{
+  if (m_keyboardState[DIK_F2] & 0x80)
+    {
+      if (m_F2_released)
+	{
+	  m_F2_released = false;
+	  return true; 
+	}
+    }
+  else
+    {
+      m_F2_released = true; 
+    }
+
+  return true; 
 }
