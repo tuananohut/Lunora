@@ -21,13 +21,13 @@ bool FontShader::Initialize(ID3D11Device* device, HWND hwnd)
   wchar_t psFilename[128];
   int error;
 
-  error = wcscpy_s(vsFilename, 128, L"src/shaders/font.vs");
+  error = wcscpy_s(vsFilename, 128, L"font.vs");
   if (error != 0)
     {
       return false;
     }
 
-  error = wcscpy_s(psFilename, 128, L"src/shaders/font.ps");
+  error = wcscpy_s(psFilename, 128, L"font.ps");
   if (error != 0)
     {
       return false;
@@ -68,7 +68,7 @@ bool FontShader::Render(ID3D11DeviceContext* deviceContext,
   return true;
 }
 
-bool FontShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+bool FontShader::InitializeShader(ID3D11Device* device, HWND hwnd, LPCSTR vsFilename, LPCSTR psFilename)
 {
   HRESULT result;
   ID3D10Blob* errorMessage = nullptr;
@@ -90,7 +90,7 @@ bool FontShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFile
 
       else
 	{
-	  MessageBoxA(hwnd, vsFilename, "Missing Shader File", MB_OK | MB_ICONERROR);
+	  MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK | MB_ICONERROR);
 	}
 
       return false;
