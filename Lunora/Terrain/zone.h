@@ -12,7 +12,7 @@
 
 class Zone
 {
- public:
+public:
   Zone();
   Zone(const Zone&);
   ~Zone();
@@ -21,11 +21,11 @@ class Zone
   void Shutdown();
   bool Frame(D3D*, Input*, ShaderManager*, float, int);
 
- private:
+private:
   void HandleMovementInput(Input*, float);
   bool Render(D3D*, ShaderManager*);
 
- private:
+private:
   UserInterface* m_UserInterface;
   Camera* m_Camera;
   Position* m_Position;
