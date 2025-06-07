@@ -258,16 +258,6 @@ void Input::GetMouseLocation(int& mouseX, int& mouseY)
   mouseY = m_mouseY;
 }
 
-bool Input::IsMousePressed()
-{
-  if (m_mouseState.rgbButtons[0] & 0x80)
-    {
-      return true;
-    }
-
-  return false;
-}
-
 bool Input::IsAPressed()
 {
   if (m_keyboardState[DIK_A] & 0x80)
