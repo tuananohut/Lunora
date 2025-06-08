@@ -36,7 +36,7 @@ class Position
   float m_forwardSpeed, m_backwardSpeed;
   float m_upwardSpeed, m_downwardSpeed;
   float m_leftTurnSpeed, m_rightTurnSpeed;
-  float m_lookUpSpeed, m_lookDowndSpeed; 
+  float m_lookUpSpeed, m_lookDownSpeed; 
 };
 
 #endif

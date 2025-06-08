@@ -19,7 +19,7 @@ Position::Position()
   m_leftTurnSpeed = 0.f; 
   m_rightTurnSpeed = 0.f;
   m_lookUpSpeed = 0.f; 
-  m_lookDowndSpeed = 0.f; 
+  m_lookDownSpeed = 0.f; 
 }
 
 Position::Position(const Position& other) {}
@@ -47,7 +47,7 @@ void Position::GetPosition(float& x, float& y, float& z)
   z = m_positionZ;
 }
 
-void PositionClass::GetRotation(float& x, float& y, float& z)
+void Position::GetRotation(float& x, float& y, float& z)
 {
   x = m_rotationX;
   y = m_rotationY;

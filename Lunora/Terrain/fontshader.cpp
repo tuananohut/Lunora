@@ -90,7 +90,7 @@ bool FontShader::InitializeShader(ID3D11Device* device, HWND hwnd, wchar_t* vsFi
 
       else
 	{
-	  MessageBoxA(hwnd, vsFilename, "Missing Shader File", MB_OK | MB_ICONERROR);
+	  MessageBoxW(hwnd, vsFilename, L"Missing Shader File", MB_OK | MB_ICONERROR);
 	}
 
       return false;
@@ -106,7 +106,7 @@ bool FontShader::InitializeShader(ID3D11Device* device, HWND hwnd, wchar_t* vsFi
 		
       else
 	{
-	  MessageBoxA(hwnd, psFilename, "Missing Shader File", MB_OK | MB_ICONERROR);
+	  MessageBoxW(hwnd, psFilename, L"Missing Shader File", MB_OK | MB_ICONERROR);
 	}
 
       return false;
@@ -264,7 +264,7 @@ void FontShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, W
   errorMessage->Release();
   errorMessage = nullptr;
 
-  MessageBoxA(hwnd, "Error compiling shader. Check shader-error.txt for message.", shaderFilename, MB_OK | MB_ICONERROR);
+  MessageBoxW(hwnd, L"Error compiling shader. Check shader-error.txt for message.", shaderFilename, MB_OK | MB_ICONERROR);
 }
 
 bool FontShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, 
