@@ -2,7 +2,7 @@ cbuffer MatrixBuffer
 {
 	matrix worldMatrix;
 	matrix viewMatrix;
-	matrix projectionMatrix; 
+	matrix projectionMatrix;
 };
 
 struct VertexInputType
@@ -11,23 +11,19 @@ struct VertexInputType
 	float4 color: COLOR;
 };
 
-struct PixelInputType
+struct HullInputType
 {
-	float4 position: SV_POSITION;
-	float4 color: COLOR; 
+	float3 position: POSITION;
+	float4 color: COLOR;
 };
 
-PixelInputType ColorVertexShader(VertexInputType input)
+HullInputType ColorVertexShader(VertexInputType input)
 {
-	PixelInputType output;
+	HullInputType output;
 
-	input.position.w = 1.f;
-
-	output.position = mul(input.position, worldMatrix);
-	output.position = mul(output.position, viewMatrix);
-	output.position = mul(output.position, projectionMatrix);
+	output.position = input.position;
 
 	output.color = input.color;
 
-	return output; 
+	return output;
 }

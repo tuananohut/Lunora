@@ -2,9 +2,8 @@
 
 ShaderManager::ShaderManager()
 {
-  m_TextureShader = nullptr;
-  m_LightShader = nullptr;
-  m_NormalMapShader = nullptr;
+  m_ColorShader = nullptr;
+  m_FontShader = nullptr; 
 }
 
 ShaderManager::ShaderManager(const ShaderManager& other) {}
@@ -15,113 +14,61 @@ bool ShaderManager::Initialize(ID3D11Device* device, HWND hwnd)
 {
   bool result;
 
-  m_TextureShader = new TextureShader;
+  m_ColorShader = new ColorShader;
+  if (!m_ColorShader)
+    return false;
 
-  result = m_TextureShader->Initialize(device, hwnd);
+  result = m_ColorShader->Initialize(device, hwnd);
   if (!result)
-    {
-      return false;
-    }
+    return false;
 
-  m_LightShader = new LightShader;
+  m_FontShader = new FontShader;
+  if (!m_FontShader)
+    return false; 
 
-  result = m_LightShader->Initialize(device, hwnd);
+  result = m_FontShader->Initialize(device, hwnd);
   if (!result)
-    {
-      return false;
-    }
-
-  m_NormalMapShader = new NormalMapShader;
-
-  result = m_NormalMapShader->Initialize(device, hwnd);
-  if (!result)
-    {
-      return false;
-    }
-
+    return false; 
+  
   return true;
 }
 
 void ShaderManager::Shutdown()
 {
-  if (m_NormalMapShader)
+  if (m_FontShader)
     {
-      m_NormalMapShader->Shutdown();
-      delete m_NormalMapShader;
-      m_NormalMapShader = nullptr;
+      m_FontShader->Shutdown();
+      delete m_FontShader;
+      m_FontShader = nullptr; 
     }
 
-  if (m_LightShader)
+  if (m_ColorShader)
     {
-      m_LightShader->Shutdown();
-      delete m_LightShader;
-      m_LightShader = nullptr;
-    }
-
-  if (m_TextureShader)
-    {
-      m_TextureShader->Shutdown();
-      delete m_TextureShader;
-      m_TextureShader = nullptr;
+      m_ColorShader->Shutdown();
+      delete m_ColorShader;
+      m_ColorShader = nullptr; 
     }
 }
 
-bool ShaderManager::RenderTextureShader(ID3D11DeviceContext* deviceContext,
-					int indexCount,
-					XMMATRIX worldMatrix,
-					XMMATRIX viewMatrix,
-					XMMATRIX projectionMatrix,	
-					ID3D11ShaderResourceView* texture)
-{
-  bool result;
-
-  result = m_TextureShader->Render(deviceContext, indexCount, worldMatrix, viewMatrix, projectionMatrix, texture);
-  if (!result)
-    {
-      return false;
-    }
-
-  return true;
-}
-
-bool ShaderManager::RenderLightShader(ID3D11DeviceContext* deviceContext, 
+bool ShaderManager::RenderColorShader(ID3D11DeviceContext* deviceContext,
 				      int indexCount,
 				      XMMATRIX worldMatrix,
 				      XMMATRIX viewMatrix,
-				      XMMATRIX projectionMatrix,
-				      ID3D11ShaderResourceView* texture,
-				      XMFLOAT3 lightDirection,
-				      XMFLOAT4 ambientColor,
-				      XMFLOAT4 diffuseColor)
+				      XMMATRIX projectionMatrix)
 {
-  bool result;
-
-  result = m_LightShader->Render(deviceContext, indexCount, worldMatrix, viewMatrix, projectionMatrix, texture, lightDirection, diffuseColor);
-  if (!result)
-    {
-      return false;
-    }
-
-  return true;
+  return m_ColorShader->Render(deviceContext, indexCount,
+			       worldMatrix, viewMatrix, projectionMatrix);
 }
 
-bool ShaderManager::RenderNormalMapShader(ID3D11DeviceContext* deviceContext, 
-					  int indexCount, 
-					  XMMATRIX worldMatrix,
-					  XMMATRIX viewMatrix,
-					  XMMATRIX projectionMatrix,
-					  ID3D11ShaderResourceView* colorTexture,
-					  ID3D11ShaderResourceView* normalTexture,
-					  XMFLOAT3 lightDirection, XMFLOAT4 diffuseColor)
+bool ShaderManager::RenderFontShader(ID3D11DeviceContext* deviceContext,
+				     int indexCount,
+				     XMMATRIX worldMatrix,
+				     XMMATRIX viewMatrix,
+				     XMMATRIX projectionMatrix,
+				     ID3D11ShaderResourceView*  texture,
+				     XMFLOAT4 color)
 {
-  bool result;
-
-  result = m_NormalMapShader->Render(deviceContext, indexCount, worldMatrix, viewMatrix, projectionMatrix, colorTexture, normalTexture, lightDirection, diffuseColor);
-  if (!result)
-    {
-      return false;
-    }
-
-  return true;
+  return m_FontShader->Render(deviceContext, indexCount,
+			      worldMatrix, viewMatrix, projectionMatrix,
+			      texture, color);
 }
-
