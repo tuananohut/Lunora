@@ -207,7 +207,7 @@ void Terrain::ShutdownBuffers()
 
   if (m_vertexBuffer)
     {
-      m_vertexBuffer->Release;
+      m_vertexBuffer->Release();
       m_vertexBuffer = nullptr;
     }
 }

@@ -2,39 +2,42 @@
 #define _TEXT_H_
 
 #include "font.h"
+#include "shadermanager.h"
 
 class Text
 {
 private:
-	struct VertexType
-	{
-		XMFLOAT3 position;
-		XMFLOAT2 texture;
-	};
+  struct VertexType
+  {
+    XMFLOAT3 position;
+    XMFLOAT2 texture;
+  };
 
 public:
-	Text();
-	Text(const Text&);
-	~Text();
+  Text();
+  Text(const Text&);
+  ~Text();
 
-	bool Initialize(ID3D11Device*, ID3D11DeviceContext*, int, int, int, Font*, char*, int, int, float, float, float);
-	void Shutdown();
-	void Render(ID3D11DeviceContext*);
+  bool Initialize(ID3D11Device*, ID3D11DeviceContext*,
+		  int, int, int, Font*, char*, int, int, float, float, float);
+  void Shutdown();
+  void Render(ID3D11DeviceContext*, ShaderManager*,
+	      XMMATRIX, XMMATRIX, XMMATRIX,
+	      ID3D11ShaderResourceView*);
 
-	int GetIndexCount();
-	bool UpdateText(ID3D11DeviceContext*, Font*, char*, int, int, float, float, float);
-	XMFLOAT4 GetPixelColor();
-
+  bool UpdateSentence(ID3D11DeviceContext*, Font*, char*, int, int, float, float, float);
+  
 private:
-	bool InitializeBuffers(ID3D11Device*, ID3D11DeviceContext*, Font*, char*, int, int, float, float, float);
-	void ShutdownBuffers();
-	void RenderBuffers(ID3D11DeviceContext*);
-
+  bool InitializeSentence(ID3D11Device*, ID3D11DeviceContext*, Font*, char*, int, int, float, float, float);
+  void RenderSentence(ID3D11DeviceContext*, ShaderManager*, XMMATRIX, XMMATRIX, XMMATRIX, ID3D11ShaderResourceView*); 
+  
+  
 private:
-	ID3D11Buffer* m_vertexBuffer;
-	ID3D11Buffer* m_indexBuffer;
-	int m_screenWidth, m_screenHeight, m_maxLength, m_vertexCount, m_indexCount;
-	XMFLOAT4 m_pixelColor;
+  ID3D11Buffer *m_vertexBuffer, *m_vertexBuffer2;
+  ID3D11Buffer *m_indexBuffer, *m_indexBuffer2;
+  int m_screenWidth, m_screenHeight, m_maxLength, m_vertexCount, m_indexCount;
+  bool m_shadow; 
+  XMFLOAT4 m_pixelColor;
 };
 
 #endif
