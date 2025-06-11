@@ -19,7 +19,7 @@ public:
   ~Text();
 
   bool Initialize(ID3D11Device*, ID3D11DeviceContext*,
-		  int, int, int, Font*, char*, int, int, float, float, float);
+		  int, int, int, bool, Font*, char*, int, int, float, float, float);
   void Shutdown();
   void Render(ID3D11DeviceContext*, ShaderManager*,
 	      XMMATRIX, XMMATRIX, XMMATRIX,

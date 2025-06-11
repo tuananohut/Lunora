@@ -16,7 +16,8 @@ bool Text::Initialize(ID3D11Device* device,
 		      ID3D11DeviceContext* deviceContext, 
 		      int screenWidth, 
 		      int screenHeight, 
-		      int maxLength, 
+		      int maxLength,
+		      bool shadow,
 		      Font* Font, 
 		      char* text,
 		      int positionX, 
@@ -34,7 +35,7 @@ bool Text::Initialize(ID3D11Device* device,
 
   m_shadow = shadow; 
   
-  result = InitializeBuffers(device, deviceContext, Font, text, positionX, positionY, red, green, blue);
+  result = InitializeSentence(device, deviceContext, Font, text, positionX, positionY, red, green, blue);
   if (!result)
     {
       return false;
@@ -96,4 +97,74 @@ bool Text::InitializeSentence(ID3D11Device* device,
 
   m_vertexCount = 6 * m_maxLength;
   m_indexCount = 6 * m_maxLength;
+
+  vertices = new VertexType[m_vertexCount];
+  if (!vertices)
+    return false;
+
+  indices = new unsigned long[m_indexCount];
+  if (!indices)
+    return false;
+
+  memset(vertices, 0, (sizeof(VertexType) * m_vertexCount));
+
+  for (i = 0; i < m_indexCount; i++)
+    {
+      indices[i] = i;
+    }
+
+  vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+  vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+  vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  vertexBufferDesc.MiscFlags = 0;
+  vertexBufferDesc.StructureByteStride = 0;
+
+  vertexData.pSysMem = vertices;
+  vertexData.SysMemPitch = 0;
+  vertexData.SysMemSlicePitch = 0; 
+
+  result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
+  if (FAILED(result))
+    return false;
+
+  indexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+  indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+  indexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  indexBufferDesc.MiscFlags = 0;
+  indexBufferDesc.StructureByteStride = 0;
+
+  indexData.pSysMem = indices;
+  indexData.SysMemPitch = 0;
+  indexData.SysMemSlicePitch = 0;
+
+  result = device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
+  if (FAILED(result))
+    return false;
+
+  if (m_shadow)
+    {
+      result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer2);
+      if (FAILED(result))
+	return false;
+
+      result = device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer2);
+      if (FAILED(result))
+	return false;  
+    }
+
+  delete[] vertices;
+  vertices = nullptr;
+
+  delete[] indices;
+  indices = nullptr;
+
+  result = UpdateSentence(deviceContext, Font, text, positionX, positionY, red, green, blue);
+  if (!result)
+    return false;
+
+  return true; 
 }
+
+
