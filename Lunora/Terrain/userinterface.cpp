@@ -25,7 +25,7 @@ bool UserInterface::Initialize(D3D* Direct3D,
   int i;
 
   m_Font1 = new Font;
-  if (!m_Font)
+  if (!m_Font1)
     {
       return false; 
     }
@@ -87,8 +87,8 @@ bool UserInterface::Initialize(D3D* Direct3D,
     {
       return false; 
     }
-    
-  m_PositionStrings = new TextClass[6];
+  
+  m_PositionStrings = new Text[6];
   if(!m_PositionStrings)
     {
       return false;

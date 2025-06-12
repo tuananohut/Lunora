@@ -9,17 +9,17 @@
 class Fps
 {
 public:
-	Fps();
-	Fps(const Fps&);
-	~Fps();
+  Fps();
+  Fps(const Fps&);
+  ~Fps();
 
-	void Initialize();
-	void Frame();
-	int GetFps();
+  void Initialize();
+  void Frame();
+  int GetFps();
 
 private:
-	int m_fps, m_count;
-	unsigned long m_startTime;
+  int m_fps, m_count;
+  unsigned long m_startTime;
 };
 
 #endif

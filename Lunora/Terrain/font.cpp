@@ -10,45 +10,27 @@ Font::Font(const Font& other) {}
 
 Font::~Font() {}
 
-bool Font::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, int fontChoice)
+bool Font::Initialize(ID3D11Device* device,
+		      ID3D11DeviceContext* deviceContext,
+		      char* fontFilename,
+		      char* textureFilename,
+		      float fontHeight,
+		      int spaceSize)
 {
-  char fontFilename[128];
-  char fontTextureFilename[128];
   bool result;
 
-  switch (fontChoice)
-    {
-    case 0:
-      {
-	strcpy_s(fontFilename, "assets/font/font01.txt");
-	strcpy_s(fontTextureFilename, "assets/font/font01.tga");
-	m_fontHeight = 32.f;
-	m_spaceSize = 3;
-	break;
-      }
-		
-    default:
-      {
-	strcpy_s(fontFilename, "assets/font/font01.txt");
-	strcpy_s(fontTextureFilename, "assets/font/font01.tga");
-	m_fontHeight = 32.f;
-	m_spaceSize = 3;
-	break;
-      }
-    }
+  m_fontHeight = fontHeight;
+
+  m_spaceSize = spaceSize;
 
   result = LoadFontData(fontFilename);
   if (!result)
-    {
-      return false;
-    }
+    return false;
 
-  result = LoadTexture(device, deviceContext, fontTextureFilename);
+  result = LoadTexture(device, deviceContext, textureFilename);
   if (!result)
-    {
-      return false;
-    }
-
+    return false; 
+  
   return true;
 }
 
