@@ -167,4 +167,105 @@ bool Text::InitializeSentence(ID3D11Device* device,
   return true; 
 }
 
+bool Text::UpdateSentence(ID3D11DeviceContext* deviceContext,
+			       Font* Font, char* text,
+			       int positionX, int positionY,
+			       float red, float green, float blue)
+{
+  int numLetters;
+  VertexType* vertices;
+  float drawX, drawY;
+  D3D11_MAPPED_SUBRESOURCE mappedResource;
+  void* verticesPtr;
+  HRESULT result;
+
+  m_pixelColor = XMFLOAT4(red, green, blue, 1.0f);
+  
+  numLetters = (int)strlen(text);
+
+  if (numLetters > m_maxLength)
+    {
+      return false;
+    }
+  
+  vertices = new VertexType[m_vertexCount];
+  if (!vertices)
+    {
+      return false;
+    }
+
+  memset(vertices, 0, (sizeof(VertexType) * m_vertexCount));
+
+  drawX = (float)(((m_screenWidth / 2) * -1) + positionX);
+  drawY = (float)((m_screenHeight / 2) - positionY);
+
+  Font->BuildVertexArray((void*)vertices, text, drawX, drawY);
+
+  result = deviceContext->Map(m_vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+  if(FAILED(result))
+    {
+      return false;
+    }
+
+  verticesPtr = (void*)mappedResource.pData;
+
+  memcpy(verticesPtr, (void*)vertices, (sizeof(VertexType) * m_vertexCount));
+
+  deviceContext->Unmap(m_vertexBuffer, 0);
+
+  if (m_shadow)
+    {
+      memset(vertices, 0, (sizeof(VertexType) * m_vertexCount));
+
+      drawX = (float)((((m_screenWidth / 2) * -1) + positionX) + 2);
+      drawY = (float)(((m_screenHeight / 2) - positionY) - 2);
+      Font->BuildVertexArray((void*)vertices, text, drawX, drawY);
+
+      result = deviceContext->Map(m_vertexBuffer2, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+      if(FAILED(result))
+	{
+	  return false;
+	}
+      verticesPtr = (void*)mappedResource.pData;
+      memcpy(verticesPtr, (void*)vertices, (sizeof(VertexType) * m_vertexCount));
+      deviceContext->Unmap(m_vertexBuffer2, 0);
+    }
+
+  delete[] vertices;
+  vertices = nullptr;
+
+  return true;
+}
+
+void Text::RenderSentence(ID3D11DeviceContext* deviceContext,
+			  ShaderManager* ShaderManager,
+			  XMMATRIX worldMatrix,
+			  XMMATRIX viewMatrix,
+			  XMMATRIX orthoMatrix,
+			  ID3D11ShaderResourceView* fontTexture)
+{
+  unsigned int stride, offset;
+  XMFLOAT4 shadowColor;
+
+  stride = sizeof(VertexType);
+  offset = 0;
+
+  if (m_shadow)
+    {
+      shadowColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+
+      deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer2, &stride, &offset);
+      deviceContext->IASetIndexBuffer(m_indexBuffer2, DXGI_FORMAT_R32_UINT, 0);
+      deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+      ShaderManager->RenderFontShader(deviceContext, m_indexCount, worldMatrix, viewMatrix, orthoMatrix, fontTexture, shadowColor);
+    }
+
+  deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+  deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+  deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+  ShaderManager->RenderFontShader(deviceContext, m_indexCount, worldMatrix, viewMatrix, orthoMatrix, fontTexture, m_pixelColor);
+}
+
 

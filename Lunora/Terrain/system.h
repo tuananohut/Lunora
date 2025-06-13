@@ -11,28 +11,28 @@
 class System
 {
 public:
-	System();
-	System(const System&);
-	~System();
+  System();
+  System(const System&);
+  ~System();
 
-	bool Initialize();
-	void Shutdown();
-	void Run();
+  bool Initialize();
+  void Shutdown();
+  void Run();
 
-	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
-
-private:
-	bool Frame();
-	void InitializeWindows(int&, int&);
-	void ShutdownWindows();
+  LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
 
 private:
-        LPCSTR m_applicationName;
-	HINSTANCE m_hInstance;
-	HWND m_hwnd;
+  bool Frame();
+  void InitializeWindows(int&, int&);
+  void ShutdownWindows();
 
-	Input* m_Input;
-	Application* m_Application;
+private:
+  LPCSTR m_applicationName;
+  HINSTANCE m_hInstance;
+  HWND m_hwnd;
+
+  Input* m_Input;
+  Application* m_Application;
 };
 
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);

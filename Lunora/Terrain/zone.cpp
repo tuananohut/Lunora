@@ -12,11 +12,11 @@ Zone::Zone(const Zone& other) {}
 
 Zone::~Zone() {}
 
-bool Initialize(D3D* Direct3D,
-		HWND hwnd,
-		int screenWidth,
-		int screenHeight,
-		float screenDepth)
+bool Zone::Initialize(D3D* Direct3D,
+		      HWND hwnd,
+		      int screenWidth,
+		      int screenHeight,
+		      float screenDepth)
 {
   bool result;
 
@@ -81,11 +81,11 @@ void Zone::Shutdown()
 
   if (m_Position)
     {
-      m_Position->Shutdown();
+      /*m_Position->Shutdown(); */
       delete m_Position;
       m_Position = nullptr; 
     }
-
+  
   if (m_Camera)
     {
       delete m_Camera;

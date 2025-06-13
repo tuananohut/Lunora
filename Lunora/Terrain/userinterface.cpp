@@ -221,7 +221,7 @@ bool UserInterface::Render(D3D* Direct3D,
 			   ShaderManager* ShaderManager,
 			   XMMATRIX worldMatrix,
 			   XMMATRIX viewMatrix,
-			   XMMATRIX projectionMatrix)
+			   XMMATRIX orthoMatrix)
 {
   int i;
 
@@ -392,5 +392,6 @@ bool UserInterface::UpdatePositionStrings(ID3D11DeviceContext* deviceContext,
 	  return false; 
 	}
     }
-  
+
+  return true; 
 }
