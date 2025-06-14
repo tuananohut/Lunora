@@ -13,7 +13,7 @@ ShaderManager::~ShaderManager() {}
 bool ShaderManager::Initialize(ID3D11Device* device, HWND hwnd)
 {
   bool result;
-
+  
   m_ColorShader = new ColorShader;
   if (!m_ColorShader)
     return false;

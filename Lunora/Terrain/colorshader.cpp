@@ -19,13 +19,13 @@ bool ColorShader::Initialize(ID3D11Device* device, HWND hwnd)
   wchar_t psFilename[128];
   int error;
 
-  error = wcscpy_s(vsFilename, 128, L"color.vs");
+  error = wcscpy_s(vsFilename, 128, L"../Lunora/Terrain/color.vs");
   if(error != 0)
     {
       return false;
     }
 
-  error = wcscpy_s(psFilename, 128, L"color.ps");
+  error = wcscpy_s(psFilename, 128, L"../Lunora/Terrain/color.ps");
   if(error != 0)
     {
       return false;
@@ -64,7 +64,7 @@ bool ColorShader::Render(ID3D11DeviceContext* deviceContext,
   return true;
 }
 
-bool ColorShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+bool ColorShader::InitializeShader(ID3D11Device* device, HWND hwnd, LPCWSTR vsFilename, WCHAR* psFilename)
 {
   HRESULT result;
   ID3D10Blob* errorMessage = nullptr;
@@ -202,7 +202,7 @@ void ColorShader::ShutdownShader()
     }
 }
 
-void ColorShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+void ColorShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, LPCWSTR shaderFilename)
 {
   char* compileErrors;
   unsigned long long bufferSize, i;

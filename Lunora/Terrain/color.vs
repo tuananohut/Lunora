@@ -11,15 +11,9 @@ struct VertexInputType
 	float4 color: COLOR;
 };
 
-struct HullInputType
+VertexInputType ColorVertexShader(VertexInputType input)
 {
-	float3 position: POSITION;
-	float4 color: COLOR;
-};
-
-HullInputType ColorVertexShader(VertexInputType input)
-{
-	HullInputType output;
+	VertexInputType output;
 
 	output.position = input.position;
 

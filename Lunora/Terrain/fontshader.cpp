@@ -21,13 +21,13 @@ bool FontShader::Initialize(ID3D11Device* device, HWND hwnd)
   wchar_t psFilename[128];
   int error;
 
-  error = wcscpy_s(vsFilename, 128, L"font.vs");
+  error = wcscpy_s(vsFilename, 128, L"../Lunora/Terrain/font.vs");
   if (error != 0)
     {
       return false;
     }
 
-  error = wcscpy_s(psFilename, 128, L"font.ps");
+  error = wcscpy_s(psFilename, 128, L"../Lunora/Terrain/font.ps");
   if (error != 0)
     {
       return false;
