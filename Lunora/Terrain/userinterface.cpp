@@ -32,7 +32,7 @@ bool UserInterface::Initialize(D3D* Direct3D,
 
   result = m_Font1->Initialize(Direct3D->GetDevice(),
 			       Direct3D->GetDeviceContext(),
-			       "font01.txt", "font01.tga", 32.f, 3);
+			       "../Lunora/Terrain/font01.txt", "../Lunora/Terrain/font01.tga", 32.f, 3);
   if (!result)
     {
       return false; 
