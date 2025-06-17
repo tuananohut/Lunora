@@ -54,7 +54,7 @@ bool Terrain::InitializeBuffers(ID3D11Device* device)
   terrainHeight = 256;
   terrainWidth = 256;
 
-  color = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+  color = XMFLOAT4(0.f, 1.f, 0.f, 1.f);
 
   // Drawing a line = 2 points
   // Square has 4 lines
