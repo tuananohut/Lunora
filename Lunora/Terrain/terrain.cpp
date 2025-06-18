@@ -3,22 +3,43 @@
 Terrain::Terrain()
 {
   m_vertexBuffer = nullptr;
-  m_indexBuffer = nullptr; 
+  m_indexBuffer = nullptr;
+  m_terrainFilename = nullptr;
+  m_heightMap = nullptr;
+  m_terrainModel = nullptr; 
 }
 
 Terrain::Terrain(const Terrain& other) {}
 
 Terrain::~Terrain() {}
 
-bool Terrain::Initialize(ID3D11Device* device)
+bool Terrain::Initialize(ID3D11Device* device, char* setupFilename)
 {
   bool result;
 
+  result = LoadSetupFile(setupFilename);
+  if (!result)
+    return false;
+
+  result = LoadBitmapHeightMap();
+  if (!result)
+    return false;
+
+  SetTerrainCoordinates();
+
+  result = BuildTerrainModel();
+  if (!result)
+    return false;
+
+  ShutdownHeightMap();
+  
   result = InitializeBuffers(device);
   if (!result)
     {
       return false; 
     }
+
+  ShutdownTerrainModel();
 
   return true; 
 }

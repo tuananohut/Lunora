@@ -33,7 +33,7 @@ class Terrain
   Terrain(const Terrain&);
   ~Terrain();
 
-  bool Initialize(ID3D11Device*);
+  bool Initialize(ID3D11Device*, char*);
   void Shutdown();
   bool Render(ID3D11DeviceContext*);
 
