@@ -47,6 +47,10 @@ bool Terrain::Initialize(ID3D11Device* device, char* setupFilename)
 void Terrain::Shutdown()
 {
   ShutdownBuffers();
+
+  ShutdownTerrainModel();
+
+  ShutdownHeightMap(); 
 }
 
 bool Terrain::Render(ID3D11DeviceContext* deviceContext)
@@ -59,6 +63,129 @@ bool Terrain::Render(ID3D11DeviceContext* deviceContext)
 int Terrain::GetIndexCount()
 {
   return m_indexCount; 
+}
+
+bool Terrain::LoadSetupFile(char* filename)
+{
+  int stringLength;
+  ifstream fin;
+  char input;
+
+  stringLength = 256;
+  m_terrainFilename = new char[stringLength];
+  if (!m_terrainFilename)
+    return false;
+
+  fin.open(filename);
+  if (fin.fail())
+    return false;
+
+  fin.get(input);
+  while (input != ':')
+    {
+      fin.get(input);
+    }
+  
+  fin >> m_terrainFilename;
+  fin.get(input);
+  while(input != ':')
+    {
+      fin.get(input); 
+    }
+
+  fin >> m_terrainHeight;
+
+  fin.get(input);
+  while (input != ':')
+    {
+      fin.get(input);
+    }
+
+  fin >> m_terrainWidth;
+
+  fin.get(input);
+  while (input != ':')
+    {
+      fin.get(input); 
+    }
+
+  fin >> m_heightScale;
+
+  fin.close();
+
+  return true; 
+}
+
+bool Terrain::LoadBitmapHeightMap()
+{
+  int error, imageSize, i, j, k, index;
+  FILE* filePtr;
+  unsigned long long count;
+  BITMAPFILEHEADER bitmapFileHeader;
+  BITMAPINFOHEADER bitmapInfoHeader;
+  unsigned char* bitmapImage;
+  unsigned char height;
+
+  m_heightMap = new HeightMapType[m_terrainWidth * m_terrainHeight];
+  if (!m_heightMap)
+    return false;
+
+  error = fopen_s(&filePtr, m_terrainFilename, "rb");
+  if (error != 0)
+    return false;
+
+  count = fread(&bitmapFileHeader, sizeof(BITMAPFILEHEADER), 1, filePtr);
+  if (count != 1)
+    return false;
+
+  count = fread(&bitmapInfoHeader, sizeof(BITMAPINFOHEADER), 1, filePtr);
+  if (count != 1)
+    return false;
+
+  if ((bitmapInfoHeader.biHeight != m_terrainHeight) || (bitmapInfoHeader.biWidth != m_terrainWidth))
+    return false;
+
+  imageSize = m_terrainHeight * ((m_terrainWidth * 3) + 1);
+
+  bitmapImage = new unsigned char[imageSize];
+  if (!bitmapImage)
+    return false; 
+
+  fseek(filePtr, bitmapFileHeader.bfOffBits, SEEK_SET);
+
+  count = fread(bitmapImage, 1, imageSize, filePtr);
+  if (count != imageSize)
+    return false;
+
+  error = fclose(filePtr);
+  if (error != 0)
+    return false;
+
+  k = 0;
+
+  for (j = 0; j < m_terrainHeight < j++)
+    {
+      for (i = 0; i < m_terrainWidth; i++)
+	{
+	  index = (m_terrainWidth * (m_terrainHeight - 1 - j)) + i;
+
+	  height = bitmapImage[k];
+
+	  m_heightMap[index].y = (float)height;
+
+	  k += 3;
+	}
+
+      k++;
+    }
+
+  delete[]  bitmapImage;
+  bitmapImage = nullptr;
+
+  delete[] m_terrainFilename;
+  m_terrainFilename = nullptr;
+
+  return true; 
 }
 
 bool Terrain::InitializeBuffers(ID3D11Device* device)
