@@ -188,6 +188,35 @@ bool Terrain::LoadBitmapHeightMap()
   return true; 
 }
 
+void Terrain::ShutdownHeightMap()
+{
+  if (m_heightMap)
+    {
+      delete[] m_heightMap;
+      m_heightMap = nullptr; 
+    }
+}
+
+void Terrain::SetTerrainCoordinates()
+{
+  int i, j, index;
+
+  for (j = 0; j < m_terrainHeight; j++)
+    {
+      for (i = 0; i < m_terrainWidth; i++)
+	{
+	  index = (m_terrainWidth * j) + i;
+
+	  m_heightMap[index].x = (float)i;
+	  m_heightMap[index].z = -(float)j;
+
+	  m_heightMap[index].z += (float)(m_terrainHeight - 1);
+
+	  m_heightMap[index].y /= m_heightScale; 
+	}
+    }
+}
+
 bool Terrain::InitializeBuffers(ID3D11Device* device)
 {
   VertexType* vertices;
