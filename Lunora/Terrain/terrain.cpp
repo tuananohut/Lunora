@@ -217,6 +217,64 @@ void Terrain::SetTerrainCoordinates()
     }
 }
 
+bool Terrain::BuildTerrainModel()
+{
+  int i, j, index, index1, index2, index3, index4;
+  
+  m_vertexCount = (m_terrainHeight - 1) * (m_terrainWidth - 1) * 6;
+
+  m_terrainModel = new ModelType[m_vertexCount];
+  if (!m_terrainModel)
+    {
+      return false; 
+    }
+  
+  index = 0;
+
+  for (j = 0; j < (m_terrainHeight - 1); j++)
+    {
+      for (i = 0; i < (m_terrainWidth - 1); i++)
+	{
+	  index1 = (m_terrainWidth * j) + i;
+	  index2 = (m_terrainWidth * j) + (i + 1);
+	  index3 = (m_terrainWidth * (j + 1)) + i;
+	  index4 = (m_terrainWidth * (j + 1)) + (i + 1);
+
+	  m_terrainModel[index].x = m_heightMap[index1].x;
+	  m_terrainModel[index].y = m_heightMap[index1].y;
+	  m_terrainModel[index].z = m_heightMap[index1].z;
+	  index++;
+	  
+	  m_terrainModel[index].x = m_heightMap[index2].x;
+	  m_terrainModel[index].y = m_heightMap[index2].y;
+	  m_terrainModel[index].z = m_heightMap[index2].z;
+	  index++;
+
+	  m_terrainModel[index].x = m_heightMap[index3].x;
+	  m_terrainModel[index].y = m_heightMap[index3].y;
+	  m_terrainModel[index].z = m_heightMap[index3].z;
+	  index++;
+
+	  m_terrainModel[index].x = m_heightMap[index3].x;
+	  m_terrainModel[index].y = m_heightMap[index3].y;
+	  m_terrainModel[index].z = m_heightMap[index3].z;
+	  index++;
+	 
+	  m_terrainModel[index].x = m_heightMap[index2].x;
+	  m_terrainModel[index].y = m_heightMap[index2].y;
+	  m_terrainModel[index].z = m_heightMap[index2].z;
+	  index++;
+	  
+	  m_terrainModel[index].x = m_heightMap[index4].x;
+	  m_terrainModel[index].y = m_heightMap[index4].y;
+	  m_terrainModel[index].z = m_heightMap[index4].z;
+	  index++;
+	}
+    }
+
+  return true; 
+}
+
 bool Terrain::InitializeBuffers(ID3D11Device* device)
 {
   VertexType* vertices;
