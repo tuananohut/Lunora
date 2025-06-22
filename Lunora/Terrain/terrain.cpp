@@ -275,6 +275,15 @@ bool Terrain::BuildTerrainModel()
   return true; 
 }
 
+void Terrain::ShutdownTerrainModel()
+{
+  if (m_terrainModel)
+    {
+      delete[] m_terrainModel;
+      m_terrainModel = nullptr;
+    }
+}
+
 bool Terrain::InitializeBuffers(ID3D11Device* device)
 {
   VertexType* vertices;
@@ -294,7 +303,7 @@ bool Terrain::InitializeBuffers(ID3D11Device* device)
   // Drawing a line = 2 points
   // Square has 4 lines
   // Drawing a square 2 points * 4 lines = 8 lines
-  m_vertexCount = (terrainWidth - 1) * (terrainHeight - 1) * 8;
+  m_vertexCount = (terrainWidth - 1) * (terrainHeight - 1) * 6;
   
   m_indexCount = m_vertexCount; 
 
@@ -310,85 +319,15 @@ bool Terrain::InitializeBuffers(ID3D11Device* device)
       return false; 
     }
   
-  index = 0;
-
-  for (j = 0; j < (terrainHeight - 1); j++)
-    {      for (i = 0; i < (terrainWidth - 1); i++)
-	{
-	  // Line 1 - Upper Left
-	  positionX = (float)i;
-	  positionZ = (float)(j + 1);
-
-	  vertices[index].position = XMFLOAT3(positionX, 0.f, positionZ);
-	  vertices[index].color = color;
-	  indices[index] = index;
-	  index++;
-
-	  // Line 1 - Upper right
-	  positionX = (float)(i + 1);
-	  positionZ = (float)(j + 1);
-	  
-	  vertices[index].position = XMFLOAT3(positionX, 0.f, positionZ);
-	  vertices[index].color = color;
-	  indices[index] = index;
-	  index++;
-
-	  // Line 2 - Upper right
-	  positionX = (float)(i + 1);
-	  positionZ = (float)(j + 1);
-
-	  vertices[index].position = XMFLOAT3(positionX, 0.f, positionZ);
-	  vertices[index].color = color;
-	  indices[index] = index;
-	  index++;
-
-	  // Line 2 - Bottom right
-	  positionX = (float)(i + 1);
-	  positionZ = (float)j;
-
-	  vertices[index].position = XMFLOAT3(positionX, 0.f, positionZ);
-	  vertices[index].color = color;
-	  indices[index] = index;
-	  index++; 
-
-	  // Line 3 - Bottom right
-	  positionX = (float)(i + 1);
-	  positionZ = (float)j;
-
-	  vertices[index].position = XMFLOAT3(positionX, 0.f, positionZ);
-	  vertices[index].color = color;
-	  indices[index] = index;
-	  index++;
-
-	  // Line 3 - Bottom left
-	  positionX = (float)i;
-	  positionZ = (float)j;
-
-	  vertices[index].position = XMFLOAT3(positionX, 0.f, positionZ);
-	  vertices[index].color = color;
-	  indices[index] = index;
-	  index++;
-
-	  // Line 4 - Bottom left
-	  positionX = (float)i;
-	  positionZ = (float)j;
-
-	  vertices[index].position = XMFLOAT3(positionX, 0.f, positionZ);
-	  vertices[index].color = color;
-	  indices[index] = index;
-	  index++;
-
-	  // Line 4 - Upper left
-	  positionX = (float)i;
-	  positionZ = (float)(j + 1);
-
-	  vertices[index].position = XMFLOAT3(positionX, 0.f, positionZ);
-	  vertices[index].color = color;
-	  indices[index] = index;
-	  index++;
-	}
+  for (i = 0; i < m_vertexCount; i++)
+    {
+      vertices[i].position = XMFLOAT(m_terrainModel[i].x,
+				     m_terrainModel[i].y,
+				     m_terrainModel[i].z);
+      vertices[i].color = color;
+      indices[i] = i; 
     }
-
+  
   vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
   vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
   vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -459,5 +398,5 @@ void Terrain::RenderBuffers(ID3D11DeviceContext* deviceContext)
   
   deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-  deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST); 
+  deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
 }

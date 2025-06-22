@@ -49,7 +49,7 @@ bool Zone::Initialize(D3D* Direct3D,
       return false; 
     }
 
-  m_Position->SetPosition(128.f, 5.f, -10.f);
+  m_Position->SetPosition(128.f, 10.f, -10.f);
   m_Position->SetRotation(0.f, 0.f, 0.f);
 
   m_Terrain = new Terrain;
@@ -66,6 +66,8 @@ bool Zone::Initialize(D3D* Direct3D,
     }
 
   m_displayUI = true;
+
+  m_wireFrame = true; 
 
   return true;
 }
@@ -173,6 +175,11 @@ void Zone::HandleMovementInput(Input* Input, float frameTime)
     {
       m_displayUI = !m_displayUI; 
     }
+
+   if (Input->IsF12oggled())
+    {
+      m_wireFrame = !m_wireFrame; 
+    }
 }
 
 bool Zone::Render(D3D* Direct3D, ShaderManager* ShaderManager)
@@ -190,11 +197,21 @@ bool Zone::Render(D3D* Direct3D, ShaderManager* ShaderManager)
 
   Direct3D->BeginScene(0.f, 0.f, 0.f, 1.f);
 
+  if (m_wireFrame)
+    {
+      Direct3D->EnableWireframe(); 
+    }
+
   m_Terrain->Render(Direct3D->GetDeviceContext());
   result = ShaderManager->RenderColorShader(Direct3D->GetDeviceContext(), m_Terrain->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix);
   if (!result)
     {
       return false; 
+    }
+
+  if (m_wireFrame)
+    {
+      Direct3D->DisableWireframe(); 
     }
 
   if (m_displayUI)
