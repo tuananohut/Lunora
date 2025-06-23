@@ -11,15 +11,24 @@ D3D::D3D()
   m_depthDisabledStencilState = nullptr;
   m_depthStencilView = nullptr;
   m_rasterState = 0;
+  m_rasterStateNoCulling = 0;
+  m_rasterStateWireframe = 0;
   m_alphaEnableBlendingState = nullptr;
   m_alphaDisableBlendingState = nullptr;
+  m_alphaEnableBlendingState2 = nullptr;
 }
 
 D3D::D3D(const D3D& other) {}
 
 D3D::~D3D() {}
 
-bool D3D::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen, float screenDepth, float screenNear)
+bool D3D::Initialize(int screenWidth,
+		     int screenHeight,
+		     bool vsync,
+		     HWND hwnd,
+		     bool fullscreen,
+		     float screenDepth,
+		     float screenNear)
 {
   HRESULT result;
   IDXGIFactory* factory;
@@ -40,7 +49,6 @@ bool D3D::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd, b
   D3D11_RASTERIZER_DESC rasterDesc;
   float fieldOfView, screenAspect;
   D3D11_BLEND_DESC blendStateDescription;
-  D3D11_BLEND_DESC smokeBlendStateDescription;
 
   m_vsync_enabled = vsync;
 
@@ -273,6 +281,31 @@ bool D3D::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd, b
 
   m_deviceContext->RSSetState(m_rasterState);
 
+  rasterDesc.CullMode = D3D11_CULL_NONE;
+
+  result = m_device->CreateRasterizerState(&rasterDesc, &m_rasterStateNoCulling);
+  if (FAILED(result))
+    {
+      return false;
+    }
+
+  rasterDesc.AntialiasedLineEnable = false;
+  rasterDesc.CullMode = D3D11_CULL_BACK;
+  rasterDesc.DepthBias = 0;
+  rasterDesc.DepthBiasClamp = 0.0f;
+  rasterDesc.DepthClipEnable = true;
+  rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
+  rasterDesc.FrontCounterClockwise = false;
+  rasterDesc.MultisampleEnable = false;
+  rasterDesc.ScissorEnable = false;
+  rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+  result = m_device->CreateRasterizerState(&rasterDesc, &m_rasterStateWireframe);
+  if (FAILED(result))
+    {
+      return false; 
+    }
+
   m_viewport.Width = (float)screenWidth;
   m_viewport.Height = (float)screenHeight;
   m_viewport.MinDepth = 0.0f;
@@ -327,35 +360,35 @@ bool D3D::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd, b
 
   result = m_device->CreateBlendState(&blendStateDescription, &m_alphaEnableBlendingState);
   if (FAILED(result))
-  {
+    {
       return false;
-  }
+    }
 
   blendStateDescription.RenderTarget[0].BlendEnable = FALSE;
+  blendStateDescription.AlphaToCoverageEnable = false; 
 
   result = m_device->CreateBlendState(&blendStateDescription, &m_alphaDisableBlendingState);
   if (FAILED(result))
-  {
+    {
       return false;
-  }  
+    }
 
-  ZeroMemory(&blendStateDescription, sizeof(D3D11_BLEND_DESC));
-
-  // Premultiplied alpha blend state: result = src.RGB + (dest.RGB * (1 - src.A))
-  blendStateDescription.RenderTarget[0].BlendEnable = TRUE;
-  blendStateDescription.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-  blendStateDescription.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+  blendStateDescription.AlphaToCoverageEnable = true;
+  blendStateDescription.IndependentBlendEnable = false;
+  blendStateDescription.RenderTarget[0].BlendEnable = true;
   blendStateDescription.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-  blendStateDescription.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
-  blendStateDescription.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
   blendStateDescription.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+  blendStateDescription.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+  blendStateDescription.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+  blendStateDescription.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+  blendStateDescription.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
   blendStateDescription.RenderTarget[0].RenderTargetWriteMask = 0x0f;
 
-  result = m_device->CreateBlendState(&blendStateDescription, &m_alphaParticleEnableBlendingState);
+  result = m_device->CreateBlendState(&blendStateDescription, &m_alphaEnableBlendingState2);
   if (FAILED(result))
-  {
-      return false; 
-  }
+    {
+      return false;
+    }
 
   return true;
 }
@@ -367,17 +400,17 @@ void D3D::Shutdown()
       m_swapChain->SetFullscreenState(false, NULL);
     }
 
-  if (m_alphaEnableBlendingState)
-  {
-      m_alphaEnableBlendingState->Release();
-      m_alphaEnableBlendingState = nullptr;
-  }
-
+  if (m_alphaEnableBlendingState2)
+    {
+      m_alphaEnableBlendingState2->Release();
+      m_alphaEnableBlendingState2 = nullptr;
+    }
+  
   if (m_alphaDisableBlendingState)
-  {
+    {
       m_alphaDisableBlendingState->Release();
       m_alphaDisableBlendingState = nullptr;
-  }
+    }
 
   if(m_depthDisabledStencilState)
     {
@@ -390,7 +423,20 @@ void D3D::Shutdown()
       m_rasterState->Release();
       m_rasterState = nullptr;
     }
-	
+
+  if(m_rasterStateNoCulling)
+    {
+      m_rasterStateNoCulling->Release();
+      m_rasterStateNoCulling = nullptr;
+    }
+
+    
+  if(m_rasterStateWireframe)
+    {
+      m_rasterStateWireframe->Release();
+      m_rasterStateWireframe = nullptr;
+    }
+  
   if(m_depthStencilView)
     {
       m_depthStencilView->Release();
@@ -513,36 +559,25 @@ void D3D::TurnZBufferOff()
 
 void D3D::EnableAlphaBlending()
 {
-    float blendFactor[4];
+  float blendFactor[4];
 
-    blendFactor[0] = 0.0f;
-    blendFactor[1] = 0.0f;
-    blendFactor[2] = 0.0f;
-    blendFactor[3] = 0.0f;
+  blendFactor[0] = 0.0f;
+  blendFactor[1] = 0.0f;
+  blendFactor[2] = 0.0f;
+  blendFactor[3] = 0.0f;
 
-    m_deviceContext->OMSetBlendState(m_alphaEnableBlendingState, blendFactor, 0xffffffff);
+  m_deviceContext->OMSetBlendState(m_alphaEnableBlendingState, blendFactor, 0xffffffff);
 }
 
 void D3D::DisableAlphaBlending()
 {
-    float blendFactor[4];
+  float blendFactor[4];
 
-    blendFactor[0] = 0.0f;
-    blendFactor[1] = 0.0f;
-    blendFactor[2] = 0.0f;
-    blendFactor[3] = 0.0f;
+  blendFactor[0] = 0.0f;
+  blendFactor[1] = 0.0f;
+  blendFactor[2] = 0.0f;
+  blendFactor[3] = 0.0f;
 
-    m_deviceContext->OMSetBlendState(m_alphaDisableBlendingState, blendFactor, 0xffffffff);
+  m_deviceContext->OMSetBlendState(m_alphaDisableBlendingState, blendFactor, 0xffffffff);
 }
 
-void D3D::EnableParticleAlphaBlending()
-{
-    float blendFactor[4];
-
-    blendFactor[0] = 0.0f;
-    blendFactor[1] = 0.0f;
-    blendFactor[2] = 0.0f;
-    blendFactor[3] = 0.0f;
-
-    m_deviceContext->OMSetBlendState(m_alphaParticleEnableBlendingState, blendFactor, 0xffffffff);
-}

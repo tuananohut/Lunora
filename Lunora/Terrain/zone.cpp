@@ -58,7 +58,7 @@ bool Zone::Initialize(D3D* Direct3D,
       return false; 
     }
 
-  result = m_Terrain->Initialize(Direct3D->GetDevice());
+  result = m_Terrain->Initialize(Direct3D->GetDevice(), "..Lunora/Terrain/setup.txt");
   if (!result)
     {
       MessageBoxA(hwnd, "Could not initialize the terrain object.", "Error", MB_OK | MB_ICONERROR);
@@ -176,7 +176,7 @@ void Zone::HandleMovementInput(Input* Input, float frameTime)
       m_displayUI = !m_displayUI; 
     }
 
-   if (Input->IsF12oggled())
+   if (Input->IsF12Toggled())
     {
       m_wireFrame = !m_wireFrame; 
     }
