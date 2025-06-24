@@ -163,7 +163,7 @@ bool Terrain::LoadBitmapHeightMap()
 
   k = 0;
 
-  for (j = 0; j < m_terrainHeight < j++)
+  for (j = 0; j < m_terrainHeight; j++)
     {
       for (i = 0; i < m_terrainWidth; i++)
 	{
@@ -321,9 +321,9 @@ bool Terrain::InitializeBuffers(ID3D11Device* device)
   
   for (i = 0; i < m_vertexCount; i++)
     {
-      vertices[i].position = XMFLOAT(m_terrainModel[i].x,
-				     m_terrainModel[i].y,
-				     m_terrainModel[i].z);
+      vertices[i].position = XMFLOAT3(m_terrainModel[i].x,
+				      m_terrainModel[i].y,
+				      m_terrainModel[i].z);
       vertices[i].color = color;
       indices[i] = i; 
     }
