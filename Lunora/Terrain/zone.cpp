@@ -176,7 +176,7 @@ void Zone::HandleMovementInput(Input* Input, float frameTime)
       m_displayUI = !m_displayUI; 
     }
 
-   if (Input->IsF12Toggled())
+   if (Input->IsF2Toggled())
     {
       m_wireFrame = !m_wireFrame; 
     }
