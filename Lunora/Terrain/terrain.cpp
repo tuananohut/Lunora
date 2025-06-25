@@ -19,18 +19,24 @@ bool Terrain::Initialize(ID3D11Device* device, char* setupFilename)
 
   result = LoadSetupFile(setupFilename);
   if (!result)
-    return false;
-
+    {
+      return false;
+    }
+  
   result = LoadBitmapHeightMap();
   if (!result)
-    return false;
+    {
+      return false;
+    }
 
   SetTerrainCoordinates();
 
   result = BuildTerrainModel();
   if (!result)
-    return false;
-
+    {
+      return false;
+    }
+  
   ShutdownHeightMap();
   
   result = InitializeBuffers(device);
@@ -74,12 +80,16 @@ bool Terrain::LoadSetupFile(char* filename)
   stringLength = 256;
   m_terrainFilename = new char[stringLength];
   if (!m_terrainFilename)
-    return false;
-
+    {
+      return false;
+    }
+  
   fin.open(filename);
   if (fin.fail())
-    return false;
-
+    {
+      return false;
+    }
+  
   fin.get(input);
   while (input != ':')
     {
@@ -87,6 +97,7 @@ bool Terrain::LoadSetupFile(char* filename)
     }
   
   fin >> m_terrainFilename;
+  
   fin.get(input);
   while(input != ':')
     {
@@ -128,39 +139,55 @@ bool Terrain::LoadBitmapHeightMap()
 
   m_heightMap = new HeightMapType[m_terrainWidth * m_terrainHeight];
   if (!m_heightMap)
-    return false;
-
+    {
+      return false;
+    }
+  
   error = fopen_s(&filePtr, m_terrainFilename, "rb");
   if (error != 0)
-    return false;
-
+    {
+      return false;
+    }
+  
   count = fread(&bitmapFileHeader, sizeof(BITMAPFILEHEADER), 1, filePtr);
   if (count != 1)
-    return false;
-
+    {
+      return false;
+    }
+  
   count = fread(&bitmapInfoHeader, sizeof(BITMAPINFOHEADER), 1, filePtr);
   if (count != 1)
-    return false;
-
+    {
+      return false;
+    }
+  
   if ((bitmapInfoHeader.biHeight != m_terrainHeight) || (bitmapInfoHeader.biWidth != m_terrainWidth))
-    return false;
-
+    {
+      return false;
+    }
+  
   imageSize = m_terrainHeight * ((m_terrainWidth * 3) + 1);
 
   bitmapImage = new unsigned char[imageSize];
   if (!bitmapImage)
-    return false; 
-
+    {
+      return false; 
+    }
+  
   fseek(filePtr, bitmapFileHeader.bfOffBits, SEEK_SET);
 
   count = fread(bitmapImage, 1, imageSize, filePtr);
   if (count != imageSize)
-    return false;
-
+    {
+      return false;
+    }
+  
   error = fclose(filePtr);
   if (error != 0)
-    return false;
-
+    {
+      return false;
+    }
+  
   k = 0;
 
   for (j = 0; j < m_terrainHeight; j++)

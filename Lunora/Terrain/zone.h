@@ -19,8 +19,8 @@ public:
 
   bool Initialize(D3D*, HWND, int, int, float);
   void Shutdown();
-  bool Frame(D3D*, Input*, ShaderManager*, float, int);
-
+  bool Frame(D3D*, Input*, ShaderManager*, float, int);  
+  
 private:
   void HandleMovementInput(Input*, float);
   bool Render(D3D*, ShaderManager*);
@@ -30,7 +30,7 @@ private:
   Camera* m_Camera;
   Position* m_Position;
   Terrain* m_Terrain;
-  bool m_displayUI, m_wireFrame; 
+  bool m_displayUI, m_wireFrame;
 };
 
 #endif

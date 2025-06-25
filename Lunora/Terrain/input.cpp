@@ -7,15 +7,9 @@ Input::Input()
   m_mouse = nullptr;
 }
 
-Input::Input(const Input& other)
-{
+Input::Input(const Input& other) {}
 
-}
-
-Input::~Input()
-{
-
-}
+Input::~Input() {}
 
 bool Input::Initialize(HINSTANCE hInstance, 
 		       HWND hwnd,
@@ -313,7 +307,7 @@ bool Input::IsF1Toggled()
       m_F1_released = true; 
     }
 
-  return true; 
+  return false; 
 }
 
 bool Input::IsF2Toggled()
@@ -331,5 +325,5 @@ bool Input::IsF2Toggled()
       m_F2_released = true; 
     }
 
-  return true; 
+  return false; 
 }

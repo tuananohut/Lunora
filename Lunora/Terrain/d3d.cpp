@@ -581,3 +581,12 @@ void D3D::DisableAlphaBlending()
   m_deviceContext->OMSetBlendState(m_alphaDisableBlendingState, blendFactor, 0xffffffff);
 }
 
+void D3D::EnableWireframe()
+{
+  m_deviceContext->RSSetState(m_rasterStateWireframe);
+}
+
+void D3D::DisableWireframe()
+{
+  m_deviceContext->RSSetState(m_rasterState);
+}

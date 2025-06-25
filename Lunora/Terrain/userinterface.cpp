@@ -82,7 +82,7 @@ bool UserInterface::Initialize(D3D* Direct3D,
   result = m_VideoStrings[1].Initialize(Direct3D->GetDevice(),
 					Direct3D->GetDeviceContext(),
 					screenWidth, screenHeight, 32, false, m_Font1,
-					videoString, 10, 30, 1.f, 1.f, 1.f);
+				        memoryString, 10, 30, 1.f, 1.f, 1.f);
   if (!result)
     {
       return false; 
