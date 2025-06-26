@@ -270,31 +270,43 @@ bool Terrain::BuildTerrainModel()
 	  m_terrainModel[index].x = m_heightMap[index1].x;
 	  m_terrainModel[index].y = m_heightMap[index1].y;
 	  m_terrainModel[index].z = m_heightMap[index1].z;
+	  m_terrainModel[index].tu = 0.f;
+	  m_terrainModel[index].tv = 0.f;
 	  index++;
 	  
 	  m_terrainModel[index].x = m_heightMap[index2].x;
 	  m_terrainModel[index].y = m_heightMap[index2].y;
 	  m_terrainModel[index].z = m_heightMap[index2].z;
+	  m_terrainModel[index].tu = 1.f;
+	  m_terrainModel[index].tv = 0.f;
 	  index++;
 
 	  m_terrainModel[index].x = m_heightMap[index3].x;
 	  m_terrainModel[index].y = m_heightMap[index3].y;
 	  m_terrainModel[index].z = m_heightMap[index3].z;
+	  m_terrainModel[index].tu = 0.f;
+	  m_terrainModel[index].tv = 1.f;
 	  index++;
 
 	  m_terrainModel[index].x = m_heightMap[index3].x;
 	  m_terrainModel[index].y = m_heightMap[index3].y;
 	  m_terrainModel[index].z = m_heightMap[index3].z;
+	  m_terrainModel[index].tu = 0.f;
+	  m_terrainModel[index].tv = 1.f;
 	  index++;
 	 
 	  m_terrainModel[index].x = m_heightMap[index2].x;
 	  m_terrainModel[index].y = m_heightMap[index2].y;
 	  m_terrainModel[index].z = m_heightMap[index2].z;
+	  m_terrainModel[index].tu = 1.f;
+	  m_terrainModel[index].tv = 0.f;
 	  index++;
 	  
 	  m_terrainModel[index].x = m_heightMap[index4].x;
 	  m_terrainModel[index].y = m_heightMap[index4].y;
 	  m_terrainModel[index].z = m_heightMap[index4].z;
+	  m_terrainModel[index].tu = 1.f;
+	  m_terrainModel[index].tv = 1.f;
 	  index++;
 	}
     }
@@ -351,7 +363,7 @@ bool Terrain::InitializeBuffers(ID3D11Device* device)
       vertices[i].position = XMFLOAT3(m_terrainModel[i].x,
 				      m_terrainModel[i].y,
 				      m_terrainModel[i].z);
-      vertices[i].color = color;
+      vertices[i].texture = XMFLOAT2(m_terrainModel[i].tu, m_terrainModel[i].tv);
       indices[i] = i; 
     }
   
