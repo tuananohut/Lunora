@@ -10,7 +10,7 @@ class TextureManager
   TextureManager(const TextureManager&);
   ~TextureManager();
 
-  bool Initialize();
+  bool Initialize(int);
   void Shutdown();
 
   bool LoadTexture(ID3D11Device*, ID3D11DeviceContext*, char*, int);

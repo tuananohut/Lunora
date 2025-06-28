@@ -5,7 +5,7 @@ TextureManager::TextureManager()
   m_TextureArray = nullptr;
 }
 
-TextureManager::TextureManager() {}
+TextureManager::TextureManager(const TextureManager& other) {}
 
 TextureManager::~TextureManager() {}
 
@@ -14,7 +14,7 @@ bool TextureManager::Initialize(int count)
   m_textureCount = count;
 
   m_TextureArray = new Texture[m_textureCount];
-  if (!m_textureArray)
+  if (!m_TextureArray)
     {
       return false;
     }

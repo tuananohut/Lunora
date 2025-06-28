@@ -7,6 +7,7 @@ Application::Application()
   m_Timer = nullptr;
   m_Fps = nullptr;
   m_ShaderManager = nullptr;
+  m_TextureManager = nullptr; 
   m_Zone = nullptr; 
 }
 
@@ -52,7 +53,6 @@ bool Application::Initialize(HINSTANCE instance,
     {
       return false; 
     }
-
   result = m_ShaderManager->Initialize(m_Direct3D->GetDevice(), window);
   if (!result)
     {
@@ -60,12 +60,39 @@ bool Application::Initialize(HINSTANCE instance,
       return false; 
     }
 
+  m_TextureManager = new TextureManager;
+  if (!m_TextureManager)
+    {
+      return false; 
+    }
+  result = m_TextureManager->Initialize(10);
+  if (!result)
+    {
+      MessageBoxA(window, "Could not initialize the texture manager object.", "Error", MB_OK | MB_ICONERROR);
+      return false; 
+    }
+
+  result = m_TextureManager->LoadTexture(m_Direct3D->GetDevice(),
+					 m_Direct3D->GetDeviceContext(),
+					 "../Lunora/Terrain/test.tga", 0);
+  if (!result)
+    {
+      return false; 
+    }
+
+  result = m_TextureManager->LoadTexture(m_Direct3D->GetDevice(),
+					 m_Direct3D->GetDeviceContext(),
+					 "../Lunora/Terrain/dirt01d.tga", 1);
+  if (!result)
+    {
+      return false; 
+    }
+    
   m_Timer = new Timer;
   if (!m_Timer)
     {
       return false; 
     }
-
   result = m_Timer->Initialize();
   if (!result)
     {
@@ -118,6 +145,13 @@ void Application::Shutdown()
       m_Timer = nullptr; 
     }
 
+  if (m_TextureManager)
+    {
+      m_TextureManager->Shutdown();
+      delete m_TextureManager;
+      m_TextureManager = nullptr; 
+    }
+
   if (m_ShaderManager)
     {
       m_ShaderManager->Shutdown();
@@ -158,7 +192,12 @@ bool Application::Frame()
       return false; 
     }
   
-  result = m_Zone->Frame(m_Direct3D, m_Input, m_ShaderManager, m_Timer->GetTime(), m_Fps->GetFps());
+  result = m_Zone->Frame(m_Direct3D,
+			 m_Input,
+			 m_ShaderManager,
+			 m_TextureManager,
+			 m_Timer->GetTime(),
+			 m_Fps->GetFps());
   if (!result)
     {
       return false;
