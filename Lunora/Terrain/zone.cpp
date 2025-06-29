@@ -171,7 +171,7 @@ void Zone::HandleMovementInput(Input* Input, float frameTime)
 
   m_Camera->SetPosition(posX, posY, posZ);
   m_Camera->SetRotation(rotX, rotY, rotZ);
-  
+ 
   if (Input->IsF1Toggled())
     {
       m_displayUI = !m_displayUI; 
@@ -211,7 +211,7 @@ bool Zone::Render(D3D* Direct3D,
 					      worldMatrix,
 					      viewMatrix,
 					      projectionMatrix,
-					      TextureManager->GetTexture(1));
+					      TextureManager->GetTexture(0));
   if (!result)
     {
       return false; 
