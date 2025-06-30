@@ -7,8 +7,7 @@
 #include "Renderer/Shader/ShaderSystem.cpp"
 #include "Renderer/Mesh/MeshBuilder.cpp"
 #include "Renderer/Mesh/MeshFactory.cpp"
-#include "HeightMapGenerator.cpp"
-#include "TerrainMeshBuilder.cpp"
+#include "Input/InputHandler.h"
 
 using namespace std;
 
@@ -229,36 +228,6 @@ static void RenderCube(DeviceManager& DeviceManager,
   DeviceManager.DeviceContext->DrawIndexed(Mesh->indexCount, 0, 0);
 }
 
-static bool KeyW;
-static bool KeyA;
-static bool KeyD;
-static bool KeyS;
-
-void UpdateInput()
-{
-    if (KeyW)
-      {
-        Camera.m_positionZ += 0.1f;
-        ChangeColor(XMFLOAT4{1.f, 0.f, 0.f, 1.f}); 
-    }
-    if (KeyA)
-    {
-        Camera.m_positionX += 0.1f;
-        ChangeColor(XMFLOAT4{0.f, 1.f, 0.f, 1.f}); 
-    }
-    if (KeyS)
-    {
-        Camera.m_positionZ -= 0.1f;
-        ChangeColor(XMFLOAT4{0.f, 0.f, 1.f, 1.f}); 
-    }
-    if (KeyD)
-    {
-        Camera.m_positionX -= 0.1f;
-        ChangeColor(XMFLOAT4{0.15f, 0.15f, 0.15f, 1.f});
-    }
-}
-
-
 LRESULT CALLBACK WindowProc(HWND Window, 
                             UINT Message, 
                             WPARAM WParam, 
@@ -277,24 +246,26 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	uint32_t VKCode = WParam;
 	int32_t WasDown = ((LParam & (1 << 30)) != 0);
 	int32_t IsDown = ((LParam & (1 << 31)) == 0);
-
+	
+	InputHandler Input; 
+	
 	switch(VKCode)
 	  {
 	  case 'W':
 	    {
-	      KeyW = IsDown;
+	      Input.KeyW = IsDown;
 	    } break;
 	  case 'A':
 	    {
-	      KeyA = IsDown;
+	      Input.KeyA = IsDown;
 	    } break;
 	  case 'S':
 	    {
-	      KeyS = IsDown;
+	      Input.KeyS = IsDown;
 	    } break;
 	  case 'D':
 	    {
-	      KeyD = IsDown;
+	      Input.KeyD = IsDown;
 	    } break; 
 	  }
 	
@@ -401,18 +372,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 			 Shader,
 			 VSFileName,
 			 PSFileName);
-
-	  std::vector<float> heightMap = HeightMapGenerator::Generate(256, 256, 32.f);
-
-	  std::vector<TerrainVertex> vertices;
-	  std::vector<unsigned int> indices;
-
-	  auto terrain = TerrainMeshBuilder::BuildMesh(heightMap, 256, 256, 1.f, vertices, indices);
-	  
-	  
-	  Mesh.Transform = TransformSystem::Identity();
-	  AddMesh(&Scene.Meshes, &Mesh);
-	  
+	 	  
 	  // Quad.Transform = TransformSystem::Identity();
 	  // AddMesh(&Scene.Meshes, &Quad);
 

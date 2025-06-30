@@ -30,7 +30,7 @@ struct Camera
   float m_rotationX, m_rotationY, m_rotationZ;
   XMMATRIX m_viewMatrix;
   XMMATRIX m_baseViewMatrix;
-  XMMATRIX m_reflectionMatrix; 
+  XMMATRIX m_reflectionViewMatrix; 
 }; 
 
 #endif
