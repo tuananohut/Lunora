@@ -49,7 +49,7 @@ private:
 
   int m_screenWidth, m_screenHeight;
   int m_mouseX, m_mouseY;
-
+  
   bool m_F1_released;
   bool m_F2_released;
 };

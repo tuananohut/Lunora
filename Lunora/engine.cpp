@@ -8,6 +8,7 @@
 #include "Renderer/Mesh/MeshBuilder.cpp"
 #include "Renderer/Mesh/MeshFactory.cpp"
 #include "Input/InputHandler.h"
+#include "Camera/FreeCamera.h"
 
 using namespace std;
 
@@ -247,7 +248,8 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	int32_t WasDown = ((LParam & (1 << 30)) != 0);
 	int32_t IsDown = ((LParam & (1 << 31)) == 0);
 	
-	InputHandler Input; 
+	InputHandler Input;
+	FreeCamera FCamera; 
 	
 	switch(VKCode)
 	  {
