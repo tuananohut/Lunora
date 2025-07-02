@@ -11,12 +11,6 @@
 #include "Camera/Camera.h"
 #include "Camera/Camera.cpp"
 
-#include "Renderer/Render.cpp"
-#include "Renderer/Transform/Transform.h"
-#include "Renderer/Transform/TransformSystem.h"
-
-#include "Scene/Scene.cpp"
-
 using namespace DirectX;
 
 #define DeleteObject(object) if ((object) != NULL) { delete object; object = NULL; }
@@ -30,6 +24,13 @@ struct VertexBufferType
 {
   XMFLOAT3 position;
   XMFLOAT3 normal; 
+};
+
+struct Transform
+{
+  XMMATRIX Scale;
+  XMMATRIX RotationMatrix;
+  XMMATRIX Translation;
 };
 
 static XMMATRIX GetWorldMatrix(const Transform& T)

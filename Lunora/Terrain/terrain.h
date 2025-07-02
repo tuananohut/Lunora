@@ -47,7 +47,7 @@ class Terrain
   void SetTerrainCoordinates();
   bool BuildTerrainModel();
   void ShutdownTerrainModel(); 
-  
+
   bool InitializeBuffers(ID3D11Device*);
   void ShutdownBuffers();
   void RenderBuffers(ID3D11DeviceContext*);
