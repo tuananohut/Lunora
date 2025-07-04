@@ -8,22 +8,9 @@ Terrain::Terrain()
 
 Terrain::~Terrain() {}
 
-bool Terrain::Initialize(ID3D11Device* Device)
+int Terrain::GetIndexCount()
 {
-  bool result;
-
-  result = InitializeBuffers(Device);
-  if (!result)
-    {
-      return false;
-    }
-  
-  return true;
-}
-
-void Terrain::Shutdown()
-{
-  ShutdownBuffers(); 
+  return m_indexCount; 
 }
 
 bool Terrain::InitializeBuffers(ID3D11Device* Device)
@@ -58,8 +45,126 @@ bool Terrain::InitializeBuffers(ID3D11Device* Device)
     {
       return false;
     }
+
+  index = 0;
+
+  for(j=0; j<(terrainHeight-1); j++)
+    {
+      for(i=0; i<(terrainWidth-1); i++)
+	{
+	  // Line 1 - Upper left.
+	  positionX = (float)i;
+	  positionZ = (float)(j + 1);
+
+	  vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+	  vertices[index].color = color;
+	  indices[index] = index;
+	  index++;
+
+	  // Line 1 - Upper right.
+	  positionX = (float)(i + 1);
+	  positionZ = (float)(j + 1);
+
+	  vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+	  vertices[index].color = color;
+	  indices[index] = index;
+	  index++;
+
+	  // Line 2 - Upper right
+	  positionX = (float)(i + 1);
+	  positionZ = (float)(j + 1);
+
+	  vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+	  vertices[index].color = color;
+	  indices[index] = index;
+	  index++;
+
+	  // Line 2 - Bottom right.
+	  positionX = (float)(i + 1);
+	  positionZ = (float)j;
+
+	  vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+	  vertices[index].color = color;
+	  indices[index] = index;
+	  index++;
+
+	  // Line 3 - Bottom right.
+	  positionX = (float)(i + 1);
+	  positionZ = (float)j;
+
+	  vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+	  vertices[index].color = color;
+	  indices[index] = index;
+	  index++;
+
+	  // Line 3 - Bottom left.
+	  positionX = (float)i;
+	  positionZ = (float)j;
+
+	  vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+	  vertices[index].color = color;
+	  indices[index] = index;
+	  index++;
+
+	  // Line 4 - Bottom left.
+	  positionX = (float)i;
+	  positionZ = (float)j;
+
+	  vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+	  vertices[index].color = color;
+	  indices[index] = index;
+	  index++;
+
+	  // Line 4 - Upper left.
+	  positionX = (float)i;
+	  positionZ = (float)(j + 1);
+
+	  vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+	  vertices[index].color = color;
+	  indices[index] = index;
+	  index++;
+	}
+    }
+
+  vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+  vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+  vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+  vertexBufferDesc.CPUAccessFlags = 0;
+  vertexBufferDesc.MiscFlags = 0;
+  vertexBufferDesc.StructureByteStride = 0;
+  
+  vertexData.pSysMem = vertices; 
+  vertexData.SysMemPitch = 0;
+  vertexData.SysMemSlicePitch = 0;
+
+  result = Device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
+  if (FAILED(result))
+    {
+      return false; 
+    }
+
+  indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+  indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+  indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+  indexBufferDesc.CPUAccessFlags = 0;
+  indexBufferDesc.MiscFlags = 0;
+  indexBufferDesc.StructureByteStride = 0;
+  
+  indexData.pSysMem = indices; 
+  indexData.SysMemPitch = 0;
+  indexData.SysMemSlicePitch = 0;
+
+  result = Device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
+  if (FAILED(result))
+    {
+      return false; 
+    }
+
+  delete[] vertices;
+  vertices = nullptr;
+
+  delete[] indices;
+  indices = nullptr; 
   
   return true; 
 }
-
-
