@@ -80,7 +80,15 @@ bool FontShader::InitializeShader(ID3D11Device* device, HWND hwnd, wchar_t* vsFi
   D3D11_SAMPLER_DESC samplerDesc;
   D3D11_BUFFER_DESC pixelBufferDesc;
 
-  result = D3DCompileFromFile(vsFilename, NULL, NULL, "FontVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vertexShaderBuffer, &errorMessage);
+  result = D3DCompileFromFile(vsFilename,
+			      NULL,
+			      NULL,
+			      "FontVertexShader",
+			      "vs_5_0",
+			      D3D10_SHADER_ENABLE_STRICTNESS,
+			      0,
+			      &vertexShaderBuffer,
+			      &errorMessage);
   if (FAILED(result))
     {
       if (errorMessage)

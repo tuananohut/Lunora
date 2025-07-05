@@ -24,9 +24,9 @@ struct RenderManager
   D3D11_INPUT_ELEMENT_DESC* GetLayout(ShaderLayoutType type);
   unsigned int GetLayoutElementCount(ShaderLayoutType type);
   
-  static D3D11_INPUT_ELEMENT_DESC ColorLayout[2];
-  static D3D11_INPUT_ELEMENT_DESC TextureLayout[2];
-  static D3D11_INPUT_ELEMENT_DESC LightLayout[2];
+  static D3D11_INPUT_ELEMENT_DESC* ColorLayout;
+  static D3D11_INPUT_ELEMENT_DESC* TextureLayout;
+  static D3D11_INPUT_ELEMENT_DESC* LightLayout;
   static bool layoutsInitialized;   
 };
 

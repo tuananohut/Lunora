@@ -1,9 +1,9 @@
 #include <windows.h>
 #include <d3dcompiler.h>
 
-#include "managers.cpp"
+#include "managers.h"
 #include "resource.h"
-#include "renderer.cpp"
+#include "renderer.h"
 #include "Input/InputHandler.h"
 #include "Camera/FreeCamera.h"
 #include "Mesh/Terrain/TerrainMeshData.h"

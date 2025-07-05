@@ -31,6 +31,12 @@ bool Terrain::Initialize(ID3D11Device* device, char* setupFilename)
 
   SetTerrainCoordinates();
 
+  result = CalculateNormals();
+  if (!result)
+    {
+      return false;
+    }
+
   result = BuildTerrainModel();
   if (!result)
     {

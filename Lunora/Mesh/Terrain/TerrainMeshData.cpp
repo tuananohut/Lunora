@@ -168,3 +168,33 @@ bool Terrain::InitializeBuffers(ID3D11Device* Device)
   
   return true; 
 }
+
+void Terrain::ShutdownBuffers()
+{
+  if (m_indexBuffer)
+    {
+      m_indexBuffer->Release();
+      m_indexBuffer = nullptr;
+    }
+
+  if (m_vertexBuffer)
+    {
+      m_vertexBuffer->Release();
+      m_vertexBuffer = nullptr; 
+    }
+}
+
+void Terrain::RenderBuffers(ID3D11DeviceContext* DeviceContext)
+{
+  unsigned int stride;
+  unsigned int offset;
+
+  stride = sizeof(VertexType);
+  offset = 0;
+
+  DeviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+
+  DeviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+  DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+}

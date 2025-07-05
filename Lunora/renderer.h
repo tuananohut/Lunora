@@ -3,13 +3,13 @@
 
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include <d3dcompiler.h>
 
-#include "Core/Device/DeviceManager.cpp"
-#include "Core/Pipeline/PipelineStateManager.cpp"
-#include "Core/Resource/RenderTargetManager.cpp"
+#include "Core/Device/DeviceManager.h"
+#include "Core/Pipeline/PipelineStateManager.h"
+#include "Core/Resource/RenderTargetManager.h"
 
 #include "Camera/Camera.h"
-#include "Camera/Camera.cpp"
 
 using namespace DirectX;
 

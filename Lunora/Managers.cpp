@@ -2,9 +2,9 @@
 
 bool RenderManager::layoutsInitialized = false;
 
-D3D11_INPUT_ELEMENT_DESC RenderManager::ColorLayout[2];
-D3D11_INPUT_ELEMENT_DESC RenderManager::TextureLayout[2];
-D3D11_INPUT_ELEMENT_DESC RenderManager::LightLayout[2];
+D3D11_INPUT_ELEMENT_DESC* RenderManager::ColorLayout = nullptr;
+D3D11_INPUT_ELEMENT_DESC* RenderManager::TextureLayout = nullptr;
+D3D11_INPUT_ELEMENT_DESC* RenderManager::LightLayout = nullptr;
 
 RenderManager::RenderManager()
 {
