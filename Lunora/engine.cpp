@@ -1,5 +1,4 @@
 #include <windows.h>
-#include <d3dcompiler.h>
 
 #include "managers.h"
 #include "resource.h"
@@ -83,6 +82,9 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  
 	  PipelineStateManager PipelineStateManager; 
 	  PipelineStateManager.Initialize(DeviceManager);
+
+	  Terrain terrain;
+	  terrain.InitializeBuffers(DeviceManager.Device);
 	 
 	  Running = true;
 	  while(Running)
@@ -95,16 +97,30 @@ int WINAPI WinMain(HINSTANCE Instance,
 		      DeviceManager.Cleanup();
 		      RenderTargetManager.Cleanup();
 		      PipelineStateManager.Cleanup();	     
-		      
+
+		      terrain.ShutdownBuffers();
+			
 		      Running = false;
 		    }
 		  
 		  TranslateMessage(&Message);
 		  DispatchMessageA(&Message);
 		}
-	    } 
-	}
+
+	      float color[4] = { 1.f, 0.f, 1.f, 1.f };
+	      
+	      DeviceManager.DeviceContext->ClearRenderTargetView(RenderTargetManager.RenderTargetView, color);
+
+	      DeviceManager.DeviceContext->ClearDepthStencilView(RenderTargetManager.DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	      terrain.RenderBuffers(DeviceManager.DeviceContext); 
+	      
+	      DeviceManager.SwapChain->Present(1, 0);
+	    }
+	  
+	      
+	} 
     }
-   
+  
   return 0;
 }

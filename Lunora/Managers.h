@@ -19,7 +19,7 @@ struct RenderManager
 {
   RenderManager();
   ~RenderManager();
-
+  
   void InitializeLayouts();
   D3D11_INPUT_ELEMENT_DESC* GetLayout(ShaderLayoutType type);
   unsigned int GetLayoutElementCount(ShaderLayoutType type);

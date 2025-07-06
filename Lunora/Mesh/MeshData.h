@@ -4,6 +4,8 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 
+#include "../renderer.h"
+
 using namespace DirectX; 
 
 struct Mesh

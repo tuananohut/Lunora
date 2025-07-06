@@ -1,6 +1,8 @@
 #ifndef PIPELINESTATEMANAGER_H
 #define PIPELINESTATEMANAGER_H
 
+#include "../Device/DeviceManager.h"
+
 struct PipelineStateManager
 {
   ID3D11RasterizerState* RasterizerState;
