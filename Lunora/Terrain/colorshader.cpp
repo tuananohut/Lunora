@@ -253,7 +253,7 @@ bool ColorShader::SetShaderParamteres(ID3D11DeviceContext* deviceContext, XMMATR
   deviceContext->Unmap(m_matrixBuffer, 0);
 
   bufferNumber = 0;
-  
+
   deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer); 
 
   return true;

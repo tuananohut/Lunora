@@ -6,6 +6,7 @@
 #include "Input/InputHandler.h"
 #include "Camera/FreeCamera.h"
 #include "Mesh/Terrain/TerrainMeshData.h"
+#include "Shader/ColorShader.h"
 
 static bool Running; 
 
@@ -85,7 +86,13 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	  Terrain terrain;
 	  terrain.InitializeBuffers(DeviceManager.Device);
-	 
+
+	  ColorShader shader;
+	  shader.InitializeShader(DeviceManager.Device, Window,
+				  L"../Lunora/Assets/color.vs",
+				  L"../Lunora/Assets/color.ps");
+	  
+	  
 	  Running = true;
 	  while(Running)
 	    {
@@ -99,6 +106,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 		      PipelineStateManager.Cleanup();	     
 
 		      terrain.ShutdownBuffers();
+		      shader.ShutdownShader();
 			
 		      Running = false;
 		    }
@@ -106,14 +114,22 @@ int WINAPI WinMain(HINSTANCE Instance,
 		  TranslateMessage(&Message);
 		  DispatchMessageA(&Message);
 		}
-
+	      
 	      float color[4] = { 1.f, 0.f, 1.f, 1.f };
 	      
 	      DeviceManager.DeviceContext->ClearRenderTargetView(RenderTargetManager.RenderTargetView, color);
 
 	      DeviceManager.DeviceContext->ClearDepthStencilView(RenderTargetManager.DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-	      terrain.RenderBuffers(DeviceManager.DeviceContext); 
+	      XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	      
+	      terrain.RenderBuffers(DeviceManager.DeviceContext);
+	      shader.SetShaderParameters(DeviceManager.DeviceContext,
+					 worldMatrix,
+					 viewMatrix,
+					 projectionMatrix);
+	      shader.RenderShader(DeviceManager.DeviceContext,
+				  terrain.GetIndexCount());
 	      
 	      DeviceManager.SwapChain->Present(1, 0);
 	    }
