@@ -250,6 +250,122 @@ void Terrain::SetTerrainCoordinates()
     }
 }
 
+bool Terrain::CalculateNormals()
+{
+  int i, j, index1, index2, index3, index;
+  float vertex1[3], vertex2[3], vertex3[3], vector1[3], vector2[3], sum[3], length;
+  VectorType* normals;
+
+  normals = new VectorType[(m_terrainHeight-1) * (m_terrainWidth-1)];
+  if(!normals)
+    {
+      return false;
+    }
+
+  for(j = 0; j < (m_terrainHeight-1); j++)
+    {
+      for(i = 0; i < (m_terrainWidth-1); i++)
+	{
+	  index1 = ((j+1) * m_terrainWidth) + i;      
+	  index2 = ((j+1) * m_terrainWidth) + (i+1);  
+	  index3 = (j * m_terrainWidth) + i;          
+
+	  vertex1[0] = m_heightMap[index1].x;
+	  vertex1[1] = m_heightMap[index1].y;
+	  vertex1[2] = m_heightMap[index1].z;
+
+	  vertex2[0] = m_heightMap[index2].x;
+	  vertex2[1] = m_heightMap[index2].y;
+	  vertex2[2] = m_heightMap[index2].z;
+
+	  vertex3[0] = m_heightMap[index3].x;
+	  vertex3[1] = m_heightMap[index3].y;
+	  vertex3[2] = m_heightMap[index3].z;
+
+	  vector1[0] = vertex1[0] - vertex3[0];
+	  vector1[1] = vertex1[1] - vertex3[1];
+	  vector1[2] = vertex1[2] - vertex3[2];
+	  vector2[0] = vertex3[0] - vertex2[0];
+	  vector2[1] = vertex3[1] - vertex2[1];
+	  vector2[2] = vertex3[2] - vertex2[2];
+
+	  index = (j * (m_terrainWidth - 1)) + i;
+
+	  normals[index].x = (vector1[1] * vector2[2]) - (vector1[2] * vector2[1]);
+	  normals[index].y = (vector1[2] * vector2[0]) - (vector1[0] * vector2[2]);
+	  normals[index].z = (vector1[0] * vector2[1]) - (vector1[1] * vector2[0]);
+
+	  
+	  length = (float)sqrt((normals[index].x * normals[index].x) +
+			       (normals[index].y * normals[index].y) + 
+			       (normals[index].z * normals[index].z));
+
+	  normals[index].x = (normals[index].x / length);
+	  normals[index].y = (normals[index].y / length);
+	  normals[index].z = (normals[index].z / length);
+	}
+    }
+
+  for(j = 0; j < m_terrainHeight; j++)
+    {
+      for(i = 0; i < m_terrainWidth; i++)
+	{
+	  sum[0] = 0.0f;
+	  sum[1] = 0.0f;
+	  sum[2] = 0.0f;
+
+	  if(((i-1) >= 0) && ((j-1) >= 0))
+	    {
+	      index = ((j-1) * (m_terrainWidth-1)) + (i-1);
+
+	      sum[0] += normals[index].x;
+	      sum[1] += normals[index].y;
+	      sum[2] += normals[index].z;
+	    }
+
+	  if((i<(m_terrainWidth-1)) && ((j-1) >= 0))
+	    {
+	      index = ((j - 1) * (m_terrainWidth - 1)) + i;
+
+	      sum[0] += normals[index].x;
+	      sum[1] += normals[index].y;
+	      sum[2] += normals[index].z;
+	    }
+
+	  if(((i-1) >= 0) && (j<(m_terrainHeight-1)))
+	    {
+	      index = (j * (m_terrainWidth-1)) + (i-1);
+
+	      sum[0] += normals[index].x;
+	      sum[1] += normals[index].y;
+	      sum[2] += normals[index].z;
+	    }
+
+	  if((i < (m_terrainWidth-1)) && (j < (m_terrainHeight-1)))
+	    {
+	      index = (j * (m_terrainWidth-1)) + i;
+
+	      sum[0] += normals[index].x;
+	      sum[1] += normals[index].y;
+	      sum[2] += normals[index].z;
+	    }
+
+	  length = (float)sqrt((sum[0] * sum[0]) + (sum[1] * sum[1]) + (sum[2] * sum[2]));
+
+	  index = (j * m_terrainWidth) + i;
+
+	  m_heightMap[index].nx = (sum[0] / length);
+	  m_heightMap[index].ny = (sum[1] / length);
+	  m_heightMap[index].nz = (sum[2] / length);
+	}
+    }
+
+  delete[] normals;
+  normals = nullptr;
+
+  return true;
+}
+
 bool Terrain::BuildTerrainModel()
 {
   int i, j, index, index1, index2, index3, index4;
