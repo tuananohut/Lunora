@@ -8,7 +8,6 @@ using namespace DirectX;
 struct Camera
 {
   Camera();
-  Camera(const Camera&);
   ~Camera();
 
   void SetPosition(float, float, float);

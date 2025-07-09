@@ -11,7 +11,7 @@ Camera::Camera()
   m_rotationZ = 0.f;  
 }
 
-Camera::Camera(const Camera& other) {}
+Camera::~Camera() {}
 
 void Camera::SetPosition(float x, float y, float z)
 {
@@ -36,7 +36,6 @@ XMFLOAT3 Camera::GetRotation()
 {
   return XMFLOAT3(m_rotationX, m_rotationY, m_rotationZ);
 }
-
 
 void Camera::Render()
 {

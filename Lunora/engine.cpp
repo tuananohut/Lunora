@@ -5,6 +5,7 @@
 #include "renderer.h"
 #include "Input/InputHandler.h"
 #include "Camera/FreeCamera.h"
+#include "Camera/Camera.h"
 #include "Mesh/Terrain/TerrainMeshData.h"
 #include "Shader/ColorShader.h"
 
@@ -81,9 +82,11 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  RenderTargetManager RenderTargetManager;
 	  RenderTargetManager.Initialize(DeviceManager, ScreenWidth, ScreenHeight);
 	  
-	  PipelineStateManager PipelineStateManager; 
+	  PipelineStateManager PipelineStateManager;
 	  PipelineStateManager.Initialize(DeviceManager);
 
+	  DeviceManager.DeviceContext->OMSetRenderTargets(1, &RenderTargetManager.RenderTargetView, RenderTargetManager.DepthStencilView);
+	  
 	  Terrain terrain;
 	  terrain.InitializeBuffers(DeviceManager.Device);
 
@@ -92,6 +95,9 @@ int WINAPI WinMain(HINSTANCE Instance,
 				  L"../Lunora/Assets/color.vs",
 				  L"../Lunora/Assets/color.ps");
 	  
+	  Camera camera;
+	  camera.SetPosition(128.f, 5.f, -10.f);
+	  camera.Render();
 	  
 	  Running = true;
 	  while(Running)
@@ -103,25 +109,36 @@ int WINAPI WinMain(HINSTANCE Instance,
 		    {
 		      DeviceManager.Cleanup();
 		      RenderTargetManager.Cleanup();
-		      PipelineStateManager.Cleanup();	     
-
+		      PipelineStateManager.Cleanup();	      
+		      
 		      terrain.ShutdownBuffers();
 		      shader.ShutdownShader();
-			
+		      
 		      Running = false;
 		    }
 		  
 		  TranslateMessage(&Message);
 		  DispatchMessageA(&Message);
 		}
+
+	      XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
 	      
-	      float color[4] = { 1.f, 0.f, 1.f, 1.f };
+	      camera.Render();
+
+	      float fieldOfView = 3.141592654f / 4.0f;
+	      float screenAspect = (float)ScreenWidth / (float)ScreenHeight;
+	      float screenNear = 0.1f;
+	      float screenDepth = 1000.f; 
+	      
+	      worldMatrix = XMMatrixIdentity();   
+	      camera.GetViewMatrix(viewMatrix);             
+	      projectionMatrix = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, screenNear, screenDepth);
+
+	      float color[4] = { 0.f, 0.f, 0.f, 1.f };
 	      
 	      DeviceManager.DeviceContext->ClearRenderTargetView(RenderTargetManager.RenderTargetView, color);
 
 	      DeviceManager.DeviceContext->ClearDepthStencilView(RenderTargetManager.DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-
-	      XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
 	      
 	      terrain.RenderBuffers(DeviceManager.DeviceContext);
 	      shader.SetShaderParameters(DeviceManager.DeviceContext,
