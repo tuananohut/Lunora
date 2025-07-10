@@ -7,6 +7,7 @@ struct RenderTargetManager
 {
   ID3D11RenderTargetView* RenderTargetView = nullptr;
   ID3D11DepthStencilView* DepthStencilView = nullptr;
+  D3D11_VIEWPORT* Viewport = nullptr;
 
   void Initialize(DeviceManager& DeviceManager, int ScreenWidth, int ScreenHeight);
   void Cleanup();

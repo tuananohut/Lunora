@@ -4,6 +4,7 @@ Zone::Zone()
 {
   m_UserInterface = nullptr;
   m_Camera = nullptr;
+  m_Light = nullptr; 
   m_Position = nullptr;
   m_Terrain = nullptr; 
 }
@@ -42,6 +43,15 @@ bool Zone::Initialize(D3D* Direct3D,
   m_Camera->SetPosition(0.f, 0.f, -10.f);
   m_Camera->Render();
   m_Camera->RenderBaseViewMatrix();
+
+  m_Light = new Light;
+  if (!m_Light)
+    {
+      return false; 
+    }
+
+  m_Light->SetDiffuseColor(1.f, 1.f, 1.f, 1.f);
+  m_Light->SetDirection(-0.5f, -1.f, -0.5f);
 
   m_Position = new Position; 
   if (!m_Position)
@@ -83,9 +93,14 @@ void Zone::Shutdown()
 
   if (m_Position)
     {
-      /*m_Position->Shutdown(); */
       delete m_Position;
       m_Position = nullptr; 
+    }
+
+  if (m_Light)
+    {
+      delete m_Light;
+      m_Light = nullptr; 
     }
   
   if (m_Camera)
@@ -117,6 +132,8 @@ bool Zone::Frame(D3D* Direct3D,
   m_Position->GetPosition(posX, posY, posZ);
   m_Position->GetRotation(rotX, rotY, rotZ);
 
+  m_Light->SetDirection(posX, posY, posZ);
+  
   result = m_UserInterface->Frame(Direct3D->GetDeviceContext(),
 				  fps,
 				  posX, posY, posZ,
@@ -206,12 +223,14 @@ bool Zone::Render(D3D* Direct3D,
     }
 
   m_Terrain->Render(Direct3D->GetDeviceContext());
-  result = ShaderManager->RenderTextureShader(Direct3D->GetDeviceContext(),
-					      m_Terrain->GetIndexCount(),
-					      worldMatrix,
-					      viewMatrix,
-					      projectionMatrix,
-					      TextureManager->GetTexture(0));
+  result = ShaderManager->RenderLightShader(Direct3D->GetDeviceContext(),
+					    m_Terrain->GetIndexCount(),
+					    worldMatrix,
+					    viewMatrix,
+					    projectionMatrix,
+					    TextureManager->GetTexture(1),
+					    m_Light->GetDirection(),
+					    m_Light->GetDiffuseColor());
   if (!result)
     {
       return false; 

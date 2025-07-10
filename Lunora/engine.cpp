@@ -78,14 +78,13 @@ int WINAPI WinMain(HINSTANCE Instance,
 	{
 	  DeviceManager DeviceManager;
 	  DeviceManager.Initialize(Window, ScreenWidth, ScreenHeight);
+	  DeviceManager.SetViewport(ScreenWidth / 2, ScreenHeight / 2); 
 	  
 	  RenderTargetManager RenderTargetManager;
 	  RenderTargetManager.Initialize(DeviceManager, ScreenWidth, ScreenHeight);
 	  
 	  PipelineStateManager PipelineStateManager;
 	  PipelineStateManager.Initialize(DeviceManager);
-
-	  DeviceManager.DeviceContext->OMSetRenderTargets(1, &RenderTargetManager.RenderTargetView, RenderTargetManager.DepthStencilView);
 	  
 	  Terrain terrain;
 	  terrain.InitializeBuffers(DeviceManager.Device);
@@ -120,8 +119,9 @@ int WINAPI WinMain(HINSTANCE Instance,
 		  TranslateMessage(&Message);
 		  DispatchMessageA(&Message);
 		}
-
+	      
 	      XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	      bool result;
 	      
 	      camera.Render();
 
@@ -141,12 +141,17 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      DeviceManager.DeviceContext->ClearDepthStencilView(RenderTargetManager.DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	      
 	      terrain.RenderBuffers(DeviceManager.DeviceContext);
-	      shader.SetShaderParameters(DeviceManager.DeviceContext,
-					 worldMatrix,
-					 viewMatrix,
-					 projectionMatrix);
+	      result = shader.SetShaderParameters(DeviceManager.DeviceContext,
+						  worldMatrix,
+						  viewMatrix,
+						  projectionMatrix);
 	      shader.RenderShader(DeviceManager.DeviceContext,
 				  terrain.GetIndexCount());
+	      
+	      if (!result)
+		{
+		  return false; 
+		}
 	      
 	      DeviceManager.SwapChain->Present(1, 0);
 	    }

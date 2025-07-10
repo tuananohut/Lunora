@@ -29,7 +29,7 @@ bool Terrain::InitializeBuffers(ID3D11Device* Device)
   terrainWidth = 256;
 
   color = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
-
+  
   m_vertexCount = (terrainWidth - 1) * (terrainHeight - 1) * 8;
 
   m_indexCount = m_vertexCount;

@@ -3,7 +3,8 @@
 ShaderManager::ShaderManager()
 {
   m_ColorShader = nullptr;
-  m_TextureShader = nullptr; 
+  m_TextureShader = nullptr;
+  m_LightShader = nullptr; 
   m_FontShader = nullptr; 
 }
 
@@ -27,6 +28,13 @@ bool ShaderManager::Initialize(ID3D11Device* device, HWND hwnd)
     return false;
   result = m_TextureShader->Initialize(device, hwnd);
   if (!result)
+    return false;
+
+  m_LightShader = new LightShader;
+  if (!m_LightShader)
+    return false;
+  result = m_LightShader->Initialize(device, hwnd);
+  if (!result)
     return false; 
   
   m_FontShader = new FontShader;
@@ -46,6 +54,13 @@ void ShaderManager::Shutdown()
       m_FontShader->Shutdown();
       delete m_FontShader;
       m_FontShader = nullptr; 
+    }
+
+  if (m_LightShader)
+    {
+      m_LightShader->Shutdown();
+      delete m_LightShader;
+      m_LightShader = nullptr; 
     }
 
   if (m_TextureShader)
@@ -85,6 +100,24 @@ bool ShaderManager::RenderTextureShader(ID3D11DeviceContext* deviceContext,
 				 viewMatrix,
 				 projectionMatrix,
 				 texture); 
+}
+
+bool ShaderManager::RenderLightShader(ID3D11DeviceContext* deviceContext,
+				      int indexCount,
+				      XMMATRIX worldMatrix,
+				      XMMATRIX viewMatrix,
+				      XMMATRIX projectionMatrix,
+				      ID3D11ShaderResourceView* texture,
+				      XMFLOAT3 lightDirection,
+				      XMFLOAT4 diffuseColor)
+{
+  return m_LightShader->Render(deviceContext, indexCount,
+			       worldMatrix,
+			       viewMatrix,
+			       projectionMatrix,
+			       texture,
+			       lightDirection,
+			       diffuseColor);
 }
 
 bool ShaderManager::RenderFontShader(ID3D11DeviceContext* deviceContext,

@@ -20,13 +20,13 @@ bool LightShader::Initialize(ID3D11Device* device, HWND hwnd)
   int error;
   bool result;
 
-  error = wcscpy_s(vsFilename, 128, L"src/shaders/light.vs");
+  error = wcscpy_s(vsFilename, 128, L"../Lunora/Terrain/light.vs");
   if (error != 0)
     {
       return false;
     }
 
-  error = wcscpy_s(psFilename, 128, L"src/shaders/light.ps");
+  error = wcscpy_s(psFilename, 128, L"../Lunora/Terrain/light.ps");
   if (error != 0)
     {
       return false;
@@ -53,12 +53,11 @@ bool LightShader::Render(ID3D11DeviceContext* deviceContext,
 			 XMMATRIX projectionMatrix, 
 			 ID3D11ShaderResourceView* texture, 
 			 XMFLOAT3 lightDirection,
-			 XMFLOAT4 ambientColor,
 			 XMFLOAT4 diffuseColor)
 {
   bool result;
 
-  result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, lightDirection, ambientColor, diffuseColor);
+  result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, lightDirection, diffuseColor);
   if (!result)
     {
       return false;
@@ -188,10 +187,10 @@ bool LightShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFil
       return false;
     }
 
-  samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-  samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-  samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-  samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+  samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+  samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+  samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+  samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
   samplerDesc.MipLODBias = 0.0f;
   samplerDesc.MaxAnisotropy = 1;
   samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
@@ -281,7 +280,6 @@ bool LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 				      XMMATRIX projectionMatrix, 
 				      ID3D11ShaderResourceView* texture,
 				      XMFLOAT3 lightDirection,
-				      XMFLOAT4 ambientColor,
 				      XMFLOAT4 diffuseColor)
 {
   HRESULT result;
@@ -322,7 +320,6 @@ bool LightShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 
   dataPtr2 = (LightBufferType*)mappedResource.pData;
 
-  dataPtr2->ambientColor = ambientColor;
   dataPtr2->diffuseColor = diffuseColor;
   dataPtr2->lightDirection = lightDirection;
   dataPtr2->padding = 0.f;

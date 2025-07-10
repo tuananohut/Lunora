@@ -56,6 +56,12 @@ void RenderTargetManager::Initialize(DeviceManager& DeviceManager,
     {
       OutputDebugStringA("Depth stencil buffer failed");
     }
+
+  DeviceManager.DeviceContext->OMSetRenderTargets(1, &RenderTargetView, DepthStencilView);
+  if (FAILED(Result))
+    {
+      OutputDebugStringA("Rasterizer failed");
+    }
 }
 
 void RenderTargetManager::Cleanup()

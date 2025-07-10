@@ -9,8 +9,8 @@ void PipelineStateManager::Initialize(DeviceManager& DeviceManager)
   D3D11_RASTERIZER_DESC RasterizerDesc;
   ZeroMemory(&RasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
 
-  RasterizerDesc.FillMode = D3D11_FILL_SOLID;
-  RasterizerDesc.CullMode = D3D11_CULL_NONE;  
+  RasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
+  RasterizerDesc.CullMode = D3D11_CULL_BACK;  
   RasterizerDesc.FrontCounterClockwise = FALSE; 
   RasterizerDesc.DepthBias = 0;
   RasterizerDesc.DepthBiasClamp = 0;
