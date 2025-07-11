@@ -51,7 +51,7 @@ bool Zone::Initialize(D3D* Direct3D,
     }
 
   m_Light->SetDiffuseColor(1.f, 1.f, 1.f, 1.f);
-  m_Light->SetDirection(-0.5f, -1.f, -0.5f);
+  m_Light->SetDirection(-0.5f, -1.f, -5.f);
 
   m_Position = new Position; 
   if (!m_Position)
@@ -132,7 +132,7 @@ bool Zone::Frame(D3D* Direct3D,
   m_Position->GetPosition(posX, posY, posZ);
   m_Position->GetRotation(rotX, rotY, rotZ);
 
-  m_Light->SetDirection(posX, posY, posZ);
+  // m_Light->SetDirection(posX, posY, posZ);
   
   result = m_UserInterface->Frame(Direct3D->GetDeviceContext(),
 				  fps,
