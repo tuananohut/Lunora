@@ -126,13 +126,27 @@ bool Zone::Frame(D3D* Direct3D,
 {
   bool result;
   float posX, posY, posZ, rotX, rotY, rotZ;
-
+  static float lightPosX = 9.f;
+  float radians;
+  static float lightAngle = 270.f; 
+  
   HandleMovementInput(Input, frameTime);
 
   m_Position->GetPosition(posX, posY, posZ);
   m_Position->GetRotation(rotX, rotY, rotZ);
 
-  // m_Light->SetDirection(posX, posY, posZ);
+  lightPosX -= 0.3f * frameTime;
+
+  lightAngle -= 0.03f * frameTime;
+  if (lightAngle < 90.f)
+    {
+      lightAngle = 270.f;
+
+      lightPosX = 9.f; 
+    }
+  radians = lightAngle * 0.0174532925f;
+
+  m_Light->SetDirection(sinf(radians), cosf(radians) * -1.f, -5.f);
   
   result = m_UserInterface->Frame(Direct3D->GetDeviceContext(),
 				  fps,
