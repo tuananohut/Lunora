@@ -23,7 +23,7 @@ bool Terrain::InitializeBuffers(ID3D11Device* Device)
   
   int i, j, terrainWidth, terrainHeight, index;
   XMFLOAT4 color;
-  float positionX, positionZ;
+  float positionX, positionY, positionZ;
 
   terrainHeight = 256;
   terrainWidth = 256;
@@ -31,7 +31,7 @@ bool Terrain::InitializeBuffers(ID3D11Device* Device)
   color = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
   
   m_vertexCount = (terrainWidth - 1) * (terrainHeight - 1) * 8;
-
+  
   m_indexCount = m_vertexCount;
 
   vertices = new VertexType[m_vertexCount];
@@ -55,8 +55,8 @@ bool Terrain::InitializeBuffers(ID3D11Device* Device)
 	  // Line 1 - Upper left.
 	  positionX = (float)i;
 	  positionZ = (float)(j + 1);
-
-	  vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+	  
+	  vertices[index].position = XMFLOAT3(positionX, 0.f, positionZ);
 	  vertices[index].color = color;
 	  indices[index] = index;
 	  index++;

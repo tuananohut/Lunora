@@ -78,7 +78,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	{
 	  DeviceManager DeviceManager;
 	  DeviceManager.Initialize(Window, ScreenWidth, ScreenHeight);
-	  DeviceManager.SetViewport(ScreenWidth / 2, ScreenHeight / 2); 
+	  DeviceManager.SetViewport(ScreenWidth, ScreenHeight); 
 	  
 	  RenderTargetManager RenderTargetManager;
 	  RenderTargetManager.Initialize(DeviceManager, ScreenWidth, ScreenHeight);
