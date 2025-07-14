@@ -16,13 +16,15 @@ class Terrain
   {
     XMFLOAT3 position;
     XMFLOAT2 texture; 
-    XMFLOAT3 normal; 
+    XMFLOAT3 normal;
+    XMFLOAT3 color; 
   };
 
   struct HeightMapType
   {
     float x, y, z;
     float nx, ny, nz;
+    float r, g, b; 
   };
 
   struct ModelType
@@ -30,6 +32,7 @@ class Terrain
     float x, y, z;
     float tu, tv;
     float nx, ny, nz;
+    float r, g, b;
   };
 
   struct VectorType
@@ -53,8 +56,9 @@ class Terrain
   bool LoadBitmapHeightMap();
   void ShutdownHeightMap();
   void SetTerrainCoordinates();
-
   bool CalculateNormals();
+
+  bool LoadColorMap();
   bool BuildTerrainModel();
   void ShutdownTerrainModel(); 
 
@@ -67,7 +71,7 @@ class Terrain
   int m_vertexCount, m_indexCount; 
   int m_terrainHeight, m_terrainWidth;
   float m_heightScale;
-  char* m_terrainFilename;
+  char *m_terrainFilename, *m_colorMapFilename;
   HeightMapType* m_heightMap;
   ModelType* m_terrainModel; 
 };

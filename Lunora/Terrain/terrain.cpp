@@ -5,6 +5,7 @@ Terrain::Terrain()
   m_vertexBuffer = nullptr;
   m_indexBuffer = nullptr;
   m_terrainFilename = nullptr;
+  m_colorMapFilename = nullptr; 
   m_heightMap = nullptr;
   m_terrainModel = nullptr; 
 }
@@ -35,6 +36,12 @@ bool Terrain::Initialize(ID3D11Device* device, char* setupFilename)
   if (!result)
     {
       return false;
+    }
+
+  result = LoadColorMap();
+  if (!result)
+    {
+      return false; 
     }
 
   result = BuildTerrainModel();
@@ -89,6 +96,12 @@ bool Terrain::LoadSetupFile(char* filename)
     {
       return false;
     }
+
+  m_colorMapFilename = new char[stringLength];
+  if (!m_colorMapFilename)
+    {
+      return false; 
+    }
   
   fin.open(filename);
   if (fin.fail())
@@ -127,6 +140,14 @@ bool Terrain::LoadSetupFile(char* filename)
     }
 
   fin >> m_heightScale;
+
+  fin.get(input);
+  while (input != ':')
+    {
+      fin.get(input);
+    }
+
+  fin >> m_colorMapFilename; 
 
   fin.close();
 
@@ -366,6 +387,88 @@ bool Terrain::CalculateNormals()
   return true;
 }
 
+bool Terrain::LoadColorMap()
+{
+  int error, imageSize, i, j, k, index;
+  FILE* filePtr;
+  unsigned long long count;
+  BITMAPFILEHEADER bitmapFileHeader;
+  BITMAPINFOHEADER bitmapInfoHeader;
+  unsigned char* bitmapImage;
+
+  error = fopen_s(&filePtr, m_colorMapFilename, "rb");
+  if (error != 0)
+    {
+      return false; 
+    }
+
+  count = fread(&bitmapFileHeader, sizeof(BITMAPFILEHEADER), 1, filePtr);
+  if (count != 1)
+    {
+      return false; 
+    }
+
+  count = fread(&bitmapInfoHeader, sizeof(BITMAPINFOHEADER), 1, filePtr);
+  if (count != 1)
+    {
+      return false;
+    }
+
+  if ((bitmapInfoHeader.biWidth != m_terrainWidth) ||
+      (bitmapInfoHeader.biHeight != m_terrainHeight))
+    {
+      return false;
+    }
+
+  imageSize = m_terrainHeight * ((m_terrainWidth * 3) + 1);
+
+  bitmapImage = new unsigned char[imageSize];
+  if (!bitmapImage)
+    {
+      return false; 
+    }
+
+  fseek(filePtr, bitmapFileHeader.bfOffBits, SEEK_SET);
+
+  count = fread(bitmapImage, 1, imageSize, filePtr);
+  if (count != imageSize)
+    {
+      return false; 
+    }
+
+  error = fclose(filePtr);
+  if (error != 0)
+    {
+      return false; 
+    }
+
+  k = 0;
+
+  for (j = 0; j < m_terrainHeight; j++)
+    {
+      for (i = 0; i < m_terrainWidth; i++)
+	{
+	  index = (m_terrainWidth * (m_terrainHeight - 1 - j)) + i;
+
+	  m_heightMap[index].b = (float)bitmapImage[k] / 255.f;
+	  m_heightMap[index].g = (float)bitmapImage[k + 1] / 255.f;
+	  m_heightMap[index].r = (float)bitmapImage[k + 2] / 255.f;
+
+	  k += 3;
+	}
+
+      k++;
+    }
+
+  delete[] bitmapImage;
+  bitmapImage = nullptr;
+
+  delete[] m_colorMapFilename;
+  m_colorMapFilename = nullptr; 
+
+  return true; 
+}
+
 bool Terrain::BuildTerrainModel()
 {
   int i, j, index, index1, index2, index3, index4;
@@ -397,6 +500,9 @@ bool Terrain::BuildTerrainModel()
 	  m_terrainModel[index].nx = m_heightMap[index1].nx;
 	  m_terrainModel[index].ny = m_heightMap[index1].ny;
 	  m_terrainModel[index].nz = m_heightMap[index1].nz;
+	  m_terrainModel[index].r = m_heightMap[index1].r;
+	  m_terrainModel[index].g = m_heightMap[index1].g;
+	  m_terrainModel[index].b = m_heightMap[index1].b; 
 	  index++;
 	  
 	  m_terrainModel[index].x = m_heightMap[index2].x;
@@ -407,6 +513,9 @@ bool Terrain::BuildTerrainModel()
 	  m_terrainModel[index].nx = m_heightMap[index2].nx;
 	  m_terrainModel[index].ny = m_heightMap[index2].ny;
 	  m_terrainModel[index].nz = m_heightMap[index2].nz;
+	  m_terrainModel[index].r = m_heightMap[index2].r;
+	  m_terrainModel[index].g = m_heightMap[index2].g;
+	  m_terrainModel[index].b = m_heightMap[index2].b;
 	  index++;
 
 	  m_terrainModel[index].x = m_heightMap[index3].x;
@@ -417,6 +526,9 @@ bool Terrain::BuildTerrainModel()
 	  m_terrainModel[index].nx = m_heightMap[index3].nx;
 	  m_terrainModel[index].ny = m_heightMap[index3].ny;
 	  m_terrainModel[index].nz = m_heightMap[index3].nz;
+	  m_terrainModel[index].r = m_heightMap[index3].r;
+	  m_terrainModel[index].g = m_heightMap[index3].g;
+	  m_terrainModel[index].b = m_heightMap[index3].b;
 	  index++;
 
 	  m_terrainModel[index].x = m_heightMap[index3].x;
@@ -427,6 +539,9 @@ bool Terrain::BuildTerrainModel()
 	  m_terrainModel[index].nx = m_heightMap[index3].nx;
 	  m_terrainModel[index].ny = m_heightMap[index3].ny;
 	  m_terrainModel[index].nz = m_heightMap[index3].nz;
+	  m_terrainModel[index].r = m_heightMap[index3].r;
+	  m_terrainModel[index].g = m_heightMap[index3].g;
+	  m_terrainModel[index].b = m_heightMap[index3].b;
 	  index++;
 	 
 	  m_terrainModel[index].x = m_heightMap[index2].x;
@@ -437,6 +552,9 @@ bool Terrain::BuildTerrainModel()
 	  m_terrainModel[index].nx = m_heightMap[index2].nx;
 	  m_terrainModel[index].ny = m_heightMap[index2].ny;
 	  m_terrainModel[index].nz = m_heightMap[index2].nz;
+	  m_terrainModel[index].r = m_heightMap[index2].r;
+	  m_terrainModel[index].g = m_heightMap[index2].g;
+	  m_terrainModel[index].b = m_heightMap[index2].b;
 	  index++;
 	  
 	  m_terrainModel[index].x = m_heightMap[index4].x;
@@ -447,6 +565,9 @@ bool Terrain::BuildTerrainModel()
 	  m_terrainModel[index].nx = m_heightMap[index4].nx;
 	  m_terrainModel[index].ny = m_heightMap[index4].ny;
 	  m_terrainModel[index].nz = m_heightMap[index4].nz;
+	  m_terrainModel[index].r = m_heightMap[index4].r;
+	  m_terrainModel[index].g = m_heightMap[index4].g;
+	  m_terrainModel[index].b = m_heightMap[index4].b;
 	  index++;
 	}
     }
@@ -507,6 +628,9 @@ bool Terrain::InitializeBuffers(ID3D11Device* device)
       vertices[i].normal = XMFLOAT3(m_terrainModel[i].nx,
 				    m_terrainModel[i].ny,
 				    m_terrainModel[i].nz);
+      vertices[i].color = XMFLOAT3(m_terrainModel[i].r,
+				   m_terrainModel[i].g,
+				   m_terrainModel[i].b);
       indices[i] = i; 
     }
   
