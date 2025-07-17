@@ -13,13 +13,22 @@ struct Mesh
   struct VertexType
   {
     XMFLOAT3 position;
-    XMFLOAT4 color; 
+    XMFLOAT2 texture;
+    XMFLOAT3 normal;
+    XMFLOAT3 color; 
   };
-
+  
   struct ModelType
   {
     float x, y, z;
-    float tu, tv; 
+    float tu, tv;
+    float nx, ny, nz;
+    float r, g, b; 
+  };
+
+  struct Vec3
+  {
+    float x, y, z; 
   };
 
   virtual bool InitializeBuffers(ID3D11Device*);
