@@ -56,10 +56,10 @@ bool TerrainShader::Render(ID3D11DeviceContext* deviceContext,
   return true; 
 }
 
-bool TerrainShader::Initialize(ID3D11Device* device,
-			       HWND hwnd,
-			       WCHAR* vsFilename,
-			       WCHAR* psFilename)
+bool TerrainShader::InitializeShader(ID3D11Device* device,
+				     HWND hwnd,
+				     WCHAR* vsFilename,
+				     WCHAR* psFilename)
 {
   HRESULT result;
   ID3D10Blob* errorMessage;
@@ -138,13 +138,13 @@ bool TerrainShader::Initialize(ID3D11Device* device,
   polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
   polygonLayout[2].InstanceDataStepRate = 0;
 
-  polygonLayout[2].SemanticName = "COLOR";
-  polygonLayout[2].SemanticIndex = 0;
-  polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-  polygonLayout[2].InputSlot = 0;
-  polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-  polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-  polygonLayout[2].InstanceDataStepRate = 0;
+  polygonLayout[3].SemanticName = "COLOR";
+  polygonLayout[3].SemanticIndex = 0;
+  polygonLayout[3].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+  polygonLayout[3].InputSlot = 0;
+  polygonLayout[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+  polygonLayout[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+  polygonLayout[3].InstanceDataStepRate = 0;
 
   numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
 
@@ -207,4 +207,142 @@ bool TerrainShader::Initialize(ID3D11Device* device,
     }
   
   return true;
+}
+
+void TerrainShader::ShutdownShader()
+{
+  if (m_lightBuffer)
+    {
+      m_lightBuffer->Release();
+      m_lightBuffer = nullptr; 
+    }
+
+  if (m_sampleState)
+    {
+      m_sampleState->Release();
+      m_sampleState = nullptr; 
+    }
+
+  if (m_matrixBuffer)
+    {
+      m_matrixBuffer->Release();
+      m_matrixBuffer = nullptr; 
+    }
+
+  if (m_layout)
+    {
+      m_layout->Release();
+      m_layout = nullptr;
+    }
+  
+  if (m_pixelShader)
+    {
+      m_pixelShader->Release();
+      m_pixelShader = nullptr;
+    }
+
+  if (m_vertexShader)
+    {
+      m_vertexShader->Release();
+      m_vertexShader = nullptr; 
+    }
+}
+
+void TerrainShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage,
+					     HWND hwnd,
+					     WCHAR* shaderFilename)
+{
+  char* compileErrors;
+  unsigned long long bufferSize, i;
+  ofstream fout;
+
+  compileErrors = (char*)(errorMessage->GetBufferPointer());
+
+  bufferSize  = errorMessage->GetBufferSize();
+
+  fout.open("shader-error.txt");
+
+  for (i = 0; i < bufferSize; i++)
+    {
+      fout << compileErrors[i];
+    }
+
+  fout.close();
+
+  errorMessage->Release();
+  errorMessage = nullptr;
+  
+  MessageBox(hwnd, "Error compiling shader. Check shader-error.txt for message.", shaderFilename, MB_OK | MB_ICONERROR);
+}
+
+bool TerrainShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
+					XMMATRIX worldMatrix,
+					XMMATRIX viewMatrix,
+					XMMATRIX projectionMatrix,
+					ID3D11ShaderResourceView* texture,
+					XMFLOAT3 lightDirection,
+					XMFLOAT4 diffuseColor)
+{
+  HRESULT result;
+  D3D11_MAPPED_SUBRESOURCE mappedResource;
+  MatrixBufferType* dataPtr;
+  unsigned int bufferNumber;
+  LightBufferType* dataPtr2;
+
+  worldMatrix = XMMatrixTranspose(worldMatrix);
+  viewMatrix = XMMatrixTranspose(viewMatrix);
+  projectionMatrix = XMMatrixTranspose(projectionMatrix);
+
+  result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+  if (FAILED(result))
+    {
+      return false; 
+    }
+
+  dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+  dataPtr->world = worldMatrix;
+  dataPtr->view = viewMatrix;
+  dataPtr->projection = projectionMatrix;
+
+  deviceContext->Unmap(m_matrixBuffer, 0);
+
+  bufferNumber = 0;
+
+  deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
+
+  deviceContext->PSSetShaderResources(0, 1, &texture);
+  
+  result = deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+  if (FAILED(result))
+    {
+      return false;
+    }
+
+  dataPtr2 = (LightBufferType*)mappedResource.pData;
+
+  dataPtr2->diffuseColor = diffuseColor;
+  dataPtr2->lightDirection = lightDirection;
+  dataPtr2->padding = 0.f;
+
+  deviceContext->Unmap(m_lightBuffer, 0);
+
+  bufferNumber = 0;
+
+  deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
+
+  return true;
+}
+
+void TerrainShader::RenderShader(ID3D11DeviceContext* deviceContext,
+				 int indexCount)
+{
+  deviceContext->IASetInputLayout(m_layout);
+
+  deviceContext->VSSetShader(m_vertexShader, NULL, 0);
+  deviceContext->PSSetShader(m_pixelShader, NULL, 0);
+
+  deviceContext->PSSetSamplers(0, 1, &m_sampleState);
+
+  deviceContext->DrawIndexed(indexCount, 0, 0); 
 }
