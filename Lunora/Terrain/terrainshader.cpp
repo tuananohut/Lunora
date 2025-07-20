@@ -272,7 +272,7 @@ void TerrainShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage,
   errorMessage->Release();
   errorMessage = nullptr;
   
-  MessageBox(hwnd, "Error compiling shader. Check shader-error.txt for message.", shaderFilename, MB_OK | MB_ICONERROR);
+  MessageBoxW(hwnd, L"Error compiling shader. Check shader-error.txt for message.", shaderFilename, MB_OK | MB_ICONERROR);
 }
 
 bool TerrainShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,

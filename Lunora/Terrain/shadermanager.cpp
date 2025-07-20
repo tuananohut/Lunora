@@ -5,7 +5,8 @@ ShaderManager::ShaderManager()
   m_ColorShader = nullptr;
   m_TextureShader = nullptr;
   m_LightShader = nullptr; 
-  m_FontShader = nullptr; 
+  m_FontShader = nullptr;
+  m_TerrainShader = nullptr; 
 }
 
 ShaderManager::ShaderManager(const ShaderManager& other) {}
@@ -43,12 +44,26 @@ bool ShaderManager::Initialize(ID3D11Device* device, HWND hwnd)
   result = m_FontShader->Initialize(device, hwnd);
   if (!result)
     return false; 
+
+  m_TerrainShader = new TerrainShader;
+  if (!m_TerrainShader)
+    return false;
+  result = m_TerrainShader->Initialize(device, hwnd);
+  if (!result)
+    return false;
   
   return true;
 }
 
 void ShaderManager::Shutdown()
 {
+  if (m_TerrainShader)
+    {
+      m_TerrainShader->Shutdown();
+      delete m_TerrainShader;
+      m_TerrainShader = nullptr;
+    }
+  
   if (m_FontShader)
     {
       m_FontShader->Shutdown();
@@ -131,4 +146,18 @@ bool ShaderManager::RenderFontShader(ID3D11DeviceContext* deviceContext,
   return m_FontShader->Render(deviceContext, indexCount,
 			      worldMatrix, viewMatrix, projectionMatrix,
 			      texture, color);
+}
+
+bool ShaderManager::RenderTerrainShader(ID3D11DeviceContext* deviceContext,
+					int indexCount,
+					XMMATRIX worldMatrix,
+					XMMATRIX viewMatrix,
+					XMMATRIX projectionMatrix,
+					ID3D11ShaderResourceView* texture,
+					XMFLOAT3 lightDirection,
+					XMFLOAT4 diffuseColor)
+{
+  return m_TerrainShader->Render(deviceContext, indexCount,
+				 worldMatrix, viewMatrix, projectionMatrix,
+				 texture, lightDirection, diffuseColor);
 }

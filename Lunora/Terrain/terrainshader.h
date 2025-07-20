@@ -1,5 +1,5 @@
-#ifndef _LIGHTSHADER_H_
-#define _LIGHTSHADER_H_
+#ifndef TERRAINSHADER_H
+#define TERRAINSHADER_H
 
 #include <d3d11.h>
 #include <d3dcompiler.h>
@@ -21,7 +21,7 @@ private:
 
   struct LightBufferType
   {
-    XMFLOAT4 diffuseColor; 
+    XMFLOAT4 diffuseColor;
     XMFLOAT3 lightDirection;
     float padding;
   };

@@ -237,14 +237,14 @@ bool Zone::Render(D3D* Direct3D,
     }
 
   m_Terrain->Render(Direct3D->GetDeviceContext());
-  result = ShaderManager->RenderLightShader(Direct3D->GetDeviceContext(),
-					    m_Terrain->GetIndexCount(),
-					    worldMatrix,
-					    viewMatrix,
-					    projectionMatrix,
-					    TextureManager->GetTexture(1),
-					    m_Light->GetDirection(),
-					    m_Light->GetDiffuseColor());
+  result = ShaderManager->RenderTerrainShader(Direct3D->GetDeviceContext(),
+					      m_Terrain->GetIndexCount(),
+					      worldMatrix,
+					      viewMatrix,
+					      projectionMatrix,
+					      TextureManager->GetTexture(0),
+					      m_Light->GetDirection(),
+					      m_Light->GetDiffuseColor());
   if (!result)
     {
       return false; 
