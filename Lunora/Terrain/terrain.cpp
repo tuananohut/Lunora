@@ -371,7 +371,9 @@ bool Terrain::CalculateNormals()
 	      sum[2] += normals[index].z;
 	    }
 
-	  length = (float)sqrt((sum[0] * sum[0]) + (sum[1] * sum[1]) + (sum[2] * sum[2]));
+	  length = (float)sqrt((sum[0] * sum[0]) +
+			       (sum[1] * sum[1]) +
+			       (sum[2] * sum[2]));
 
 	  index = (j * m_terrainWidth) + i;
 
@@ -591,19 +593,12 @@ bool Terrain::InitializeBuffers(ID3D11Device* device)
   D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
   D3D11_SUBRESOURCE_DATA vertexData, indexData;
   HRESULT result;
-  int i, j, terrainWidth, terrainHeight, index;
-  XMFLOAT4 color;
-  float positionX, positionZ;
-
-  terrainHeight = 256;
-  terrainWidth = 256;
-
-  color = XMFLOAT4(0.f, 1.f, 0.f, 1.f);
+  int i;
 
   // Drawing a line = 2 points
   // Square has 4 lines
   // Drawing a square 2 points * 4 lines = 8 lines
-  m_vertexCount = (terrainWidth - 1) * (terrainHeight - 1) * 6;
+  m_vertexCount = (m_terrainWidth - 1) * (m_terrainHeight - 1) * 6;
   
   m_indexCount = m_vertexCount; 
 
@@ -624,10 +619,13 @@ bool Terrain::InitializeBuffers(ID3D11Device* device)
       vertices[i].position = XMFLOAT3(m_terrainModel[i].x,
 				      m_terrainModel[i].y,
 				      m_terrainModel[i].z);
+
       vertices[i].texture = XMFLOAT2(m_terrainModel[i].tu, m_terrainModel[i].tv);
+
       vertices[i].normal = XMFLOAT3(m_terrainModel[i].nx,
 				    m_terrainModel[i].ny,
 				    m_terrainModel[i].nz);
+
       vertices[i].color = XMFLOAT3(m_terrainModel[i].r,
 				   m_terrainModel[i].g,
 				   m_terrainModel[i].b);

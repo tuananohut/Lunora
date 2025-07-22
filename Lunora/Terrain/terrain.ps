@@ -19,21 +19,23 @@ struct PixelInputType
 float4 TerrainPixelShader(PixelInputType input): SV_TARGET
 {
     float4 textureColor;
-    float3 lightDir = -lightDirection;
+    float3 lightDir;
     float lightIntensity;
     float4 color;
     
     textureColor = shaderTexture.Sample(SampleType, input.tex);
-
+    
     textureColor = saturate(textureColor * input.color * 2.f);
-
-    // lightDir -= lightDirection;
-
+    
+    lightDir = -lightDirection;
+    
     lightIntensity = saturate(dot(input.normal, lightDir));
 
     color = saturate(diffuseColor * lightIntensity);
+    
+    // color = color * textureColor;
 
-    color = color * textureColor;
-
+    color *= input.color; 
+    
     return color; 
 }

@@ -75,15 +75,7 @@ bool Application::Initialize(HINSTANCE instance,
 
   result = m_TextureManager->LoadTexture(m_Direct3D->GetDevice(),
 					 m_Direct3D->GetDeviceContext(),
-					 "../Lunora/Terrain/test.tga", 0);
-  if (!result)
-    {
-      return false; 
-    }
-
-  result = m_TextureManager->LoadTexture(m_Direct3D->GetDevice(),
-					 m_Direct3D->GetDeviceContext(),
-					 "../Lunora/Terrain/dirt01d.tga", 1);
+					 "../Lunora/Terrain/dirt01d.tga", 0);
   if (!result)
     {
       return false; 
