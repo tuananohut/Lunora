@@ -11,12 +11,14 @@ using namespace DirectX;
 
 class Terrain
 {
- private:
+private:
   struct VertexType
   {
     XMFLOAT3 position;
     XMFLOAT2 texture; 
     XMFLOAT3 normal;
+    XMFLOAT3 tangent;
+    XMFLOAT3 binormal; 
     XMFLOAT3 color; 
   };
 
@@ -24,6 +26,8 @@ class Terrain
   {
     float x, y, z;
     float nx, ny, nz;
+    float tx, ty, tz;
+    float bx, by, bz;
     float r, g, b; 
   };
 
@@ -38,6 +42,13 @@ class Terrain
   struct VectorType
   {
     float x, y, z; 
+  };
+
+  struct TempVertexType
+  {
+    float x, y, z;
+    float tu, tv;
+    float nx, ny, nz; 
   };
 
  public:
@@ -62,6 +73,13 @@ class Terrain
   bool BuildTerrainModel();
   void ShutdownTerrainModel(); 
 
+  void CalculateTerrainVectors();
+  void CaluclateTangentBinormal(TempVertexType,
+				TempVertexType,
+				TempVertexType,
+				VectorType&,
+				VectorType&);
+  
   bool InitializeBuffers(ID3D11Device*);
   void ShutdownBuffers();
   void RenderBuffers(ID3D11DeviceContext*);
