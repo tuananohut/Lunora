@@ -33,6 +33,7 @@ public:
   bool RenderTerrainShader(ID3D11DeviceContext*, int,
 			   XMMATRIX, XMMATRIX, XMMATRIX,
 			   ID3D11ShaderResourceView*,
+			   ID3D11ShaderResourceView*,
 			   XMFLOAT3, XMFLOAT4);
   
 private:

@@ -23,7 +23,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
     {
     case WM_CLOSE: 
       {
-	Running = false;
+        Running = false;
       } break;
 
     case WM_DESTROY:

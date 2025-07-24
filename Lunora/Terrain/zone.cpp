@@ -227,6 +227,7 @@ bool Zone::Render(D3D* Direct3D,
 					      viewMatrix,
 					      projectionMatrix,
 					      TextureManager->GetTexture(0),
+					      TextureManager->GetTexture(1),
 					      m_Light->GetDirection(),
 					      m_Light->GetDiffuseColor());
   if (!result)
