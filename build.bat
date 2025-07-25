@@ -8,4 +8,6 @@ cl -EHsc -FC -Zi ..\..\Lunora\Lunora\*.cpp ..\..\Lunora\Lunora\Core\Device\Devic
 
 cl -EHsc -FC -Zi ..\..\Lunora\Lunora\Terrain\*.cpp user32.lib Gdi32.lib d3d11.lib d3dcompiler.lib dxgi.lib ..\data\resource.res /link /SUBSYSTEM:WINDOWS
 
+cl -EHsc -FC -Zi ..\..\Lunora\LunoraEngine\*.cpp user32.lib Gdi32.lib kernel32.lib ..\data\resource.res /link /SUBSYSTEM:WINDOWS
+
 popd
