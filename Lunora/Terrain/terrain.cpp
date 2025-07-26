@@ -703,7 +703,6 @@ void Terrain::CalculateTangentBinormal(TempVertexType vertex1,
   binormal.z = binormal.z / length;
 }
 
-
 bool Terrain::InitializeBuffers(ID3D11Device* device)
 {
   VertexType* vertices;

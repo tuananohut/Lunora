@@ -7,6 +7,14 @@ HostApplication::HostApplication()
   m_WindowHeight = 480;
 }
 
+HostApplication::~HostApplication()
+{
+  if (m_hWnd)
+    {
+      DestroyWindow(m_hWnd);
+    }
+}
+
 void HostApplication::Go()
 {
   WNDCLASSEX WindowClass =
@@ -38,30 +46,71 @@ void HostApplication::Go()
 			NULL);
 
   if (m_hWnd)
-    {
-      ShowWindow(m_hWnd, SW_SHOW);
-    }
+    ShowWindow(m_hWnd, SW_SHOW);
   else
-    {
-      return; 
-    }
+    return; 
 
+  if (!InitializeD3D(false))
+    {
+      MessageBoxA(m_hWnd, "E", "B", MB_OK);
+    }
+  
   MSG Message;
   PeekMessage(&Message, 0, 0, 0, PM_REMOVE);
   while(Message.message != WM_QUIT)
-    {
+    {      
       TranslateMessage(&Message);
       DispatchMessage(&Message);
       PeekMessage(&Message, 0, 0, 0, PM_REMOVE);
+      m_Continue = HandleMessage(&Message); 
     }
 }
 
-HostApplication::~HostApplication()
+HRESULT HostApplication::InitializeD3D(bool fullscreen) 
 {
-  if (m_hWnd)
+  DXGI_SWAP_CHAIN_DESC SwapChainDesc;
+  D3D_FEATURE_LEVEL FeatureLevels = D3D_FEATURE_LEVEL_11_0;
+  D3D_FEATURE_LEVEL FeatureLevel;
+  HRESULT result; 
+
+  ZeroMemory(&SwapChainDesc, sizeof(SwapChainDesc));
+  SwapChainDesc.BufferCount = 1;
+  SwapChainDesc.BufferDesc.Width = m_WindowWidth;
+  SwapChainDesc.BufferDesc.Height = m_WindowHeight;
+  SwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
+  SwapChainDesc.BufferDesc.RefreshRate.Denominator = 1; 
+  SwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  SwapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
+  SwapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+  SwapChainDesc.SampleDesc.Count = 1;
+  SwapChainDesc.SampleDesc.Quality = 0;
+  SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+  SwapChainDesc.OutputWindow = m_hWnd;
+  if (fullscreen)
+    SwapChainDesc.Windowed = FALSE;
+  else
+    SwapChainDesc.Windowed = TRUE;
+  SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+  SwapChainDesc.Flags = 0;
+
+  result = D3D11CreateDeviceAndSwapChain(NULL,
+					 D3D_DRIVER_TYPE_HARDWARE,
+					 NULL,
+					 0,
+					 &FeatureLevels,
+					 1,
+					 D3D11_SDK_VERSION,
+					 &SwapChainDesc,
+					 &m_SwapChain,
+					 &m_Device,
+					 &FeatureLevel,
+					 &m_DeviceContext);
+  if (FAILED(result))
     {
-      DestroyWindow(m_hWnd);
+      return false; 
     }
+
+  return true; 
 }
 
 LRESULT WINAPI HostApplication::MessageHandler(HWND hWnd,
@@ -80,4 +129,11 @@ LRESULT WINAPI HostApplication::MessageHandler(HWND hWnd,
   return DefWindowProc(hWnd, Message, wParam, lParam);
 }
 
+BOOL HostApplication::HandleMessage(MSG *pMessage)
+{
+  if (pMessage->message == WM_KEYDOWN &&
+      pMessage->wParam == VK_ESCAPE)
+    return FALSE;
 
+  return TRUE;
+}

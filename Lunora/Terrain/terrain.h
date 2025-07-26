@@ -36,6 +36,8 @@ private:
     float x, y, z;
     float tu, tv;
     float nx, ny, nz;
+    float tx, ty, tz;
+    float bx, by, bz; 
     float r, g, b;
   };
 
@@ -74,7 +76,7 @@ private:
   void ShutdownTerrainModel(); 
 
   void CalculateTerrainVectors();
-  void CaluclateTangentBinormal(TempVertexType,
+  void CalculateTangentBinormal(TempVertexType,
 				TempVertexType,
 				TempVertexType,
 				VectorType&,
