@@ -21,7 +21,7 @@ protected:
   HRESULT InitializeD3D(bool fullscreen);
   BOOL Render(); 
   void Shutdown();
-
+  
   BOOL HandleMessage(MSG *pMessage);
   
 protected:
@@ -31,6 +31,8 @@ protected:
   IDXGISwapChain* m_SwapChain;
   ID3D11Device* m_Device;
   ID3D11DeviceContext* m_DeviceContext;
+  ID3D11Texture2D* BackBuffer;
+  RenderTargetView;
   BOOL m_Continue; 
 };
 
