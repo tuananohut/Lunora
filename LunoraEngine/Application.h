@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include <dxgi.h>
 
 using namespace DirectX; 
 
@@ -31,8 +32,11 @@ protected:
   IDXGISwapChain* m_SwapChain;
   ID3D11Device* m_Device;
   ID3D11DeviceContext* m_DeviceContext;
-  ID3D11Texture2D* BackBuffer;
-  RenderTargetView;
+  ID3D11Texture2D* m_BackBuffer;
+  ID3D11RenderTargetView* m_RenderTargetView;
+  ID3D11Texture2D* m_DepthStencilBuffer;
+  ID3D11DepthStencilView* m_DepthStencilView; 
+  D3D11_VIEWPORT viewport; 
   BOOL m_Continue; 
 };
 

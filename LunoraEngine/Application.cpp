@@ -59,6 +59,7 @@ void HostApplication::Go()
   PeekMessage(&Message, 0, 0, 0, PM_REMOVE);
   while(Message.message != WM_QUIT)
     {      
+      Render();
       TranslateMessage(&Message);
       DispatchMessage(&Message);
       PeekMessage(&Message, 0, 0, 0, PM_REMOVE);
@@ -69,28 +70,28 @@ void HostApplication::Go()
 HRESULT HostApplication::InitializeD3D(bool fullscreen) 
 {
   IDXGIFactory* DXFactory = NULL;
-  IDXGIAdapter* DXAdapter;
-  IDXGIAdapter* DXAdapters;
+  IDXGIAdapter* Adapter;
   IDXGIOutput* Output = NULL;
   UINT numModes = 0;
   DXGI_MODE_DESC* displayModes = NULL;
   DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT; 
   DXGI_SWAP_CHAIN_DESC SwapChainDesc;
   const D3D_FEATURE_LEVEL FeatureLevelsRequested[] = { D3D_FEATURE_LEVEL_11_1,
-                                                       D3D_FEATURE_LEVEL_11_0,
-                                                       D3D_FEATURE_LEVEL_10_1,
-                                                       D3D_FEATURE_LEVEL_10_0,
-                                                       D3D_FEATURE_LEVEL_9_3 ,
-                                                       D3D_FEATURE_LEVEL_9_2 ,
-                                                       D3D_FEATURE_LEVEL_9_1 };
+						       D3D_FEATURE_LEVEL_11_0,
+						       D3D_FEATURE_LEVEL_10_1,
+						       D3D_FEATURE_LEVEL_10_0,
+						       D3D_FEATURE_LEVEL_9_3 ,
+						       D3D_FEATURE_LEVEL_9_2 ,
+						       D3D_FEATURE_LEVEL_9_1 };
   UINT createDeviceFlags = 0; 
   D3D_FEATURE_LEVEL FeatureLevelsSupported;
-  D3D11_VIEWPORT viewport; 
+  D3D11_TEXTURE2D_DESC DepthStencilDesc;
+  D3D11_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc;
   HRESULT result;
 
-  #ifdef _DEBUG
+#ifdef _DEBUG
   createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-  #endif 
+#endif 
   
   result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&DXFactory);
   if (FAILED(result))
@@ -98,27 +99,29 @@ HRESULT HostApplication::InitializeD3D(bool fullscreen)
       return false; 
     }
   
-  for (UINT i = 0;
-       DXFactory->EnumAdapters(i, &DXAdapter) != DXGI_ERROR_NOT_FOUND;
-       ++i)
+  result = DXFactory->EnumAdapters(0, &Adapter);
+  if (FAILED(result))
     {
-      DXAdapters[i] = DXAdapter; 
+      return false; 
     }
 
+  result = Adapter->EnumOutputs(0, &Output);    
+  
+  // for (numModes = 0;
+  //   )
+  // { 
+      result = Output->GetDisplayModeList(format, 0, &numModes, NULL);
+  
+      displayModes = new DXGI_MODE_DESC[numModes];
+
+      result = Output->GetDisplayModeList(format, 0, &numModes, displayModes);
+      // }
+  
   if (DXFactory)
     {
       DXFactory->Release();
     }
   
-  for (auto a: DXAdapters)
-    result = a->EnumOutputs(0, &Output);
-  
-  result = Output->GetDisplayModeList(format, 0, &numModes, NULL);
-
-  displayModes = new DXGI_MODE_DESC[numModes];
-
-  result = Output->GetDisplayModeList(format, 0, &numModes, displayModes);
-
   ZeroMemory(&SwapChainDesc, sizeof(SwapChainDesc));
   SwapChainDesc.BufferCount = 1;
   SwapChainDesc.BufferDesc.Width = m_WindowWidth;
@@ -140,11 +143,11 @@ HRESULT HostApplication::InitializeD3D(bool fullscreen)
   SwapChainDesc.Flags = 0;
   
   result = D3D11CreateDeviceAndSwapChain(NULL,
-					 D3d_DRIVER_TYPE_HARDWARE,
+					 D3D_DRIVER_TYPE_HARDWARE,
 					 NULL,
 					 createDeviceFlags,
 					 &FeatureLevelsRequested,
-					 _countof(FeatureLevelsRequested) - 1,
+					 ARRAYSIZE(FeatureLevelsRequested),
 					 D3D11_SDK_VERSION,
 					 &SwapChainDesc,
 					 &m_SwapChain,
@@ -154,11 +157,11 @@ HRESULT HostApplication::InitializeD3D(bool fullscreen)
   if (result == E_INVALIDARG)
     {
       result = D3D11CreateDeviceAndSwapChain(NULL,
-					     D3d_DRIVER_TYPE_HARDWARE,
+					     D3D_DRIVER_TYPE_HARDWARE,
 					     NULL,
 					     createDeviceFlags,
 					     &FeatureLevelsRequested[1],
-					     _countof(FeatureLevelsRequested) - 1,
+					     ARRAYSIZE(FeatureLevelsRequested) - 1,
 					     D3D11_SDK_VERSION,
 					     &SwapChainDesc,
 					     &m_SwapChain,
@@ -171,20 +174,8 @@ HRESULT HostApplication::InitializeD3D(bool fullscreen)
     {
       return false; 
     }
-
-  /*
-    TKANE (NOTE): CHECK FOR EDITOR LAYER
-    
-  result = DXFactory->CreateSwapChain();
   
-  result = D3D11CreateDevice();
-  */ 
-  
-  result = m_SwapChain->GetBuffer(0, __uidof(ID3D11Texture2D), (LPVOID*)&BackBuffer);
-
-  m_Device->CreateRenderTargetView(BackBuffer, NULL, &RenderTargetView);
-
-  m_DeviceContext->OMSetRenderTargets(1, &RenderTargetView, NULL);
+  result = m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&m_BackBuffer);
   
   ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
   viewport.Width = m_WindowWidth;
@@ -195,8 +186,108 @@ HRESULT HostApplication::InitializeD3D(bool fullscreen)
   viewport.TopLeftY = 0;
 
   m_DeviceContext->RSSetViewports(1, &viewport);
+
+  ZeroMemory(&DepthStencilDesc, sizeof(D3D11_TEXTURE2D_DESC));
+  DepthStencilDesc.Width = m_WindowWidth;
+  DepthStencilDesc.Height = m_WindowHeight;
+  DepthStencilDesc.MipLevels = 1;
+  DepthStencilDesc.ArraySize = 1;
+  DepthStencilDesc.Format = DXGI_FORMAT_D32_FLOAT;
+  DepthStencilDesc.SampleDesc.Count = 1;
+  DepthStencilDesc.SampleDesc.Quality = 0;
+  DepthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+  DepthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+  DepthStencilDesc.CPUAccessFlags = 0;
+  DepthStencilDesc.MiscFlags = 0;
+
+  result = m_Device->CreateTexture2D(&DepthStencilDesc, 0, &m_DepthStencilBuffer);
+  if (FAILED(result))
+    return false;
   
+  result = m_Device->CreateDepthStencilView(m_DepthStencilBuffer, "/**/",&DepthView);
+    
   return true; 
+}
+
+BOOL HostApplication::Render()
+{
+  m_RenderTargetView = NULL;
+  m_DepthStencilView = 0;
+
+  m_DeviceContext->OMGetRenderTargets(0, m_RenderTargetView, m_DepthStencilView);
+  
+  float clearColours[] = { 1.f, 0.f, 1.f, 1.f };
+
+  m_DeviceContext->ClearRenderTargetView(m_RenderTargetView, clearColours );
+  if(m_RenderTargetView)
+    {
+      m_RenderTargetView->Release();
+      m_RenderTargetView = nullptr; 
+    }
+	
+  /*if (m_DepthStencilView)
+    {
+      m_DeviceContext->ClearDepthStencilView(m_DepthStencilView.,
+					 D3Dll_CLEAR_DEPTH, depth, stencil );
+    }
+ */
+  
+  if(m_DepthStencilView)
+    {
+      m_DepthStencilView->Release();
+      m_DepthStencilView = nullptr; 
+    }
+
+  m_SwapChain->Present(0, 0);
+  
+}
+
+void HostApplication::Shutdown()
+{
+  m_DeviceContext->ClearState();
+
+  if (m_Device)
+    {
+      m_Device->Release();
+      m_Device = nullptr; 
+    }
+
+  if (m_RenderTargetView)
+    {
+      m_RenderTargetView->Release();
+      m_RenderTargetView = nullptr; 
+    }
+
+  if (m_DeviceContext)
+    {
+      m_DeviceContext->Release();
+      m_DeviceContext = nullptr; 
+    }
+
+  if (m_BackBuffer)
+    {
+      m_BackBuffer->Release();
+      m_BackBuffer = nullptr; 
+    }
+
+  if (m_RenderTargetView)
+    {
+      m_RenderTargetView->Release();
+      m_RenderTargetView = nullptr; 
+    }
+    
+
+  if (m_DepthStencilBuffer)
+    {
+      m_DepthStencilBuffer->Release();
+      m_DepthStencilBuffer = nullptr; 
+    }
+
+  if (m_DepthStencilView)
+    {
+      m_DepthStencilView->Release();
+      m_DepthStencilView = nullptr; 
+    }
 }
 
 LRESULT WINAPI HostApplication::MessageHandler(HWND hWnd,
@@ -208,6 +299,7 @@ LRESULT WINAPI HostApplication::MessageHandler(HWND hWnd,
     {
     case WM_DESTROY:
       {
+	Shutdown(); 
 	PostQuitMessage(0);
       } break; 
     }
