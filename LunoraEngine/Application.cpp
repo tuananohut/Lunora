@@ -146,7 +146,7 @@ HRESULT HostApplication::InitializeD3D(bool fullscreen)
 					 D3D_DRIVER_TYPE_HARDWARE,
 					 NULL,
 					 createDeviceFlags,
-					 &FeatureLevelsRequested,
+					 FeatureLevelsRequested,
 					 ARRAYSIZE(FeatureLevelsRequested),
 					 D3D11_SDK_VERSION,
 					 &SwapChainDesc,
@@ -204,7 +204,7 @@ HRESULT HostApplication::InitializeD3D(bool fullscreen)
   if (FAILED(result))
     return false;
   
-  result = m_Device->CreateDepthStencilView(m_DepthStencilBuffer, "/**/",&DepthView);
+  // result = m_Device->CreateDepthStencilView(m_DepthStencilBuffer, "/**/",&DepthView);
     
   return true; 
 }
@@ -214,7 +214,7 @@ BOOL HostApplication::Render()
   m_RenderTargetView = NULL;
   m_DepthStencilView = 0;
 
-  m_DeviceContext->OMGetRenderTargets(0, m_RenderTargetView, m_DepthStencilView);
+  m_DeviceContext->OMGetRenderTargets(0, &m_RenderTargetView, &m_DepthStencilView);
   
   float clearColours[] = { 1.f, 0.f, 1.f, 1.f };
 
@@ -239,7 +239,8 @@ BOOL HostApplication::Render()
     }
 
   m_SwapChain->Present(0, 0);
-  
+
+  return true;
 }
 
 void HostApplication::Shutdown()
