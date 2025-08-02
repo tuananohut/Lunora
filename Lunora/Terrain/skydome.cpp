@@ -154,4 +154,57 @@ bool SkyDome::InitializeBuffers(ID3D11Device* device)
     {
       return false; 
     }
+
+  indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+  indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+  indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+  indexBufferDesc.CPUAccessFlags = 0; 
+  indexBufferDesc.MiscFlags = 0;
+  indexBufferDesc.StructureByteStride = 0;
+
+  indexData.pSysMem = indices;
+  indexData.SysMemPitch = 0;
+  indexData.SysMemSlicePitch = 0;
+
+  result = device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
+  if (FAILED(result))
+    return false;
+
+  delete[] vertices;
+  vertices = nullptr;
+
+  delete[] indices;
+  indices = nullptr;
+
+  return true; 
+}
+
+void SkyDome::ReleaseBuffers()
+{
+  if (m_indexBuffer)
+    {
+      m_indexBuffer->Release();
+      m_indexBuffer = nullptr;
+    }
+
+  if (m_vertexBuffer)
+    {
+      m_vertexBuffer->Release();
+      m_vertexBuffer = nullptr; 
+    }
+}
+
+void SkyDome::RenderBuffers(ID3D11DeviceContext* deviceContext)
+{
+  unsigned int stride;
+  unsigned int offset;
+
+  stride = sizeof(VertexType);
+  offset = 0;
+
+  deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+
+  deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+  deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
