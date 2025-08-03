@@ -3,21 +3,32 @@
 
 #include <d3d11.h>
 #include <DirectXMath.h>
-#include <d3dcompiler.h>
-
-#include "Core/Device/DeviceManager.h"
-#include "Core/Pipeline/PipelineStateManager.h"
-#include "Core/Resource/RenderTargetManager.h"
-
-#include "Camera/Camera.h"
 
 using namespace DirectX;
 
-#define DeleteObject(object) if ((object) != NULL) { delete object; object = NULL; }
-#define DeleteObjects(objects) if ((objects) != NULL) { delete[] objects; objects = NULL; }
-#define ReleaseObject(object) if ((object) != NULL) { object->Release(); object = NULL; }
+struct Win32WindowProperties
+{
+  HWND hwnd;
+  long Width;
+  long Height;
+};
 
-const UINT ScreenWidth = 1280;
-const UINT ScreenHeight = 720;
+struct CoreRenderBuffers 
+{
+  IDXGISwapChain* SwapChain;
+  ID3D11Device* Device;
+  ID3D11DeviceContext* DeviceContext;
+  ID3D11Texture2D* BackBuffer;
+  ID3D11RenderTargetView* RenderTargetView;
+  ID3D11Texture2D* DepthStencilBuffer;
+  ID3D11DepthStencilView* DepthStencilView; 
+  D3D11_VIEWPORT Viewport; 
+};
+
+CoreRenderBuffers InitializeD3D(Win32WindowProperties Window, 
+				bool fullscreen);
+void ShutdownD3D(CoreRenderBuffers& Renderer);
+
+bool Render(); 
 
 #endif
