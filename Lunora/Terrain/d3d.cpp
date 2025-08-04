@@ -147,7 +147,6 @@ bool D3D::Initialize(int screenWidth,
     }
 
   swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-
   swapChainDesc.OutputWindow = hwnd;
 
   swapChainDesc.SampleDesc.Count = 1;
