@@ -16,7 +16,7 @@ struct Renderer
 
   // How to reach Device without global definitions,
   // inheritance,
- 
+  
   ID3D11Buffer* CreateVertexBuffer(UINT,
 				   bool,
 				   bool,

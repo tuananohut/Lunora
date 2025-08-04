@@ -21,8 +21,29 @@ struct CoreRenderBuffers
   ID3D11Texture2D* BackBuffer;
   ID3D11RenderTargetView* RenderTargetView;
   ID3D11Texture2D* DepthStencilBuffer;
+  ID3D11DepthStencilState* DepthStencilState; 
   ID3D11DepthStencilView* DepthStencilView; 
   D3D11_VIEWPORT Viewport; 
+};
+
+struct HexMeshVertexBuffer
+{
+  XMFLOAT3 position;
+  XMFLOAT2 texture; 
+  XMFLOAT3 normal;
+  XMFLOAT3 tangent;
+  XMFLOAT3 binormal; 
+  XMFLOAT3 color; 
+};
+
+struct MeshVertexBuffer
+{
+  XMFLOAT3 position;
+  XMFLOAT2 texture; 
+  XMFLOAT3 normal;
+  XMFLOAT3 tangent;
+  XMFLOAT3 binormal; 
+  XMFLOAT3 color; 
 };
 
 CoreRenderBuffers InitializeD3D(Win32WindowProperties Window, 

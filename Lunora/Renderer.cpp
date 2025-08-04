@@ -22,6 +22,7 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties Window,
   UINT createDeviceFlags = 0; 
   D3D_FEATURE_LEVEL FeatureLevelsSupported;
   D3D11_TEXTURE2D_DESC DepthStencilDesc;
+  D3D11_DEPTH_STENCIL_DESC DepthStencilStateDesc; 
   D3D11_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc;
   HRESULT result;
 
@@ -38,10 +39,7 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties Window,
     {}
 
   result = Adapter->EnumOutputs(0, &Output);    
-  
-  // for (numModes = 0;
-  //   )
-  // { 
+ 
   result = Output->GetDisplayModeList(format, 0, &numModes, NULL);
   
   displayModes = new DXGI_MODE_DESC[numModes];
@@ -134,8 +132,57 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties Window,
   if (FAILED(result))
     {}
   
-  // result = m_Device->CreateDepthStencilView(m_DepthStencilBuffer, "/**/",&DepthView);
-    
-  return Renderer; 
+  ZeroMemory(&DepthStencilStateDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
 
+  // !--- CHECK FOR DEPTH STENCIL TESTS ---! //
+  
+  // Depth test parameters 
+  DepthStencilStateDesc.DepthEnable = true;
+  DepthStencilStateDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+  DepthStencilStateDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+  // Stencil test parameters 
+  DepthStencilStateDesc.StencilEnable = true;
+  DepthStencilStateDesc.StencilReadMask = 0xFF;
+  DepthStencilStateDesc.StencilWriteMask = 0xFF;
+
+  // Stencil operations if pixel is front-facing
+  DepthStencilStateDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+  DepthStencilStateDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+  DepthStencilStateDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+  DepthStencilStateDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS; 
+
+  // Stencil operations if pixel is back-facing 
+  DepthStencilStateDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+  DepthStencilStateDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+  DepthStencilStateDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+  DepthStencilStateDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS; 
+
+  result = Renderer.Device->CreateDepthStencilState(&D3D11_DEPTH_STENCIL_DESC,
+						    &Renderer.DepthStencilState);
+  
+  Renderer.DeviceContext->OMSetDepthStencilState(Renderer.DepthStencilState, 1); 
+  
+  ZeroMemory(&DepthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
+  DepthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+  DepthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+  DepthStencilViewDesc.Texture2D.MipSlice = 0;
+    
+  result = Renderer.Device->CreateDepthStencilView(Renderer.DepthStencilBuffer,
+						   &DepthStencilViewDesc,
+						   &Renderer.DepthStencilView);
+
+  D3D11_RENDER_TARGET_VIEW_DESC RenderTargetViewDesc; 
+
+  result = Renderer.Device->CreateRenderTargetView(Renderer.BackBuffer,
+						   RenderTargetViewDesc,
+						   &Renderer.RenderTargetView);
+  
+  Renderer.DeviceContext->OMSetRenderTargets();
+
+  
+  if (result)
+    return Renderer;
+  else
+    return 0; 
 }
