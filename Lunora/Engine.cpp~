@@ -38,7 +38,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 		   LPSTR CommandLine,
 		   int ShowCode)
 {
-  Win32WindowProperties* Window = new Win32WindowProperties; 
+  Win32WindowProperties Window; 
   
   WNDCLASSEXA wc = {};
   
@@ -55,27 +55,25 @@ int WINAPI WinMain(HINSTANCE Instance,
       int x = CW_USEDEFAULT;
       int y = CW_USEDEFAULT;
      
-      Window->hwnd = CreateWindowExA(0,                   
-				     wc.lpszClassName,          
-				     "Lunora",  
-				     WS_OVERLAPPEDWINDOW | WS_VISIBLE,        
-				     x, y, CW_USEDEFAULT, CW_USEDEFAULT,
-				     NULL,       
-				     NULL,       
-				     Instance,  
-				     NULL);
+      Window.hwnd = CreateWindowExA(0,                   
+				    wc.lpszClassName,          
+				    "Lunora",  
+				    WS_OVERLAPPEDWINDOW | WS_VISIBLE,        
+				    x, y, CW_USEDEFAULT, CW_USEDEFAULT,
+				    NULL,       
+				    NULL,       
+				    Instance,  
+				    NULL);
       
       
   
-      if (Window->hwnd)
+      if (Window.hwnd)
 	{	  
 	  Running = true;
 
 	  CoreRenderBuffers Renderer;
-	  Window->Width = 1080;
-	  Window->Height = 720;
-	  Renderer = InitializeD3D(*Window, false);
-    
+	  Renderer = InitializeD3D(Window, false);
+  
 	  while(Running)
 	    {
 	      MSG Message;
@@ -83,7 +81,6 @@ int WINAPI WinMain(HINSTANCE Instance,
 		{		  
 		  if (Message.message == WM_QUIT)
 		    {
-		      delete Window; 
 		      ShutdownD3D(Renderer);
 		      Running = false;
 		    }

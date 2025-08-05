@@ -1,10 +1,10 @@
 #include "Renderer.h"
 
-CoreRenderBuffers InitializeD3D(Win32WindowProperties Window,
+CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
 				bool fullscreen)
 { 
   CoreRenderBuffers Renderer; 
-  
+
   IDXGIFactory* DXFactory = NULL;
   IDXGIAdapter* Adapter;
   IDXGIOutput* Output = NULL;
@@ -24,6 +24,7 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties Window,
   D3D11_TEXTURE2D_DESC DepthStencilDesc;
   D3D11_DEPTH_STENCIL_DESC DepthStencilStateDesc; 
   D3D11_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc;
+  D3D11_RENDER_TARGET_VIEW_DESC RenderTargetViewDesc;
   HRESULT result;
 
 #ifdef _DEBUG
@@ -32,21 +33,36 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties Window,
   
   result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&DXFactory);
   if (FAILED(result))
-    {}
+    {
+      MessageBoxA(Window.hwnd, "DXGI Factory", "Error", MB_OK | MB_ICONERROR);
+    }
   
   result = DXFactory->EnumAdapters(0, &Adapter);
   if (FAILED(result))
-    {}
+    {
+      MessageBoxA(Window.hwnd, "Enum Adapters", "Error", MB_OK | MB_ICONERROR);
+    }
 
   result = Adapter->EnumOutputs(0, &Output);    
+  if (FAILED(result))
+    {
+      MessageBoxA(Window.hwnd, "Enum Outputs", "Error", MB_OK | MB_ICONERROR);
+    }
  
   result = Output->GetDisplayModeList(format, 0, &numModes, NULL);
-  
+  if (FAILED(result))
+    {
+      MessageBoxA(Window.hwnd, "Get Display Mode List", "Error", MB_OK | MB_ICONERROR);
+    }
+ 
   displayModes = new DXGI_MODE_DESC[numModes];
 
   result = Output->GetDisplayModeList(format, 0, &numModes, displayModes);
-  // }
-  
+  if (FAILED(result))
+    {
+      MessageBoxA(Window.hwnd, "Get Display Mode List", "Error", MB_OK | MB_ICONERROR);
+    }
+   
   if (DXFactory)
     {
       DXFactory->Release();
@@ -101,10 +117,16 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties Window,
     }
   
   if (FAILED(result))
-    {}
+    {
+      MessageBoxA(Window.hwnd, "Could not create Device and Swap Chain", "Error", MB_OK | MB_ICONERROR);
+    }
   
   result = Renderer.SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&Renderer.BackBuffer);
-  
+  if (FAILED(result))
+    {
+      MessageBoxA(Window.hwnd, "Get Buffer", "Error", MB_OK | MB_ICONERROR);
+    }
+ 
   ZeroMemory(&Renderer.Viewport, sizeof(D3D11_VIEWPORT));
   Renderer.Viewport.Width = Window.Width;
   Renderer.Viewport.Height = Window.Height;
@@ -120,7 +142,7 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties Window,
   DepthStencilDesc.Height = Window.Height;
   DepthStencilDesc.MipLevels = 1;
   DepthStencilDesc.ArraySize = 1;
-  DepthStencilDesc.Format = DXGI_FORMAT_D32_FLOAT;
+  DepthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
   DepthStencilDesc.SampleDesc.Count = 1;
   DepthStencilDesc.SampleDesc.Quality = 0;
   DepthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -130,7 +152,9 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties Window,
 
   result = Renderer.Device->CreateTexture2D(&DepthStencilDesc, 0, &Renderer.DepthStencilBuffer);
   if (FAILED(result))
-    {}
+    {
+      MessageBoxA(Window.hwnd, "Create Texture 2D", "Error", MB_OK | MB_ICONERROR);
+    }
   
   ZeroMemory(&DepthStencilStateDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
 
@@ -158,9 +182,13 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties Window,
   DepthStencilStateDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
   DepthStencilStateDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS; 
 
-  result = Renderer.Device->CreateDepthStencilState(&D3D11_DEPTH_STENCIL_DESC,
+  result = Renderer.Device->CreateDepthStencilState(&DepthStencilStateDesc,
 						    &Renderer.DepthStencilState);
-  
+  if (FAILED(result))
+    {
+      MessageBoxA(Window.hwnd, "Create Depth Stencil State", "Error", MB_OK | MB_ICONERROR);
+    }
+
   Renderer.DeviceContext->OMSetDepthStencilState(Renderer.DepthStencilState, 1); 
   
   ZeroMemory(&DepthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
@@ -171,18 +199,83 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties Window,
   result = Renderer.Device->CreateDepthStencilView(Renderer.DepthStencilBuffer,
 						   &DepthStencilViewDesc,
 						   &Renderer.DepthStencilView);
+  if (FAILED(result))
+    {
+      MessageBoxA(Window.hwnd, "Create Depth Stencil State", "Error", MB_OK | MB_ICONERROR);
+    }
 
-  D3D11_RENDER_TARGET_VIEW_DESC RenderTargetViewDesc; 
-
+  
   result = Renderer.Device->CreateRenderTargetView(Renderer.BackBuffer,
-						   RenderTargetViewDesc,
+						   NULL,
 						   &Renderer.RenderTargetView);
-  
-  Renderer.DeviceContext->OMSetRenderTargets();
+  if (FAILED(result))
+    {
+      MessageBoxA(Window.hwnd, "Create Render Target View", "Error", MB_OK | MB_ICONERROR);
+    }
+
+  Renderer.DeviceContext->OMSetRenderTargets(1, &Renderer.RenderTargetView,
+					     Renderer.DepthStencilView);
 
   
-  if (result)
-    return Renderer;
-  else
-    return 0; 
+  return Renderer; 
+}
+
+void ShutdownD3D(CoreRenderBuffers& Renderer)
+{
+  if (Renderer.SwapChain)
+    {
+      delete Renderer.SwapChain;
+      Renderer.SwapChain->Release();
+      Renderer.SwapChain = nullptr; 
+    }
+
+  if (Renderer.Device)
+    {
+      delete Renderer.Device;
+      Renderer.Device->Release();
+      Renderer.Device = nullptr; 
+    }
+      
+  if (Renderer.DeviceContext)
+    {
+      delete Renderer.DeviceContext;
+      Renderer.DeviceContext->Release();
+      Renderer.DeviceContext = nullptr; 
+    }
+      
+  if (Renderer.BackBuffer)
+    {
+      delete Renderer.BackBuffer;
+      Renderer.BackBuffer->Release();
+      Renderer.BackBuffer = nullptr; 
+    }
+
+  if (Renderer.RenderTargetView)
+    {
+      delete Renderer.RenderTargetView;
+      Renderer.RenderTargetView->Release();
+      Renderer.RenderTargetView = nullptr; 
+    }
+      
+  if (Renderer.DepthStencilBuffer)
+    {
+      delete Renderer.DepthStencilBuffer;
+      Renderer.DepthStencilBuffer->Release();
+      Renderer.DepthStencilBuffer = nullptr; 
+    }
+      
+  if (Renderer.DepthStencilState)
+    {
+      delete Renderer.DepthStencilState;
+      Renderer.DepthStencilState->Release();
+      Renderer.DepthStencilState = nullptr; 
+    }
+      
+  if (Renderer.DepthStencilView)
+    {
+      delete Renderer.DepthStencilView;
+      Renderer.DepthStencilView->Release();
+      Renderer.DepthStencilView = nullptr; 
+    }
+          
 }

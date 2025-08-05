@@ -46,7 +46,7 @@ struct MeshVertexBuffer
   XMFLOAT3 color; 
 };
 
-CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window, 
+CoreRenderBuffers InitializeD3D(Win32WindowProperties Window, 
 				bool fullscreen);
 void ShutdownD3D(CoreRenderBuffers& Renderer);
 
