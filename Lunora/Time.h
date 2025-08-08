@@ -23,8 +23,8 @@ float GameTime(Time&) const;
 float DeltaTime(Time&) const;
 
 void Reset(Time&);
-void Start();
-void Stop();
-void Tick();
+void Start(Time&);
+void Stop(Time&);
+void Tick(Time&);
 
 #endif
