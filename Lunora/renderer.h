@@ -3,14 +3,15 @@
 
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include <stdint.h>
 
 using namespace DirectX;
 
 struct Win32WindowProperties
 {
   HWND hwnd;
-  long Width;
-  long Height;
+  int32_t Width;
+  int32_t Height;
 };
 
 struct CoreRenderBuffers 

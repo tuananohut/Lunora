@@ -36,7 +36,36 @@ void Tick(Time& time)
     }
 }
 
-float DeltaTime() const
+float DeltaTime(Time& time) const
 {
   return (float)time.DeltaTime; 
 }
+
+void Stop(Time& time)
+{
+  if (!time.Stopped)
+    {
+      __int64 currTime;
+      QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
+
+      time.StopTime = currTime;
+      time.Stopped = true; 
+    }
+}
+
+void Start(Time& time)
+{
+  __int64 startTime;
+  QueryPerformanceCounter((LARGE_INTEGER*)&startTime);
+
+  if (time.Stopped)
+    {
+      time.PausedTime += (startTime - time.StopTime);
+
+      time.PrevTime = startTime;
+
+      time.StopTime = 0;
+      time.Stopped = false;  
+    }
+}
+

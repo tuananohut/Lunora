@@ -276,6 +276,5 @@ void ShutdownD3D(CoreRenderBuffers& Renderer)
       delete Renderer.DepthStencilView;
       Renderer.DepthStencilView->Release();
       Renderer.DepthStencilView = nullptr; 
-    }
-          
+    }          
 }

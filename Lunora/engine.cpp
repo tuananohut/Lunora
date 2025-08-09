@@ -2,6 +2,7 @@
 
 #include "resource.h"
 #include "Renderer.cpp"
+#include "Time.cpp"
 
 static bool Running; 
 
@@ -75,7 +76,10 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  Window->Width = 1080;
 	  Window->Height = 720;
 	  Renderer = InitializeD3D(*Window, false);
-    
+
+	  Time Timer;
+	  Reset(Timer); 
+	  
 	  while(Running)
 	    {
 	      MSG Message;
@@ -91,6 +95,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 		  TranslateMessage(&Message);
 		  DispatchMessageA(&Message);
 		}
+	      
+	      Tick(Timer);
 	      
 	    }  
 	} 
