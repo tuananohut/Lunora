@@ -19,7 +19,7 @@ struct Time
 
 void InitializeTime();
 
-float GameTime(Time&) const;
+float TotalTime(Time&) const;
 float DeltaTime(Time&) const;
 
 void Reset(Time&);

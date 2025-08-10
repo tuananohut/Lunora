@@ -15,6 +15,19 @@ void InitializeTime(Time& time)
   time.SecondsPerCount = 1.0 / (double)countsPerSec; 
 }
 
+float Time::TotalTime(Time& time) const
+{
+  if(time.Stopped)
+    {
+      return(float)(((time.StopTime - time.PausedTime) - time.BaseTime) * time.SecondsPerCount);
+    }
+
+  else
+    {
+      return (float)(((time.CurrTime - time.PausedTime) - time.BaseTime) * time.SecondsPerCount);
+    }
+}
+
 void Tick(Time& time)
 {
   if (time.Stopped)
@@ -68,4 +81,3 @@ void Start(Time& time)
       time.Stopped = false;  
     }
 }
-
