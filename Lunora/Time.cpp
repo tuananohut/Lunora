@@ -81,3 +81,14 @@ void Start(Time& time)
       time.Stopped = false;  
     }
 }
+
+void Reset(Timer& time)
+{
+  __int64 currTime;
+  QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
+
+  time.BaseTime = currTime;
+  time.PrevTime = currTime;
+  time.StopTime = 0;
+  time.Stopped  = false;
+}
