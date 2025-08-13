@@ -132,5 +132,86 @@ bool SkyDomeShader::InitializeShader(ID3D11Device* device,
 
   pixelShaderBuffer->Release();
   pixelShaderBuffer = nullptr; 
-  
+
+  matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+  matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  matrixBufferDesc.MiscFlags = 0;
+  matrixBufferDesc.StructureByteStride = 0;
+
+  result = device->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
+  if (FAILED(result))
+    return false;
+
+  colorBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  colorBufferDesc.ByteWidth = sizeof(ColorBufferType);
+  colorBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  colorBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  colorBufferDesc.MiscFlags = 0;
+  colorBufferDesc.StructureByteStride = 0;
+
+  result = device->CreateBuffer(&colorBufferDesc, NULL, &m_colorBuffer);
+  if (FAILED(result))
+    return false;
+
+  return true; 
+}
+
+void SkyDomeShader::ShutdownShader()
+{
+  if (m_colorBuffer)
+    {
+      m_colorBuffer->Release();
+      m_colorBuffer = nullptr;
+    }
+
+  if (m_matrixBuffer)
+    {
+      m_matrixBuffer->Release();
+      m_matrixBuffer = nullptr;
+    }
+
+  if (m_layout)
+    {
+      m_layout->Release();
+      m_layout = nullptr;
+    }
+
+  if (m_pixelShader)
+    {
+      m_pixelShader->Release();
+      m_pixelShader = nullptr;
+    }
+
+  if (m_vertexShader)
+    {
+      m_vertexShader->Release();
+      m_vertexShader = nullptr; 
+    }
+}
+
+void SkyDomeShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage,
+					     HWND hwnd,
+					     WCHAR* shaderFilename)
+{
+  char* compileErrors;
+  unsigned __int64 bufferSize, i;
+  ofstream fout;
+
+  compileErrors = (char*)(errorMessage->GetBufferPointer());
+
+  bufferSize = errorMessage->GetBufferSize();
+
+  fout.open("shader-error.txt");
+
+  for (i = 0; i < bufferSize; i++)
+    fout << compileErrors[i];
+
+  fout.close();
+
+  errorMessage->Release();
+  errorMessage = nullptr;
+
+  MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
 }
