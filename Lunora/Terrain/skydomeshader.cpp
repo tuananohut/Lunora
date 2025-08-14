@@ -215,3 +215,68 @@ void SkyDomeShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage,
 
   MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
 }
+
+bool SkyDomeShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
+					XMMATRIX worldMatrix,
+					XMMATRIX viewMatrix,
+					XMMATRIX projectionMatrix,
+					XMFLOAT4 apexColor,
+					XMFLOAT4 centerColor)
+{
+  HRESULT result;
+  D3D11_MAPPED_SUBRESOURCE mappedResource;
+  MatrixBufferType *dataPtr;
+  unsigned int bufferNumber;
+  ColorBufferType *dataPtr2;
+
+  worldMatrix = XMMatrixTranspose(worldMatrix);
+  viewMatirx = XMMatrixTranspose(viewMatrix);
+  projectionMatrix = XMMatrixTranspose(projectionMatrix);
+
+  result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+  if (FAILED(result))
+    {
+      return false;
+    }
+
+  dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+  dataPtr->world = worldMatrix;
+  dataPtr->view = viewMatrix;
+  dataPtr->projection = projectionMatrix;
+
+  deviceContext->Unmap(m_matrixBuffer, 0);
+
+  bufferNumber = 0;
+
+  deviceContext->VSSetConstantBuffers(bufferNumber, 1, &matrixBuffer);
+
+  result = deviceContext->Map(m_colorBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+  if (FAILED(result))
+    {
+      return false; 
+    }
+
+  dataPtr2 = (ColorBufferType*)mappedResource.pData;
+
+  dataPtr2->apexColor = apexColor;
+  dataPtr2->centerColor = centerColor;
+
+  deviceContext->Unmap(m_colorBuffer, 0);
+
+  bufferNumber = 0;
+
+  deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_colorBuffer);
+
+  return true;
+}
+
+void SkyDomeShader::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+  deviceContext->IASetInputLayout(m_layout);
+
+  deviceContext->VSSetShader(m_vertexShader, NULL, 0);
+  deviceContext->PSSetShader(m_pixelShader, NULL, 0);
+
+  deviceContext->DrawIndexed(indexCount, 0, 0);
+}
