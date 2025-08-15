@@ -6,6 +6,7 @@ ShaderManager::ShaderManager()
   m_TextureShader = nullptr;
   m_LightShader = nullptr; 
   m_FontShader = nullptr;
+  m_SkyDomeShader = nullptr; 
   m_TerrainShader = nullptr; 
 }
 
@@ -43,7 +44,14 @@ bool ShaderManager::Initialize(ID3D11Device* device, HWND hwnd)
     return false; 
   result = m_FontShader->Initialize(device, hwnd);
   if (!result)
-    return false; 
+    return false;
+
+  m_SkyDomeShader = new SkyDomeShader;
+  if(!m_SkyDomeShader)
+    return false;
+  result = m_SkyDomeShader->Initialize(device, hwnd);
+  if(!result)
+    return false;
 
   m_TerrainShader = new TerrainShader;
   if (!m_TerrainShader)
@@ -62,6 +70,13 @@ void ShaderManager::Shutdown()
       m_TerrainShader->Shutdown();
       delete m_TerrainShader;
       m_TerrainShader = nullptr;
+    }
+
+  if (m_SkyDomeShader)
+    {
+      m_SkyDomeShader->Shutdown();
+      delete m_SkyDomeShader;
+      m_SkyDomeShader = nullptr;
     }
   
   if (m_FontShader)
@@ -146,6 +161,18 @@ bool ShaderManager::RenderFontShader(ID3D11DeviceContext* deviceContext,
   return m_FontShader->Render(deviceContext, indexCount,
 			      worldMatrix, viewMatrix, projectionMatrix,
 			      texture, color);
+}
+
+bool ShaderManager::RenderSkyDomeShader(ID3D11DeviceContext* deviceContext,
+					int indexCount,
+					XMMATRIX worldMatrix,
+					XMMATRIX viewMatrix, 
+					XMMATRIX projectionMatrix,
+					XMFLOAT4 apexColor, XMFLOAT4 centerColor)
+{
+	return m_SkyDomeShader->Render(deviceContext, indexCount,
+				       worldMatrix, viewMatrix, projectionMatrix,
+				       apexColor, centerColor);
 }
 
 bool ShaderManager::RenderTerrainShader(ID3D11DeviceContext* deviceContext,

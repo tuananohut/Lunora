@@ -6,6 +6,7 @@
 #include "textureshader.h"
 #include "lightshader.h"
 #include "fontshader.h"
+#include "skydomeshader.h"
 #include "terrainshader.h"
 
 class ShaderManager
@@ -36,12 +37,18 @@ public:
 			   ID3D11ShaderResourceView*,
 			   XMFLOAT3, XMFLOAT4);
   
+  bool RenderSkyDomeShader(ID3D11DeviceContext*, int,
+			   XMMATRIX, XMMATRIX, XMMATRIX,
+			   XMFLOAT4, XMFLOAT4);
+
+  
 private:
   ColorShader* m_ColorShader;
   TextureShader* m_TextureShader;
   LightShader* m_LightShader;
   FontShader* m_FontShader;
   TerrainShader* m_TerrainShader;
+  SkyDomeShader *m_SkyDomeShader;
 };
 
 #endif
