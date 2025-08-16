@@ -7,7 +7,7 @@ SkyDome::SkyDome()
   m_indexBuffer = nullptr; 
 }
 
-SkyDome::SkyDome() {}
+SkyDome::SkyDome(const SkyDome& other) {}
 
 SkyDome::~SkyDome() {}
 

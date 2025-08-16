@@ -6,6 +6,7 @@ Zone::Zone()
   m_Camera = nullptr;
   m_Light = nullptr; 
   m_Position = nullptr;
+  m_SkyDome = nullptr; 
   m_Terrain = nullptr; 
 }
 
@@ -62,6 +63,19 @@ bool Zone::Initialize(D3D* Direct3D,
   m_Position->SetPosition(128.f, 10.f, -10.f);
   m_Position->SetRotation(0.f, 0.f, 0.f);
 
+  m_SkyDome = new SkyDome;
+  if (!m_SkyDome)
+    {
+      return false;
+    }
+  
+  result = m_SkyDome->Initialize(Direct3D->GetDevice());
+  if (!result)
+    {
+      MessageBoxA(hwnd, "Could not initialize the sky dome object.", "Error", MB_OK);
+      return false; 
+    }
+
   m_Terrain = new Terrain;
   if (!m_Terrain)
     {
@@ -91,6 +105,13 @@ void Zone::Shutdown()
       m_Terrain = nullptr;
     }
 
+  if (m_SkyDome)
+    {
+      m_SkyDome->Shutdown();
+      delete m_SkyDome;
+      m_SkyDome = nullptr; 
+    }
+  
   if (m_Position)
     {
       delete m_Position;
@@ -204,6 +225,7 @@ bool Zone::Render(D3D* Direct3D,
 {
   XMMATRIX worldMatrix, viewMatrix, projectionMatrix, baseViewMatrix, orthoMatrix;
   bool result;
+  XMFLOAT3 cameraPosition; 
 
   m_Camera->Render();
 
@@ -213,8 +235,33 @@ bool Zone::Render(D3D* Direct3D,
   m_Camera->GetBaseViewMatrix(baseViewMatrix);
   Direct3D->GetOrthoMatrix(orthoMatrix);
 
+  cameraPosition = m_Camera->GetPosition();
+
   Direct3D->BeginScene(0.f, 0.f, 0.f, 1.f);
 
+  Direct3D->TurnOffCulling();
+  Direct3D->TurnZBufferOff();
+
+  worldMatrix = XMMatrixTranslation(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+  m_SkyDome->Render(Direct3D->GetDeviceContext());
+  result = ShaderManager->RenderSkyDomeShader(Direct3D->GetDeviceContext(),
+					      m_SkyDome->GetIndexCount(),
+					      worldMatrix,
+					      viewMatrix, 
+					      projectionMatrix,
+					      m_SkyDome->GetApexColor(),
+					      m_SkyDome->GetCenterColor());
+  if(!result)
+    {
+      return false;
+    }
+
+  Direct3D->GetWorldMatrix(worldMatrix);
+
+  Direct3D->TurnZBufferOn();
+  Direct3D->TurnOnCulling();
+  
   if (m_wireFrame)
     {
       Direct3D->EnableWireframe(); 

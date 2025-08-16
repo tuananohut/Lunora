@@ -225,12 +225,12 @@ BOOL HostApplication::Render()
       m_RenderTargetView = nullptr; 
     }
 	
-  /*if (m_DepthStencilView)
+  if (m_DepthStencilView)
     {
       m_DeviceContext->ClearDepthStencilView(m_DepthStencilView.,
 					 D3Dll_CLEAR_DEPTH, depth, stencil );
     }
- */
+ 
   
   if(m_DepthStencilView)
     {

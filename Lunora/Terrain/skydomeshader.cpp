@@ -73,28 +73,28 @@ bool SkyDomeShader::InitializeShader(ID3D11Device* device,
   pixelShaderBuffer = nullptr;
 
   result = D3DCompileFromFile(vsFilename, NULL, NULL, "SkyDomeVertexShader", "vs_5_0",
-			      D3D_SHADER_ENABLE_STRICTNESS, 0, &vertexShaderBuffer,
+			      D3D10_SHADER_ENABLE_STRICTNESS, 0, &vertexShaderBuffer,
 			      &errorMessage);
   if (FAILED(result))
     {
       if (errorMessage)
 	OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
       else
-	MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+	MessageBoxW(hwnd, vsFilename, L"Missing Shader File", MB_OK);
 
       return false;
     }
 
   result = D3DCompileFromFile(psFilename, NULL, NULL, "SkyDomePixelShader", "ps_5_0",
-			      D3D_SHADER_ENABLE_STRICTNESS, 0, &pixelShaderBuffer,
+			      D3D10_SHADER_ENABLE_STRICTNESS, 0, &pixelShaderBuffer,
 			      &errorMessage);
   if (FAILED(result))
     {
       if (errorMessage)
 	OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
       else
-	MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
-
+	MessageBoxW(hwnd, psFilename, L"Missing Shader File", MB_OK);
+      
       return false;
     }
 
@@ -213,7 +213,7 @@ void SkyDomeShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage,
   errorMessage->Release();
   errorMessage = nullptr;
 
-  MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+  MessageBoxW(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
 }
 
 bool SkyDomeShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
@@ -230,7 +230,7 @@ bool SkyDomeShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
   ColorBufferType *dataPtr2;
 
   worldMatrix = XMMatrixTranspose(worldMatrix);
-  viewMatirx = XMMatrixTranspose(viewMatrix);
+  viewMatrix = XMMatrixTranspose(viewMatrix);
   projectionMatrix = XMMatrixTranspose(projectionMatrix);
 
   result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -249,8 +249,8 @@ bool SkyDomeShader::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 
   bufferNumber = 0;
 
-  deviceContext->VSSetConstantBuffers(bufferNumber, 1, &matrixBuffer);
-
+  deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
+  
   result = deviceContext->Map(m_colorBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
   if (FAILED(result))
     {
