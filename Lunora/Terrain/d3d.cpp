@@ -589,3 +589,13 @@ void D3D::DisableWireframe()
 {
   m_deviceContext->RSSetState(m_rasterState);
 }
+
+void D3D::TurnOnCulling()
+{
+  m_deviceContext->RSSetState(m_rasterState);
+}
+
+void D3D::TurnOffCulling()
+{
+  m_deviceContext->RSSetState(m_rasterStateNoCulling);
+}
