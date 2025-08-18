@@ -15,7 +15,7 @@ bool SkyDome::Initialize(ID3D11Device* device)
 {
   bool result;
 
-  result = LoadSkyDomeModel("../Lunora/Lunora/Terrain/skydome.txt");
+  result = LoadSkyDomeModel("../Lunora/Terrain/skydome.txt");
   if (!result)
     return false;
 
@@ -23,9 +23,9 @@ bool SkyDome::Initialize(ID3D11Device* device)
   if (!result)
     return false;
 
-  m_apexColor = XMFLOAT4(0.f, 0.05f, 0.6f, 1.f);
+  m_apexColor = XMFLOAT4(0.8f, 0.05f, 0.6f, 1.f);
 
-  m_centerColor = XMFLOAT4(0.f, 0.5f, 0.8f, 1.f);
+  m_centerColor = XMFLOAT4(0.2f, 0.5f, 0.8f, 1.f);
 
   return true;
 }
@@ -103,7 +103,7 @@ bool SkyDome::LoadSkyDomeModel(char* filename)
 
   fin.close();
 
-  return false; 
+  return true; 
 }
 
 void SkyDome::ReleaseSkyDomeModel()
