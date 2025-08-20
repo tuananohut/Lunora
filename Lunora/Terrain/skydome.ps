@@ -15,7 +15,7 @@ float4 SkyDomePixelShader(PixelInputType input): SV_TARGET
     float height;
     float4 outputColor;
 
-    height = input.domePosition.y;
+    height = input.domePosition.x;
 
     if (height <= 1.0 && height >= 0.5)
     {
