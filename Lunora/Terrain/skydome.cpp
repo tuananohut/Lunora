@@ -22,8 +22,21 @@ bool SkyDome::Initialize(ID3D11Device* device)
   result = InitializeBuffers(device);
   if (!result)
     return false;
-
-  m_apexColor = XMFLOAT4(0.8f, 0.05f, 0.6f, 1.f);
+  
+  XMFLOAT4 Colors[] =
+    {
+      Colors::White,
+      Colors::Black,
+      Colors::Red,
+      Colors::Green,
+      Colors::Blue,
+      Colors::Yellow,
+      Colors::Cyan,
+      Colors::Magenta
+    };
+  
+  
+  m_apexColor = Colors[3];
 
   m_centerColor = XMFLOAT4(0.2f, 0.5f, 0.8f, 1.f);
 
