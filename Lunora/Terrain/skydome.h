@@ -8,7 +8,7 @@
 using namespace DirectX;
 using namespace std;
 
-
+/*
 // USAGE: &Colors::White
 namespace Colors
 {
@@ -21,6 +21,7 @@ namespace Colors
   XMGLOBALCONST XMFLOAT4 Cyan = XMFLOAT4(0.f, 1.f, 1.f, 1.f);
   XMGLOBALCONST XMFLOAT4 Magenta = XMFLOAT4(1.f, 0.f, 1.f, 1.f);
 }
+*/
 
 class SkyDome
 {
@@ -62,7 +63,8 @@ class SkyDome
   ModelType* m_model;
   int m_vertexCount, m_indexCount;
   ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
-  XMFLOAT4 m_apexColor, m_centerColor; 
+  XMFLOAT4 m_apexColor, m_centerColor;
+  XMFLOAT4 Colors[8]; 
 };
 
 #endif
