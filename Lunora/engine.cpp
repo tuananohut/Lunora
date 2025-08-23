@@ -3,6 +3,7 @@
 #include "resource.h"
 #include "Renderer.cpp"
 #include "Time.cpp"
+#include "Camera/Camera.cpp"
 
 static bool Running; 
 
@@ -78,7 +79,9 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  Renderer = InitializeD3D(*Window, false);
 
 	  Time Timer;
-	  Reset(Timer); 
+	  Reset(Timer);
+
+	  Camera* mCamera = new Camera; 
 	  
 	  while(Running)
 	    {
@@ -96,8 +99,11 @@ int WINAPI WinMain(HINSTANCE Instance,
 		  DispatchMessageA(&Message);
 		}
 	      
-	      Tick(Timer);
+	      BeginScene(Renderer);
 	      
+	      Tick(Timer);
+
+	      EndScene(Renderer);
 	    }  
 	} 
     }

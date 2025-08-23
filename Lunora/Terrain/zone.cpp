@@ -76,6 +76,9 @@ bool Zone::Initialize(D3D* Direct3D,
       return false; 
     }
 
+  m_apexColor = m_SkyDome->GetApexColor();    
+  m_centerColor = m_SkyDome->GetCenterColor();
+  
   m_Terrain = new Terrain;
   if (!m_Terrain)
     {
@@ -162,6 +165,20 @@ bool Zone::Frame(D3D* Direct3D,
       return false; 
     }
 
+  static float elapsed = 0.f; 
+  static int index = 0;
+
+  elapsed += frameTime;
+
+  if (elapsed > 0.5f)
+    {
+      elapsed = 0.f;
+      index = (index + 1) % 8;
+    }
+
+  m_apexColor = m_SkyDome->Colors[index];
+  m_centerColor = m_SkyDome->Colors[(index + 1) % 8];
+    
   result = Render(Direct3D, ShaderManager, TextureManager);
   if (!result)
     {
@@ -250,8 +267,8 @@ bool Zone::Render(D3D* Direct3D,
 					      worldMatrix,
 					      viewMatrix, 
 					      projectionMatrix,
-					      m_SkyDome->GetApexColor(),
-					      m_SkyDome->GetCenterColor());
+					      m_apexColor,
+					      m_centerColor);
   if(!result)
     {
       return false;

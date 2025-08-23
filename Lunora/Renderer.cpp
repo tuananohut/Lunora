@@ -220,6 +220,25 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
   return Renderer; 
 }
 
+void BeginScene(CoreRenderBuffers& Renderer)
+{
+  float color[4];
+
+  color[0] = 1.f;
+  color[1] = 0.f;
+  color[2] = 0.5f;
+  color[3] = 1.f;
+
+  Renderer.DeviceContext->ClearRenderTargetView(Renderer.RenderTargetView, color);
+
+  Renderer.DeviceContext->ClearDepthStencilView(Renderer.DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+}
+
+void EndScene(CoreRenderBuffers& Renderer)
+{
+  Renderer.SwapChain->Present(0, 0);
+}
+
 void ShutdownD3D(CoreRenderBuffers& Renderer)
 {
   if (Renderer.SwapChain)

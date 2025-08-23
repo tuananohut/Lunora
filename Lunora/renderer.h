@@ -50,7 +50,7 @@ struct MeshVertexBuffer
 CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window, 
 				bool fullscreen);
 void ShutdownD3D(CoreRenderBuffers& Renderer);
+void BeginScene(CoreRenderBuffers& Renderer); 
 
-bool Render(); 
 
 #endif

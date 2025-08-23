@@ -8,21 +8,6 @@
 using namespace DirectX;
 using namespace std;
 
-/*
-// USAGE: &Colors::White
-namespace Colors
-{
-  XMGLOBALCONST XMFLOAT4 White = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
-  XMGLOBALCONST XMFLOAT4 Black = XMFLOAT4(0.f, 0.f, 0.f, 1.f);
-  XMGLOBALCONST XMFLOAT4 Red = XMFLOAT4(1.f, 0.f, 0.f, 1.f);
-  XMGLOBALCONST XMFLOAT4 Green = XMFLOAT4(0.f, 1.f, 0.f, 1.f);
-  XMGLOBALCONST XMFLOAT4 Blue = XMFLOAT4(0.f, 0.f, 1.f, 1.f);
-  XMGLOBALCONST XMFLOAT4 Yellow = XMFLOAT4(1.f, 1.f, 0.f, 1.f);
-  XMGLOBALCONST XMFLOAT4 Cyan = XMFLOAT4(0.f, 1.f, 1.f, 1.f);
-  XMGLOBALCONST XMFLOAT4 Magenta = XMFLOAT4(1.f, 0.f, 1.f, 1.f);
-}
-*/
-
 class SkyDome
 {
  private:
@@ -37,6 +22,20 @@ class SkyDome
   {
     XMFLOAT3 position; 
   };
+
+public:
+  XMFLOAT4 Colors[8] =
+    {
+      XMFLOAT4(1.f, 1.f, 1.f, 1.f),
+      XMFLOAT4(0.f, 0.f, 0.f, 1.f),  
+      XMFLOAT4(1.f, 0.f, 0.f, 1.f),  
+      XMFLOAT4(0.f, 1.f, 0.f, 1.f),  
+      XMFLOAT4(0.f, 0.f, 1.f, 1.f),   
+      XMFLOAT4(1.f, 1.f, 0.f, 1.f), 
+      XMFLOAT4(0.f, 1.f, 1.f, 1.f),   
+      XMFLOAT4(1.f, 0.f, 1.f, 1.f),
+    }; 
+
 
  public:
   SkyDome();
@@ -64,7 +63,6 @@ class SkyDome
   int m_vertexCount, m_indexCount;
   ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
   XMFLOAT4 m_apexColor, m_centerColor;
-  XMFLOAT4 Colors[8]; 
 };
 
 #endif

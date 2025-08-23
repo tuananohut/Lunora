@@ -36,6 +36,7 @@ private:
   SkyDome *m_SkyDome;
   Terrain* m_Terrain;
   bool m_displayUI, m_wireFrame;
+  XMFLOAT4 m_apexColor, m_centerColor;
 };
 
 #endif

@@ -19,8 +19,8 @@ struct Time
 
 void InitializeTime();
 
-float TotalTime(Time&) const;
-float DeltaTime(Time&) const;
+float TotalTime(Time&);
+float DeltaTime(Time&);
 
 void Reset(Time&);
 void Start(Time&);

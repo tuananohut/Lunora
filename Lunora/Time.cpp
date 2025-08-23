@@ -10,12 +10,12 @@ void InitializeTime(Time& time)
   time.CurrTime = 0;
   time.Stopped = false;
 
-  __int64 countsPerSecond;
+  __int64 countsPerSec;
   QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
   time.SecondsPerCount = 1.0 / (double)countsPerSec; 
 }
 
-float Time::TotalTime(Time& time) const
+float TotalTime(Time& time)
 {
   if(time.Stopped)
     {
@@ -49,7 +49,7 @@ void Tick(Time& time)
     }
 }
 
-float DeltaTime(Time& time) const
+float DeltaTime(Time& time) 
 {
   return (float)time.DeltaTime; 
 }
@@ -82,7 +82,7 @@ void Start(Time& time)
     }
 }
 
-void Reset(Timer& time)
+void Reset(Time& time)
 {
   __int64 currTime;
   QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
