@@ -141,6 +141,17 @@ void Zone::Shutdown()
     }
 }
 
+inline XMFLOAT4 LerpColor(const XMFLOAT4& a, const XMFLOAT4& b, float t)
+{
+    return XMFLOAT4(
+        a.x + (b.x - a.x) * t,
+        a.y + (b.y - a.y) * t,
+        a.z + (b.z - a.z) * t,
+        a.w + (b.w - a.w) * t
+    );
+}
+
+
 bool Zone::Frame(D3D* Direct3D,
 		 Input* Input,
 		 ShaderManager* ShaderManager,
@@ -164,7 +175,7 @@ bool Zone::Frame(D3D* Direct3D,
     {
       return false; 
     }
-
+  /*
   static float elapsed = 0.f; 
   static int index = 0;
 
@@ -173,11 +184,28 @@ bool Zone::Frame(D3D* Direct3D,
   if (elapsed > 0.5f)
     {
       elapsed = 0.f;
-      index = (index + 1) % 8;
+      index = (index + 1) % 24;
     }
 
-  m_apexColor = m_SkyDome->Colors[index];
-  m_centerColor = m_SkyDome->Colors[(index + 1) % 8];
+  m_apexColor = m_SkyDome->DayColors[index];
+  m_centerColor = m_SkyDome->DayColors[index];
+  */
+
+  static float timeOfDay = 6.0f;   // 06:00'dan baþla
+  float timeScale = 60.0f;         // 1 saniye = 1 dakika
+  timeOfDay += frameTime * (timeScale / 60.0f); // 60 saniye = 1 saat
+
+  if (timeOfDay >= 24.0f)
+    timeOfDay -= 24.0f;
+
+  int hour = static_cast<int>(timeOfDay);
+  int nextHour = (hour + 1) % 24;
+  float t = timeOfDay - static_cast<float>(hour);
+
+  XMFLOAT4 currentColor = LerpColor(m_SkyDome->DayColors[hour], m_SkyDome->DayColors[nextHour], t);
+
+  m_apexColor   = currentColor;
+  m_centerColor = currentColor;
     
   result = Render(Direct3D, ShaderManager, TextureManager);
   if (!result)
