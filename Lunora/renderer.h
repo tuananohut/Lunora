@@ -27,26 +27,6 @@ struct CoreRenderBuffers
   D3D11_VIEWPORT Viewport; 
 };
 
-struct HexMeshVertexBuffer
-{
-  XMFLOAT3 position;
-  XMFLOAT2 texture; 
-  XMFLOAT3 normal;
-  XMFLOAT3 tangent;
-  XMFLOAT3 binormal; 
-  XMFLOAT3 color; 
-};
-
-struct MeshVertexBuffer
-{
-  XMFLOAT3 position;
-  XMFLOAT2 texture; 
-  XMFLOAT3 normal;
-  XMFLOAT3 tangent;
-  XMFLOAT3 binormal; 
-  XMFLOAT3 color; 
-};
-
 CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window, 
 				bool fullscreen);
 void ShutdownD3D(CoreRenderBuffers& Renderer);

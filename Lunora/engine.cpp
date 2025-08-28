@@ -100,9 +100,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 		}
 	      
 	      BeginScene(Renderer);
-	      
-	      Tick(Timer);
-
+	 
 	      EndScene(Renderer);
 	    }  
 	} 
