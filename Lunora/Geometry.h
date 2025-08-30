@@ -45,7 +45,7 @@ HRESULT CreateVertexBuffer(CoreRenderBuffers& RenderBuffers)
   
   D3D11_BUFFER_DESC bufferDesc;
   bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-  bufferDesc.ByteWidth = sizeof( SimpleVertexCombined ) * 3;
+  bufferDesc.ByteWidth = sizeof(SimpleVertexCombined) * _countof(verticesCombo);
   bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
   bufferDesc.CPUAccessFlags = 0;
   bufferDesc.MiscFlags = 0;
@@ -56,5 +56,32 @@ HRESULT CreateVertexBuffer(CoreRenderBuffers& RenderBuffers)
   InitData.SysMemSlicePitch = 0;
 
   hr = RenderBuffers.Device->CreateBuffer( &bufferDesc, &InitData, &g_pVertexBuffer );
+  
+  return hr; 
 }
 
+ID3D11Buffer *g_pIndexBuffer = NULL;
+
+unsigned int indices[] = { 0, 1, 2 };
+
+
+HRESULT CreateIndexBuffer(CoreRenderBuffers& RenderBuffers)
+{
+  HRESULT hr; 
+  
+  D3D11_BUFFER_DESC bufferDesc;
+  bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+  bufferDesc.ByteWidth = sizeof(unsigned int) * _countof(indices);
+  bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+  bufferDesc.CPUAccessFlags = 0;
+  bufferDesc.MiscFlags = 0;
+
+  D3D11_SUBRESOURCE_DATA InitData;
+  InitData.pSysMem = indices;
+  InitData.SysMemPitch = 0;
+  InitData.SysMemSlicePitch = 0;
+
+  hr = RenderBuffers.Device->CreateBuffer( &bufferDesc, &InitData, &g_pIndexBuffer );
+  
+  return hr; 
+}

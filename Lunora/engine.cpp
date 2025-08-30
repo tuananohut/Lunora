@@ -4,6 +4,7 @@
 #include "Renderer.cpp"
 #include "Time.cpp"
 #include "Camera/Camera.cpp"
+#include "Geometry.h"
 
 static bool Running; 
 
@@ -51,6 +52,8 @@ int WINAPI WinMain(HINSTANCE Instance,
   wc.hIcon = LoadIcon(Instance, MAKEINTRESOURCE(IDI_ICON1));;
   wc.hCursor = LoadCursor(NULL, IDC_ARROW);
   wc.lpszClassName = "Lunora";
+
+  HRESULT result; 
   
   if (RegisterClassExA(&wc))
     {
@@ -100,7 +103,23 @@ int WINAPI WinMain(HINSTANCE Instance,
 		}
 	      
 	      BeginScene(Renderer);
-	 
+	      
+	      result = CreateVertexBuffer(Renderer); 
+	      if (FAILED(result))
+		{
+		  MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
+		  Running = false; 
+		}
+
+	      result = CreateIndexBuffer(Renderer);
+	      if (FAILED(result))
+		{
+		  MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
+		  Running = false; 
+		}
+
+	      Renderer.DeviceContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	      
 	      EndScene(Renderer);
 	    }  
 	} 

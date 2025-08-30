@@ -16,15 +16,16 @@ struct Win32WindowProperties
 
 struct CoreRenderBuffers 
 {
-  IDXGISwapChain* SwapChain;
-  ID3D11Device* Device;
-  ID3D11DeviceContext* DeviceContext;
-  ID3D11Texture2D* BackBuffer;
-  ID3D11RenderTargetView* RenderTargetView;
-  ID3D11Texture2D* DepthStencilBuffer;
-  ID3D11DepthStencilState* DepthStencilState; 
-  ID3D11DepthStencilView* DepthStencilView; 
-  D3D11_VIEWPORT Viewport; 
+  IDXGISwapChain *SwapChain;
+  ID3D11Device *Device;
+  ID3D11DeviceContext *DeviceContext;
+  ID3D11Texture2D *BackBuffer;
+  ID3D11RenderTargetView *RenderTargetView;
+  ID3D11Texture2D *DepthStencilBuffer;
+  ID3D11DepthStencilState *DepthStencilState; 
+  ID3D11DepthStencilView *DepthStencilView; 
+  D3D11_VIEWPORT Viewport;
+  ID3D11RasterizerState *RasterState;
 };
 
 CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window, 
