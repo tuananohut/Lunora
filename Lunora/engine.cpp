@@ -84,7 +84,21 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  Time Timer;
 	  Reset(Timer);
 
-	  Camera* mCamera = new Camera; 
+	  Camera* mCamera = new Camera;
+
+	  result = CreateVertexBuffer(Renderer); 
+	  if (FAILED(result))
+	    {
+	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
+	      Running = false; 
+	    }
+
+	  result = CreateIndexBuffer(Renderer);
+	  if (FAILED(result))
+	    {
+	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
+	      Running = false; 
+	    }
 	  
 	  while(Running)
 	    {
@@ -104,20 +118,26 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      
 	      BeginScene(Renderer);
 	      
-	      result = CreateVertexBuffer(Renderer); 
-	      if (FAILED(result))
+	      
+	      VertexShader vsCompiled = CompileShader( vs_4_0, VSmain() );
+	      technique10 t0
 		{
-		  MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
-		  Running = false; 
+		  pass p0
+		  {
+		    SetVertexShader( vsCompiled );	  
+		    SetPixelShader( CompileShader( ps_4_0, PSmain() ));
+		  }
 		}
 
-	      result = CreateIndexBuffer(Renderer);
-	      if (FAILED(result))
-		{
-		  MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
-		  Running = false; 
-		}
+	      m_pD3D11Device->IASetInputLayout( NULL );
+	      m_pD3D11Device->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+						      );
 
+	      ID3DX11EffectTechnique * pTech = NULL;
+	      pTech = m_pEffect->GetTechniqueByIndex(0);
+	      pTech->GetPassByIndex(iPass)->Apply(0);
+	      Renderer.Device->Draw( 3, 0 );
+	      
 	      Renderer.DeviceContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	      
 	      EndScene(Renderer);
