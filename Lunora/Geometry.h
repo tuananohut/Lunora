@@ -1,4 +1,5 @@
 #include <DirectXMath.h>
+#include <d3dcompiler.h>
 #include "Renderer.h"
 
 struct HexMeshVertexBuffer
@@ -84,4 +85,46 @@ HRESULT CreateIndexBuffer(CoreRenderBuffers& RenderBuffers)
   hr = RenderBuffers.Device->CreateBuffer( &bufferDesc, &InitData, &g_pIndexBuffer );
   
   return hr; 
+}
+
+void IAStage(CoreRenderBuffers& RenderBuffers)
+{
+  HRESULT hr; 
+  ID3D11InputLayout* layout; 
+  
+  D3D11_INPUT_ELEMENT_DESC input_layout[] =
+    {
+      { L"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
+	D3D11_INPUT_PER_VERTEX_DATA, 0 },
+      { L"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,
+	D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    };
+
+  UINT num_elements = sizeof(layout) / sizeof(layout)[0];
+  
+  hr = CreateInputLayout(&input_layout, num_elements, 0, ,layout);
+  
+  UINT stride = sizeof( SimpleVertex );
+  UINT offset = 0;
+  RenderBuffers.Device->IASetVertexBuffers(
+					   0, 
+					   1, 
+					   &g_pVertexBuffer,
+					   &stride, 
+					   &offset );
+  
+  RenderBuffers.Device->IASetInputLayout( g_pVertexLayout );
+}
+
+HRESULT CompileShader(_In_ LPCWSTR srcFile,
+		      _In_ LPCSTR entryPoint,
+		      _In_ LPCSTR profile,
+		      _Outptr_ ID3DBlob** blob)
+{
+  if (!srcFile || !entryPoint || !profile || !blob)
+    {
+      return E_INVALIDARG; 
+    }
+
+  *blob = nullptr;
 }

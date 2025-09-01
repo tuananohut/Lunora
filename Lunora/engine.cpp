@@ -119,27 +119,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      BeginScene(Renderer);
 	      
 	      
-	      VertexShader vsCompiled = CompileShader( vs_4_0, VSmain() );
-	      technique10 t0
-		{
-		  pass p0
-		  {
-		    SetVertexShader( vsCompiled );	  
-		    SetPixelShader( CompileShader( ps_4_0, PSmain() ));
-		  }
-		}
 
-	      m_pD3D11Device->IASetInputLayout( NULL );
-	      m_pD3D11Device->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
-						      );
-
-	      ID3DX11EffectTechnique * pTech = NULL;
-	      pTech = m_pEffect->GetTechniqueByIndex(0);
-	      pTech->GetPassByIndex(iPass)->Apply(0);
-	      Renderer.Device->Draw( 3, 0 );
-	      
-	      Renderer.DeviceContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-	      
 	      EndScene(Renderer);
 	    }  
 	} 
