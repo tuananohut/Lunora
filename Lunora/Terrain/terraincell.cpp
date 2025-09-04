@@ -9,6 +9,38 @@ TerrainCell::TerrainCell()
   m_lineIndexBuffer = nullptr; 
 }
 
-TerrainCell::TerrainCell(const TerrainCell& other) {}
+TerrainCell::TerrainCell(const TerrainCell &other) {}
 
 TerrainCell::~TerraincCell() {} 
+
+bool TerrainCell::Initialize(ID3D11Device *Device,
+			     void *terrainModelPtr,
+			     int nodeIndexX,
+			     int nodeIndexY,
+			     int cellHeight,
+			     int cellWidth,
+			     int terrainWidth)
+{
+  ModelType *terrainModel;
+  bool result;
+
+  terrainModel = (ModelType*)terrainModelPtr;
+
+  result = InitializeBuffers(Device, nodeIndexX, nodeIndexY, cellHeight, cellWidth, terrainWidth, terrainModel);
+  if (!result)
+    {
+      return false;
+    }
+
+  terrainModel = nullptr;
+
+  CalculateCellDimensions();
+
+  result = BuildLineBuffers(Device);
+  if (!result)
+    {
+      return false;
+    }
+
+  return true; 
+}
