@@ -44,3 +44,26 @@ bool TerrainCell::Initialize(ID3D11Device *Device,
 
   return true; 
 }
+
+void TerrainCell::Shutdown()
+{
+  ShutdownLineBuffers();
+
+  ShutdownBuffers();
+}
+
+void TerrainCell::Render(ID3D11DeviceContext* DeviceContext)
+{
+  RenderBuffers(DeviceContext); 
+}
+
+int TerrainCell::GetVertexCount()
+{
+  return m_vertexCount; 
+}
+
+int TerrainCell::GetIndexCount()
+{
+  return m_indexCount; 
+}
+
