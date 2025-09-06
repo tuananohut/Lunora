@@ -9,6 +9,8 @@
 using namespace std; 
 using namespace DirectX;
 
+#include "terraincell.h"
+
 class Terrain
 {
 private:
@@ -60,9 +62,13 @@ private:
 
   bool Initialize(ID3D11Device*, char*);
   void Shutdown();
-  bool Render(ID3D11DeviceContext*);
 
-  int GetIndexCount();
+  bool RenderCell(ID3D11DeviceContext*, int);
+  void RenderCellLines(ID3D11DeviceContext*, int); 
+  
+  int GetCellIndexCount(int);
+  int GetCellLinesIndexCount(int);
+  int GetCellCount();
 
  private:
   bool LoadSetupFile(char*);
@@ -83,18 +89,17 @@ private:
 				VectorType&,
 				VectorType&);
   
-  bool InitializeBuffers(ID3D11Device*);
-  void ShutdownBuffers();
-  void RenderBuffers(ID3D11DeviceContext*);
-
+  bool LoadTerrainCells(ID3D11Device*);
+  void ShutdownTerrainCells(); 
+  
  private:
-  ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
-  int m_vertexCount, m_indexCount; 
   int m_terrainHeight, m_terrainWidth;
   float m_heightScale;
   char *m_terrainFilename, *m_colorMapFilename;
-  HeightMapType* m_heightMap;
-  ModelType* m_terrainModel; 
+  HeightMapType *m_heightMap;
+  ModelType *m_terrainModel;
+  TerrainCell *m_TerrainCells;
+  int m_cellCount; 
 };
 
 #endif 

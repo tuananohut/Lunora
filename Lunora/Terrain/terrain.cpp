@@ -2,12 +2,11 @@
 
 Terrain::Terrain()
 {
-  m_vertexBuffer = nullptr;
-  m_indexBuffer = nullptr;
   m_terrainFilename = nullptr;
   m_colorMapFilename = nullptr; 
   m_heightMap = nullptr;
   m_terrainModel = nullptr; 
+  m_TerrainCells = nullptr; 
 }
 
 Terrain::Terrain(const Terrain& other) {}
@@ -60,6 +59,12 @@ bool Terrain::Initialize(ID3D11Device* device, char* setupFilename)
       return false; 
     }
 
+  result = LoadTerrainCells(device);
+  if (!result)
+    {
+      return false; 
+    }
+
   ShutdownTerrainModel();
 
   return true; 
@@ -67,7 +72,7 @@ bool Terrain::Initialize(ID3D11Device* device, char* setupFilename)
 
 void Terrain::Shutdown()
 {
-  ShutdownBuffers();
+  ShutdownTerrainCells();
 
   ShutdownTerrainModel();
 
@@ -765,129 +770,78 @@ void Terrain::CalculateTangentBinormal(TempVertexType vertex1,
   binormal.z = binormal.z / length;
 }
 
-bool Terrain::InitializeBuffers(ID3D11Device* device)
+bool Terrain::LoadTerrainCell(ID3D11Device *device)
 {
-  VertexType* vertices;
-  unsigned long* indices;
-  D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
-  D3D11_SUBRESOURCE_DATA vertexData, indexData;
-  HRESULT result;
+  int cellHeight, cellWidth, cellRowCount, i, j, index;
+  bool result; 
+  
+  cellHeight = 33;
+  cellWidth = 33;
+
+  cellRowCount = (m_terrainWidth - 1) / (cellWidth - 1);
+  m_cellCount = cellRowCount * cellRowCount;
+  
+  m_TerrainCells = new TerrainCell[m_cellCount];
+  if (!m_TerrainCells)
+    {
+      return false; 
+    }
+
+  for (j = 0; j < cellRowCount; j++)
+    {
+      for (i = 0; i < cellRowCount; i++)
+	{
+	  index = (cellRowCount * j) + i;
+
+	  result = m_TerrainCells[index].Initialize(device, m_terrainModel, i, j, cellHeight, cellWidth, m_terrainWidth);
+	  if (!result)
+	    {
+	      return false; 
+	    }
+	}
+    }
+
+  return true; 
+}
+
+void Terrain::ShutdownTerrainCells()
+{
   int i;
 
-  // Drawing a line = 2 points
-  // Square has 4 lines
-  // Drawing a square 2 points * 4 lines = 8 lines
-  m_vertexCount = (m_terrainWidth - 1) * (m_terrainHeight - 1) * 6;
-  
-  m_indexCount = m_vertexCount; 
-
-  vertices = new VertexType[m_vertexCount];
-  if (!vertices)
+  if (m_TerrainCells)
     {
-      return false; 
-    }
+      for (i = 0; i < m_cellCount; i++)
+	{
+	  m_TerrainCells[i].Shutdown(); 
+	}
 
-  indices = new unsigned long[m_indexCount];
-  if (!indices)
-    {
-      return false; 
-    }
-  
-  for (i = 0; i < m_vertexCount; i++)
-    {
-      vertices[i].position = XMFLOAT3(m_terrainModel[i].x,
-				      m_terrainModel[i].y,
-				      m_terrainModel[i].z);
-
-      vertices[i].texture = XMFLOAT2(m_terrainModel[i].tu, m_terrainModel[i].tv);
-
-      vertices[i].normal = XMFLOAT3(m_terrainModel[i].nx,
-				    m_terrainModel[i].ny,
-				    m_terrainModel[i].nz);
-
-      vertices[i].tangent = XMFLOAT3(m_terrainModel[i].tx,
-				     m_terrainModel[i].ty,
-				     m_terrainModel[i].tz);
-
-      vertices[i].binormal = XMFLOAT3(m_terrainModel[i].bx,
-				      m_terrainModel[i].by,
-				      m_terrainModel[i].bz);
-
-      vertices[i].color = XMFLOAT3(m_terrainModel[i].r,
-				   m_terrainModel[i].g,
-				   m_terrainModel[i].b);
-      indices[i] = i; 
-    }
-  
-  vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-  vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
-  vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-  vertexBufferDesc.CPUAccessFlags = 0;
-  vertexBufferDesc.MiscFlags = 0;
-  vertexBufferDesc.StructureByteStride = 0;
-
-  vertexData.pSysMem = vertices;
-  vertexData.SysMemPitch = 0;
-  vertexData.SysMemSlicePitch = 0;
-  
-  result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
-  if (FAILED(result))
-    {
-      return false; 
-    }
-
-  indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-  indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
-  indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-  indexBufferDesc.CPUAccessFlags = 0;
-  indexBufferDesc.MiscFlags = 0;
-  indexBufferDesc.StructureByteStride = 0;
-
-  indexData.pSysMem = indices;
-  indexData.SysMemPitch = 0;
-  indexData.SysMemSlicePitch = 0;
-
-  result = device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
-  if (FAILED(result))
-    {
-      return false; 
-    }
-  
-  delete[] vertices;
-  vertices = nullptr;
-
-  delete[] indices;
-  indices = nullptr; 
-
-  return true;
-}
-
-void Terrain::ShutdownBuffers()
-{
-  if (m_indexBuffer)
-    {
-      m_indexBuffer->Release();
-      m_indexBuffer = nullptr; 
-    }
-
-  if (m_vertexBuffer)
-    {
-      m_vertexBuffer->Release();
-      m_vertexBuffer = nullptr;
+      delete[] m_TerrainCells;
+      m_TerrainCells = nullptr;
     }
 }
 
-void Terrain::RenderBuffers(ID3D11DeviceContext* deviceContext)
+bool Terrain::RenderCell(ID3D11DeviceContext *deviceContext, int cellId)
 {
-  unsigned int stride;
-  unsigned int offset;
+  m_TerrainCells[cellId].Render(deviceContext);
+  return true; 
+}
 
-  stride = sizeof(VertexType);
-  offset = 0;
+void Terrain::RenderCellLines(ID3D11DeviceContext *deviceContext, int cellId)
+{
+  m_TerrainCells[cellId].RenderLineBuffers(deviceContext);
+}
 
-  deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
-  
-  deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+int Terrain::GetCellIndexCount(int cellId)
+{
+  return m_TerrainCells[cellId].GetIndexCount();
+}
 
-  deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
+int Terrain::GetCellLinesIndexCount(int cellId)
+{
+  return m_TerrainCells[cellId].GetLineBuffersIndexCount();
+}
+
+int Terrain::GetCellCount()
+{
+  return m_cellCount; 
 }
