@@ -172,4 +172,23 @@ bool TerrainCell::InitializeBuffers(ID3D11Device *device,
   return true; 
 }
 
+void TerrainCell::ShutdownBuffers()
+{
+  if (m_vertexList)
+    {
+      delete[] m_vertexList;
+      m_vertexList = nullptr; 
+    }
 
+  if (m_indexBuffer)
+    {
+      m_indexBuffer->Release();
+      m_indexBuffer = nullptr; 
+    }
+
+  if (m_vertexBuffer)
+    {
+      m_vertexBuffer->Release();
+      m_vertexBuffer = nullptr; 
+    }
+}
