@@ -192,3 +192,301 @@ void TerrainCell::ShutdownBuffers()
       m_vertexBuffer = nullptr; 
     }
 }
+
+void TerrainCell::RenderBuffers(ID3D11DeviceContext* DeviceContext)
+{
+  unsigned int stride;
+  unsigned int offset;
+
+  stride = sizeof(VertexType);
+  offset = 0;
+
+  DeviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+
+  DeviceContext->IASetIndexBuffers(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+  DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+void TerrainCell::CalculateCellDimensions()
+{
+  int i;
+  float width, height, depth;
+
+  m_maxWidth = -1000000.f;
+  m_maxHeight = -1000000.f;
+  m_maxDepth = -1000000.f;
+
+  m_minWidth = 1000000.f;
+  m_minHeight = 1000000.f;
+  m_minDepth = 1000000.f;
+
+  for(i = 0; i < m_vertexCount; i++)
+    {
+      width = m_vertexList[i].x;
+      height = m_vertexList[i].y;
+      depth = m_vertexList[i].z;
+
+      if(width > m_maxWidth)
+	{
+	  m_maxWidth = width;
+	}
+      if(width < m_minWidth)
+	{
+	  m_minWidth = width;
+	}
+      
+      if(height > m_maxHeight)
+	{
+	  m_maxHeight = height;
+	}
+      if(height < m_minHeight)
+	{
+	  m_minHeight = height;
+	}
+
+      if(depth > m_maxDepth)
+	{
+	  m_maxDepth = depth;
+	}
+      if(depth < m_minDepth)
+	{
+	  m_minDepth = depth;
+	}
+    }
+  
+  m_positionX = (m_maxWidth - m_minWidth) + m_minWidth;
+  m_positionY = (m_maxHeight - m_minHeight) + m_minHeight;
+  m_positionZ = (m_maxDepth - m_minDepth) + m_minDepth;
+}
+
+bool TerrainCell::BuildLineBuffers(ID3D11Device *Device)
+{
+  ColorVertexType *vertices;
+  unsigned long *indices;
+  D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+  D3D11_SUBRESOURCE_DATA vertexData, indexData;
+  HRESULT result;
+  XMFLOAT4 lineColor;
+  int index, vertexCount, indexCount;
+
+  lineColor = XMFLOAT4(1.f, 0.5f, 0.f, 1.f);
+
+  vertexCount = 24;
+
+  indexCount = vertexCount;
+
+  vertices = new ColorVertexType[vertexCount];
+  if (!vertices)
+    return false;
+
+  indices = new unsigned long[indexCount];
+  if (!indices)
+    return false;
+
+  vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+  vertexBufferDesc.ByteWidth = sizeof(ColorVertexType) * vertexCount;
+  vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+  vertexBufferDesc.CPUAccessFlags = 0;
+  vertexBufferDesc.StructureByteStride = 0;
+
+  vertexData.pSysMem = vertices;
+  vertexData.SysMemPitch = 0;
+  vertexData.SysMemSlicePitch = 0;
+
+  indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+  indexBufferDesc.ByteWidth = sizeof(unsigned long) * indexCount;
+  indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+  indexBufferDesc.CPUAccessFlags = 0;
+  indexBufferDesc.MiscFlags = 0;
+  indexBufferDesc.StructureByteStride = 0;
+
+  indexData.pSysMem = indices;
+  indexData.SysMemPitch = 0;
+  indexData.SysMemSlicePitch = 0;
+
+  index = 0;
+  
+  vertices[index].position = XMFLOAT3(m_minWidth, m_minHeight, m_minDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_maxWidth, m_minHeight, m_minDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_minWidth, m_minHeight, m_maxDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_maxWidth, m_minHeight, m_maxDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_minWidth, m_minHeight, m_minDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_minWidth, m_minHeight, m_maxDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_maxWidth, m_minHeight, m_minDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_maxWidth, m_minHeight, m_maxDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_minWidth, m_maxHeight, m_minDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_maxWidth, m_maxHeight, m_minDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_minWidth, m_maxHeight, m_maxDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_maxWidth, m_maxHeight, m_maxDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_minWidth, m_maxHeight, m_minDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_minWidth, m_maxHeight, m_maxDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_maxWidth, m_maxHeight, m_minDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_maxWidth, m_maxHeight, m_maxDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_maxWidth, m_maxHeight, m_maxDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_maxWidth, m_minHeight, m_maxDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_minWidth, m_maxHeight, m_maxDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_minWidth, m_minHeight, m_maxDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_maxWidth, m_maxHeight, m_minDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_maxWidth, m_minHeight, m_minDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_minWidth, m_maxHeight, m_minDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+  index++;
+
+  vertices[index].position = XMFLOAT3(m_minWidth, m_minHeight, m_minDepth);
+  vertices[index].color = lineColor;
+  indices[index] = index;
+
+  result = Device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_lineVertexBuffer);
+  if (FAILED(result))
+    return false;
+
+  result = Device->CreateBuffer(&indexBufferDesc, &indexData, &m_lineIndexBuffer);
+  if (FAILED(result))
+    return false;
+
+  m_lineIndexCount = indexCount;
+
+  delete[] vertices;
+  vertices = nullptr;
+
+  delete[] indices;
+  indices = nullptr; 
+  
+  return true;
+}
+
+void TerrainCell::ShutdownLineBuffers()
+{
+  if (m_lineIndexBuffer)
+    {
+      m_lineIndexBuffer->Release();
+      m_lineIndexBuffer = nullptr; 
+    }
+ 
+  if (m_lineVertexBuffer)
+    {
+      m_lineVertexBuffer->Release();
+      m_lineVertexBuffer = nullptr; 
+    }
+}
+
+void TerrainCell::RenderLineBuffers(ID3D11DeviceContext* DeviceContext)
+{
+  unsigned int stride;
+  unsigned int offset;
+
+  stride = sizeof(ColorVertexType);
+  offset = 0;
+
+  DeviceContext->IASetVertexBuffers(0, 1, &m_lineVertexBuffer, &stride, &offset);
+
+  DeviceContext->IASetIndexBuffer(m_lineIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+  DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST); 
+}
+
+int TerrainCell::GetLineBuffersIndexCount()
+{
+  return m_lineIndexCount; 
+}
+
+void TerrainCell::GetCellDimensions(float& maxWidth, float& maxHeight, float& maxDepth,
+				    float& minWidth, float& minHeight, float& minDepth)
+{
+  maxWidth = m_maxWidth;
+  maxHeight = m_maxHeight;
+  maxDepth = m_maxDepth;
+  minWidth = m_minWidth;
+  minHeight = m_minHeight;
+  minDepth = m_minDepth;
+}
