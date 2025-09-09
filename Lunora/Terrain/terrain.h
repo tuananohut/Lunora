@@ -93,7 +93,7 @@ private:
   void ShutdownTerrainCells(); 
   
  private:
-  int m_terrainHeight, m_terrainWidth;
+  int m_terrainHeight, m_terrainWidth, m_vertexCount;
   float m_heightScale;
   char *m_terrainFilename, *m_colorMapFilename;
   HeightMapType *m_heightMap;

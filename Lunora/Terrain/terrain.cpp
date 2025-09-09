@@ -53,12 +53,6 @@ bool Terrain::Initialize(ID3D11Device* device, char* setupFilename)
 
   CalculateTerrainVectors(); 
   
-  result = InitializeBuffers(device);
-  if (!result)
-    {
-      return false; 
-    }
-
   result = LoadTerrainCells(device);
   if (!result)
     {
@@ -77,18 +71,6 @@ void Terrain::Shutdown()
   ShutdownTerrainModel();
 
   ShutdownHeightMap(); 
-}
-
-bool Terrain::Render(ID3D11DeviceContext* deviceContext)
-{
-  RenderBuffers(deviceContext);
-
-  return true; 
-}
-
-int Terrain::GetIndexCount()
-{
-  return m_indexCount; 
 }
 
 bool Terrain::LoadSetupFile(char* filename)

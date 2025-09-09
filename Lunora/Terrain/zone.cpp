@@ -96,6 +96,8 @@ bool Zone::Initialize(D3D* Direct3D,
                       
   m_wireFrame = true;
 
+  m_cellLines = true; 
+
   return true;
 }
 
@@ -262,6 +264,11 @@ void Zone::HandleMovementInput(Input* Input, float frameTime)
     {
       m_wireFrame = !m_wireFrame; 
     }
+
+   if (Input->IsF3Toggled())
+     {
+       m_cellLines = !m_cellLines; 
+     }
 }
 
 bool Zone::Render(D3D* Direct3D,
@@ -270,7 +277,8 @@ bool Zone::Render(D3D* Direct3D,
 {
   XMMATRIX worldMatrix, viewMatrix, projectionMatrix, baseViewMatrix, orthoMatrix;
   bool result;
-  XMFLOAT3 cameraPosition; 
+  XMFLOAT3 cameraPosition;
+  int i; 
 
   m_Camera->Render();
 
@@ -312,19 +320,37 @@ bool Zone::Render(D3D* Direct3D,
       Direct3D->EnableWireframe(); 
     }
 
-  m_Terrain->Render(Direct3D->GetDeviceContext());
-  result = ShaderManager->RenderTerrainShader(Direct3D->GetDeviceContext(),
-					      m_Terrain->GetIndexCount(),
-					      worldMatrix,
-					      viewMatrix,
-					      projectionMatrix,
-					      TextureManager->GetTexture(0),
-					      TextureManager->GetTexture(1),
-					      m_Light->GetDirection(),
-					      m_Light->GetDiffuseColor());
-  if (!result)
+  for (i = 0; i < m_Terrain->GetCellCount(); i++)
     {
-      return false; 
+      result = m_Terrain->RenderCell(Direct3D->GetDeviceContext(), i);
+      if (!result)
+	return false;
+
+      result = ShaderManager->RenderTerrainShader(Direct3D->GetDeviceContext(),
+						  m_Terrain->GetCellIndexCount(i),
+						  worldMatrix,
+						  viewMatrix,
+						  projectionMatrix,
+						  TextureManager->GetTexture(0),
+						  TextureManager->GetTexture(1),
+						  m_Light->GetDirection(),
+						  m_Light->GetDiffuseColor());
+      if (!result)
+	return false;
+
+      if(m_cellLines)
+	{
+	  m_Terrain->RenderCellLines(Direct3D->GetDeviceContext(), i);
+	  ShaderManager->RenderColorShader(Direct3D->GetDeviceContext(),
+					   m_Terrain->GetCellLinesIndexCount(i),
+					   worldMatrix,
+					   viewMatrix,
+					   projectionMatrix);
+	  if(!result)
+	    {
+	      return false;
+	    }
+	}
     }
 
   if (m_wireFrame)
