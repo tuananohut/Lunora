@@ -99,6 +99,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
 	      Running = false; 
 	    }
+
+	  IAStage(Renderer);
 	  
 	  while(Running)
 	    {
@@ -118,7 +120,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      
 	      BeginScene(Renderer);
 	      
-	      
+	      Render(Renderer);
 
 	      EndScene(Renderer);
 	    }  
