@@ -79,7 +79,7 @@ bool ColorShader::InitializeShader(ID3D11Device* device, HWND hwnd, LPCWSTR vsFi
 			      "ColorVertexShader",
 			      "vs_5_0",
 			      D3D10_SHADER_ENABLE_STRICTNESS,
-			      0,
+ 			      0,
 			      &vertexShaderBuffer, &errorMessage);
   if(FAILED(result))
     {

@@ -91,65 +91,21 @@ HRESULT CreateIndexBuffer(CoreRenderBuffers& RenderBuffers)
   return hr; 
 }
 
-
-HRESULT CompileShader(_In_ LPCWSTR srcFile,
-		      _In_ LPCSTR entryPoint,
-		      _In_ LPCSTR profile,
-		      _Outptr_ ID3DBlob** blob)
-{
-  if (!srcFile || !entryPoint || !profile || !blob)
-    {
-      return E_INVALIDARG; 
-    }
-
-  *blob = nullptr;
-
-  UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
-#if defined ( DEBUG ) || defined ( _DEBUG )
-  flags |= D3DCOMPILE_DEBUG;
-#endif
-
-  const D3D_SHADER_MACRO defines[] =
-  {
-    "EXAMPLE_DEFINE", "1",
-      NULL, NULL
-      };
-
-  ID3DBlob *shaderBlob = nullptr; 
-  ID3DBlob *errorBlob = nullptr;
-  HRESULT hr = D3DCompileFromFile(srcFile, defines, D3D_COMPILE_STANDARD_FILE_INCLUDE,
-				  entryPoint, profile, flags, 0, &shaderBlob, &errorBlob);
-  if (FAILED(hr))
-    {
-      if (errorBlob)
-	{
-	  std::string msg((char*)errorBlob->GetBufferPointer(), errorBlob->GetBufferSize());
-	  MessageBoxA(nullptr, msg.c_str(), "Shader Compile Error", MB_OK);
-	  errorBlob->Release();
-	}
-      return hr;
-    }
- 
-
-  *blob = shaderBlob; 
-
-  return hr; 
-}
-
 void IAStage(CoreRenderBuffers& RenderBuffers)
 {
   HRESULT hr; 
   ID3D11InputLayout* layout;
   D3D11_SAMPLER_DESC samplerDesc;
   D3D11_BUFFER_DESC matrixBufferDesc;
-  ID3DBlob *vsBlob = nullptr;
-  ID3DBlob *psBlob = nullptr;
-  
-  hr = CompileShader(L"simple_vertex_shader.vs", "VSMain", "vs_4_0_level_9_1", &vsBlob);
+  ID3DBlob *vsBlob;
+  ID3DBlob *psBlob;
+  ID3DBlob *errorMessage;
 
+  D3DCompileFromFile(L"../Lunora/gpu.hlsl", 0, 0, "vertex_shader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
+  hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &m_vertexShader);
 
-  hr = CompileShader(L"simple_pixel_shader.vs", "PSMain", "ps_4_0_level_9_1", &psBlob);
-
+  D3DCompileFromFile(L"../Lunora/gpu.hlsl", 0, 0, "pixel_shader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
+  RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &m_pixelShader);
 
   /*
   D3D11_INPUT_ELEMENT_DESC input_layout[] =
@@ -170,32 +126,15 @@ void IAStage(CoreRenderBuffers& RenderBuffers)
   
   UINT stride = sizeof( SimpleVertex );
   UINT offset = 0;
-  /*
+  
   RenderBuffers.Device->IASetVertexBuffers(0, 
 					   1, 
 					   &g_pVertexBuffer,
 					   &stride, 
-					   &offset );
+					   &offset );  
+
   */
-
-  
-  RenderBuffers.Device->CreateVertexShader(
-					   vsBlob->GetBufferPointer(),
-					   vsBlob->GetBufferSize(),
-					   nullptr,
-					   &m_vertexShader
-					   );
-
-  RenderBuffers.Device->CreatePixelShader(
-					  psBlob->GetBufferPointer(),
-					  psBlob->GetBufferSize(),
-					  nullptr,
-					  &m_pixelShader
-					  );
-
-  
-  RenderBuffers.DeviceContext->IASetVertexBuffers(0, 0, nullptr, nullptr, nullptr);
-  RenderBuffers.DeviceContext->IASetIndexBuffer(nullptr, DXGI_FORMAT_UNKNOWN, 0);
+  RenderBuffers.DeviceContext->RSSetViewports(1, &RenderBuffers.Viewport);
 
   
   vsBlob->Release();
@@ -205,7 +144,8 @@ void IAStage(CoreRenderBuffers& RenderBuffers)
 void Render(CoreRenderBuffers& RenderBuffers)
 {
   // RenderBuffers.DeviceContext->IASetInputLayout( g_pVertexLayout );
-  RenderBuffers.DeviceContext->IASetInputLayout(nullptr);
+
+  RenderBuffers.DeviceContext->OMSetRenderTargets(1, &RenderBuffers.RenderTargetView, nullptr);
 
   RenderBuffers.DeviceContext->VSSetShader(m_vertexShader, NULL, 0);
   RenderBuffers.DeviceContext->PSSetShader(m_pixelShader, NULL, 0);

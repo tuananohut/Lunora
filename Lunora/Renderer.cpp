@@ -120,6 +120,8 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
     {
       MessageBoxA(Window.hwnd, "Could not create Device and Swap Chain", "Error", MB_OK | MB_ICONERROR);
     }
+
+  Renderer.SwapChain->GetDesc(&SwapChainDesc);
   
   result = Renderer.SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&Renderer.BackBuffer);
   if (FAILED(result))
@@ -230,7 +232,9 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
 					     Renderer.DepthStencilView);
   
   Renderer.DeviceContext->RSSetState(Renderer.RasterState); 
-  
+
+  Renderer.DeviceContext->RSSetViewports(1, &Renderer.Viewport);
+
   return Renderer; 
 }
 
@@ -250,7 +254,7 @@ void BeginScene(CoreRenderBuffers& Renderer)
 
 void EndScene(CoreRenderBuffers& Renderer)
 {
-  Renderer.SwapChain->Present(0, 0);
+  Renderer.SwapChain->Present(1, 0);
 }
 
 void ShutdownD3D(CoreRenderBuffers& Renderer)
@@ -259,7 +263,7 @@ void ShutdownD3D(CoreRenderBuffers& Renderer)
     {
       delete Renderer.SwapChain;
       Renderer.SwapChain->Release();
-      Renderer.SwapChain = nullptr; 
+      Renderer.SwapChain = nullptr;
     }
 
   if (Renderer.Device)

@@ -121,7 +121,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      BeginScene(Renderer);
 	      
 	      Render(Renderer);
-
+	      
 	      EndScene(Renderer);
 	    }  
 	} 
