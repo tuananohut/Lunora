@@ -35,12 +35,20 @@ struct SimpleVertexCombined
   XMFLOAT3 Pos;
   XMFLOAT4 Col; 
 };
-
+/*
 SimpleVertexCombined verticesCombo[] =
 {
   { XMFLOAT3(  0.0f,  0.5f, 0.5f ), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.f) },
   { XMFLOAT3(  0.5f, -0.5f, 0.5f ), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.f) },
   { XMFLOAT3( -0.5f, -0.5f, 0.5f ), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.f) },
+};
+*/
+
+SimpleVertexCombined verticesCombo[] =
+{
+  { XMFLOAT3(  0.0f,  1.0f, 0.0f ), XMFLOAT4(1,0,0,1) },
+  { XMFLOAT3(  1.0f, -1.0f, 0.0f ), XMFLOAT4(0,1,0,1) },
+  { XMFLOAT3( -1.0f, -1.0f, 0.0f ), XMFLOAT4(0,0,1,1) },
 };
 
 
@@ -68,6 +76,13 @@ HRESULT CreateVertexBuffer(CoreRenderBuffers& RenderBuffers)
 ID3D11Buffer *g_pIndexBuffer = NULL;
 
 unsigned int indices[] = { 0, 1, 2 };
+
+struct CBMatrix
+{
+    XMMATRIX mvp;
+};
+
+ID3D11Buffer* g_pConstantBuffer = nullptr;
 
 
 HRESULT CreateIndexBuffer(CoreRenderBuffers& RenderBuffers)
@@ -107,7 +122,16 @@ void IAStage(CoreRenderBuffers& RenderBuffers)
   D3DCompileFromFile(L"../Lunora/gpu.hlsl", 0, 0, "pixel_shader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
   RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &m_pixelShader);
 
-  /*
+
+  D3D11_BUFFER_DESC cbDesc = {};
+  cbDesc.Usage = D3D11_USAGE_DEFAULT;
+  cbDesc.ByteWidth = sizeof(CBMatrix);
+  cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  cbDesc.CPUAccessFlags = 0;
+
+  RenderBuffers.Device->CreateBuffer(&cbDesc, nullptr, &g_pConstantBuffer);
+
+  
   D3D11_INPUT_ELEMENT_DESC input_layout[] =
     {
       { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
@@ -118,24 +142,28 @@ void IAStage(CoreRenderBuffers& RenderBuffers)
 
   UINT num_elements = sizeof(input_layout) / sizeof(input_layout)[0];
   
-  hr = RenderBuffers.Device->CreateInputLayout(&input_layout,
+  hr = RenderBuffers.Device->CreateInputLayout(input_layout,
 					       num_elements,
 					       vsBlob->GetBufferPointer(),
 					       vsBlob->GetBufferSize(),
 					       &layout);
   
-  UINT stride = sizeof( SimpleVertex );
+  UINT stride = sizeof( SimpleVertexCombined );
   UINT offset = 0;
+
+  RenderBuffers.DeviceContext->IASetInputLayout( layout );
+  RenderBuffers.DeviceContext->IASetVertexBuffers(0, 
+						  1,
+						  &g_pVertexBuffer,
+						  &stride, 
+						  &offset );
+  RenderBuffers.DeviceContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
   
-  RenderBuffers.Device->IASetVertexBuffers(0, 
-					   1, 
-					   &g_pVertexBuffer,
-					   &stride, 
-					   &offset );  
-
-  */
+  
+  
   RenderBuffers.DeviceContext->RSSetViewports(1, &RenderBuffers.Viewport);
-
+  
+  RenderBuffers.DeviceContext->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
   
   vsBlob->Release();
   psBlob->Release();
@@ -143,14 +171,27 @@ void IAStage(CoreRenderBuffers& RenderBuffers)
 
 void Render(CoreRenderBuffers& RenderBuffers)
 {
-  // RenderBuffers.DeviceContext->IASetInputLayout( g_pVertexLayout );
+  XMMATRIX world = XMMatrixIdentity();
+  XMMATRIX view  = XMMatrixIdentity();
+  XMMATRIX proj = XMMatrixOrthographicLH(2.0f, 2.0f, -1.f, 1.0f);
+  
+  CBMatrix cb;
+  cb.mvp = XMMatrixTranspose(world * view * proj);
 
-  RenderBuffers.DeviceContext->OMSetRenderTargets(1, &RenderBuffers.RenderTargetView, nullptr);
+  RenderBuffers.DeviceContext->VSSetConstantBuffers(0, 1, &g_pConstantBuffer);
+  RenderBuffers.DeviceContext->UpdateSubresource(g_pConstantBuffer, 0, nullptr, &cb, 0, 0);
+
+  
+  RenderBuffers.DeviceContext->OMSetRenderTargets(
+						  1,
+						  &RenderBuffers.RenderTargetView,
+						  RenderBuffers.DepthStencilView
+						  );
 
   RenderBuffers.DeviceContext->VSSetShader(m_vertexShader, NULL, 0);
   RenderBuffers.DeviceContext->PSSetShader(m_pixelShader, NULL, 0);
-
-  RenderBuffers.DeviceContext->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-  RenderBuffers.DeviceContext->Draw(3, 0);
+  
+  
+  RenderBuffers.DeviceContext->DrawIndexed(3, 0, 0);
 }
 

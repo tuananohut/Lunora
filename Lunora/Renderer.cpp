@@ -191,7 +191,8 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
       MessageBoxA(Window.hwnd, "Create Depth Stencil State", "Error", MB_OK | MB_ICONERROR);
     }
 
-  Renderer.DeviceContext->OMSetDepthStencilState(Renderer.DepthStencilState, 1); 
+  Renderer.DeviceContext->OMSetDepthStencilState(Renderer.DepthStencilState, 1);
+  
   
   ZeroMemory(&DepthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
   DepthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -217,9 +218,9 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
 
   D3D11_RASTERIZER_DESC rasterizerState;
   rasterizerState.FillMode = D3D11_FILL_SOLID;
-  rasterizerState.CullMode = D3D11_CULL_FRONT;
-  rasterizerState.FrontCounterClockwise = true;
-  rasterizerState.DepthBias = false;
+  rasterizerState.CullMode = D3D11_CULL_NONE;
+  rasterizerState.FrontCounterClockwise = false;
+  rasterizerState.DepthBias = 0;
   rasterizerState.DepthBiasClamp = 0;
   rasterizerState.SlopeScaledDepthBias = 0;
   rasterizerState.DepthClipEnable = true;

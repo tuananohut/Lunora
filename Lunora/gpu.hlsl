@@ -1,16 +1,29 @@
-struct vertex
+cbuffer CBMatrix : register(b0)
 {
-	float4 pos: SV_POSITION;
-	float4 col: COL; 
-};
-
-vertex vertex_shader(uint vid: SV_VERTEXID)
-{
-    vertex output = { float4(vid * 0.5f, vid & 1, 1, 1.5f) - 0.5f, float4(vid == 0, vid == 1, vid == 2, 1) };
-    return output; 
+    float4x4 mvp;
 }
 
-float4 pixel_shader(vertex input): SV_TARGET
+struct VS_INPUT
 {
-    return input.col; 
+    float3 Pos : POSITION;
+    float4 Col : COLOR;
+};
+
+struct PS_INPUT
+{
+    float4 Pos : SV_POSITION;
+    float4 Col : COLOR;
+};
+
+PS_INPUT vertex_shader(VS_INPUT input)
+{
+    PS_INPUT output;
+    output.Pos = mul(float4(input.Pos,1.0), mvp);
+    output.Col = input.Col;
+    return output;
+}
+
+float4 pixel_shader(PS_INPUT input) : SV_TARGET
+{
+    return input.Col;
 }
