@@ -84,7 +84,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  Time Timer;
 	  Reset(Timer);
 
-	  Camera* mCamera = new Camera;
+	  Camera mCamera;
 
 	  result = CreateVertexBuffer(Renderer); 
 	  if (FAILED(result))
@@ -120,7 +120,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      
 	      BeginScene(Renderer);
 	      
-	      Render(Renderer);
+	      Render(Renderer, mCamera);
 	      
 	      EndScene(Renderer);
 	    }  

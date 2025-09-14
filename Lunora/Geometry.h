@@ -29,20 +29,21 @@ ID3D11Buffer* g_pVertexBuffer;
 ID3D11VertexShader* m_vertexShader = nullptr;
 ID3D11PixelShader* m_pixelShader = nullptr;
 
+ID3D11Buffer* g_pMatrixBuffer;
+
+struct MatrixBufferType
+{
+  XMMATRIX world;
+  XMMATRIX view;
+  XMMATRIX proj;
+};
+
 
 struct SimpleVertexCombined
 {
   XMFLOAT3 Pos;
   XMFLOAT4 Col; 
 };
-/*
-SimpleVertexCombined verticesCombo[] =
-{
-  { XMFLOAT3(  0.0f,  0.5f, 0.5f ), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.f) },
-  { XMFLOAT3(  0.5f, -0.5f, 0.5f ), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.f) },
-  { XMFLOAT3( -0.5f, -0.5f, 0.5f ), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.f) },
-};
-*/
 
 SimpleVertexCombined verticesCombo[] =
 {
@@ -50,7 +51,6 @@ SimpleVertexCombined verticesCombo[] =
   { XMFLOAT3(  1.0f, -1.0f, 0.0f ), XMFLOAT4(0,1,0,1) },
   { XMFLOAT3( -1.0f, -1.0f, 0.0f ), XMFLOAT4(0,0,1,1) },
 };
-
 
 HRESULT CreateVertexBuffer(CoreRenderBuffers& RenderBuffers)
 {
@@ -122,15 +122,13 @@ void IAStage(CoreRenderBuffers& RenderBuffers)
   D3DCompileFromFile(L"../Lunora/gpu.hlsl", 0, 0, "pixel_shader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
   RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &m_pixelShader);
 
-
-  D3D11_BUFFER_DESC cbDesc = {};
-  cbDesc.Usage = D3D11_USAGE_DEFAULT;
-  cbDesc.ByteWidth = sizeof(CBMatrix);
-  cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-  cbDesc.CPUAccessFlags = 0;
-
-  RenderBuffers.Device->CreateBuffer(&cbDesc, nullptr, &g_pConstantBuffer);
-
+  matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+  matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  matrixBufferDesc.MiscFlags = 0;
+  matrixBufferDesc.StructureByteStride = 0; 
+  RenderBuffers.Device->CreateBuffer(&matrixBufferDesc, NULL, &g_pMatrixBuffer);
   
   D3D11_INPUT_ELEMENT_DESC input_layout[] =
     {
@@ -169,19 +167,42 @@ void IAStage(CoreRenderBuffers& RenderBuffers)
   psBlob->Release();
 }
 
-void Render(CoreRenderBuffers& RenderBuffers)
+void Render(CoreRenderBuffers& RenderBuffers, Camera& Camera)
 {
+  D3D11_MAPPED_SUBRESOURCE mappedResource;
+  MatrixBufferType* dataPtr;
+  unsigned int bufferNumber;
   XMMATRIX world = XMMatrixIdentity();
-  XMMATRIX view  = XMMatrixIdentity();
-  XMMATRIX proj = XMMatrixOrthographicLH(2.0f, 2.0f, -1.f, 1.0f);
-  
-  CBMatrix cb;
-  cb.mvp = XMMatrixTranspose(world * view * proj);
+  XMMATRIX view;
+  Camera.GetViewMatrix(view);
 
-  RenderBuffers.DeviceContext->VSSetConstantBuffers(0, 1, &g_pConstantBuffer);
-  RenderBuffers.DeviceContext->UpdateSubresource(g_pConstantBuffer, 0, nullptr, &cb, 0, 0);
+  float fieldOfView = 3.141592654f / 4.0f;
+  float screenAspect = (float)1080 / (float)720;
 
+  const float SCREEN_DEPTH = 1000.f;
+  const float SCREEN_NEAR = 0.1f;
   
+  XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
+  
+  world = XMMatrixTranspose(world);
+  view = XMMatrixTranspose(view);
+  proj = XMMatrixTranspose(proj);
+
+  RenderBuffers.DeviceContext->Map(g_pMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+
+  dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+  dataPtr->world = world;
+  dataPtr->view = view;
+  dataPtr->proj = proj;
+
+  RenderBuffers.DeviceContext->Unmap(g_pMatrixBuffer, 0);
+
+  bufferNumber = 0;
+
+  RenderBuffers.DeviceContext->VSSetConstantBuffers(bufferNumber, 1, &g_pMatrixBuffer); 
+
+ 
   RenderBuffers.DeviceContext->OMSetRenderTargets(
 						  1,
 						  &RenderBuffers.RenderTargetView,

@@ -1,7 +1,9 @@
-cbuffer CBMatrix : register(b0)
+cbuffer MatrixBuffer
 {
-    float4x4 mvp;
-}
+    matrix world;
+    matrix view;
+    matrix proj;
+};
 
 struct VS_INPUT
 {
@@ -18,8 +20,15 @@ struct PS_INPUT
 PS_INPUT vertex_shader(VS_INPUT input)
 {
     PS_INPUT output;
-    output.Pos = mul(float4(input.Pos,1.0), mvp);
+
+    input.Pos.w = 1.0f;
+
+    output.Pos = mul(input.position, world);
+    output.Pos = mul(output.position, view);
+    output.Pos = mul(output.position, proj);
+
     output.Col = input.Col;
+    
     return output;
 }
 
