@@ -38,7 +38,6 @@ struct MatrixBufferType
   XMMATRIX proj;
 };
 
-
 struct SimpleVertexCombined
 {
   XMFLOAT3 Pos;
@@ -47,9 +46,9 @@ struct SimpleVertexCombined
 
 SimpleVertexCombined verticesCombo[] =
 {
-  { XMFLOAT3(  0.0f,  1.0f, 0.0f ), XMFLOAT4(1,0,0,1) },
-  { XMFLOAT3(  1.0f, -1.0f, 0.0f ), XMFLOAT4(0,1,0,1) },
-  { XMFLOAT3( -1.0f, -1.0f, 0.0f ), XMFLOAT4(0,0,1,1) },
+  { XMFLOAT3(-1.f, -1.f, 0.f ), XMFLOAT4(1.f,0.f,0.f,1.f) }, 
+  { XMFLOAT3( 0.f, 1.f, 0.f ), XMFLOAT4(0.f,1.f,0.f,1.f) }, 
+  { XMFLOAT3( 1.f, -1.f, 0.f ), XMFLOAT4(0.f,0.f,1.f,1.f) }, 
 };
 
 HRESULT CreateVertexBuffer(CoreRenderBuffers& RenderBuffers)
@@ -76,14 +75,6 @@ HRESULT CreateVertexBuffer(CoreRenderBuffers& RenderBuffers)
 ID3D11Buffer *g_pIndexBuffer = NULL;
 
 unsigned int indices[] = { 0, 1, 2 };
-
-struct CBMatrix
-{
-    XMMATRIX mvp;
-};
-
-ID3D11Buffer* g_pConstantBuffer = nullptr;
-
 
 HRESULT CreateIndexBuffer(CoreRenderBuffers& RenderBuffers)
 {
@@ -146,15 +137,23 @@ void IAStage(CoreRenderBuffers& RenderBuffers)
 					       vsBlob->GetBufferSize(),
 					       &layout);
   
+  RenderBuffers.DeviceContext->IASetInputLayout( layout );
+  
+  vsBlob->Release();
+  psBlob->Release();
+}
+
+void Render(CoreRenderBuffers& RenderBuffers, Camera* Camera)
+{
   UINT stride = sizeof( SimpleVertexCombined );
   UINT offset = 0;
-
-  RenderBuffers.DeviceContext->IASetInputLayout( layout );
+  
   RenderBuffers.DeviceContext->IASetVertexBuffers(0, 
 						  1,
 						  &g_pVertexBuffer,
 						  &stride, 
 						  &offset );
+
   RenderBuffers.DeviceContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
   
   
@@ -162,19 +161,16 @@ void IAStage(CoreRenderBuffers& RenderBuffers)
   RenderBuffers.DeviceContext->RSSetViewports(1, &RenderBuffers.Viewport);
   
   RenderBuffers.DeviceContext->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-  
-  vsBlob->Release();
-  psBlob->Release();
-}
 
-void Render(CoreRenderBuffers& RenderBuffers, Camera& Camera)
-{
   D3D11_MAPPED_SUBRESOURCE mappedResource;
   MatrixBufferType* dataPtr;
   unsigned int bufferNumber;
   XMMATRIX world = XMMatrixIdentity();
   XMMATRIX view;
-  Camera.GetViewMatrix(view);
+
+  Camera->Render(); 
+  
+  Camera->GetViewMatrix(view);
 
   float fieldOfView = 3.141592654f / 4.0f;
   float screenAspect = (float)1080 / (float)720;
@@ -187,7 +183,7 @@ void Render(CoreRenderBuffers& RenderBuffers, Camera& Camera)
   world = XMMatrixTranspose(world);
   view = XMMatrixTranspose(view);
   proj = XMMatrixTranspose(proj);
-
+  
   RenderBuffers.DeviceContext->Map(g_pMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 
   dataPtr = (MatrixBufferType*)mappedResource.pData;

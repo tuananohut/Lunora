@@ -84,15 +84,16 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  Time Timer;
 	  Reset(Timer);
 
-	  Camera mCamera;
-
+	  Camera* mCamera = new Camera;
+	  mCamera->SetPosition(0.0f, 0.0f, -5.0f);
+	  
 	  result = CreateVertexBuffer(Renderer); 
 	  if (FAILED(result))
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
 	      Running = false; 
 	    }
-
+	  
 	  result = CreateIndexBuffer(Renderer);
 	  if (FAILED(result))
 	    {
@@ -110,6 +111,11 @@ int WINAPI WinMain(HINSTANCE Instance,
 		  if (Message.message == WM_QUIT)
 		    {
 		      delete Window; 
+		      if (mCamera)
+			{
+			  delete mCamera;
+			  mCamera = nullptr; 
+			}
 		      ShutdownD3D(Renderer);
 		      Running = false;
 		    }

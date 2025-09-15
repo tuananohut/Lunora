@@ -21,11 +21,11 @@ PS_INPUT vertex_shader(VS_INPUT input)
 {
     PS_INPUT output;
 
-    input.Pos.w = 1.0f;
+    float4 pos = float4(input.Pos, 1.0f);
 
-    output.Pos = mul(input.position, world);
-    output.Pos = mul(output.position, view);
-    output.Pos = mul(output.position, proj);
+    output.Pos = mul(pos, world);
+    output.Pos = mul(output.Pos, view);
+    output.Pos = mul(output.Pos, proj);
 
     output.Col = input.Col;
     

@@ -75,7 +75,7 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
   SwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
   SwapChainDesc.BufferDesc.RefreshRate.Denominator = 1; 
   SwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-  SwapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
+  SwapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
   SwapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
   SwapChainDesc.SampleDesc.Count = 1;
   SwapChainDesc.SampleDesc.Quality = 0;
@@ -191,8 +191,8 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
       MessageBoxA(Window.hwnd, "Create Depth Stencil State", "Error", MB_OK | MB_ICONERROR);
     }
 
-  Renderer.DeviceContext->OMSetDepthStencilState(Renderer.DepthStencilState, 1);
-  
+  // Renderer.DeviceContext->OMSetDepthStencilState(Renderer.DepthStencilState, 1);
+  Renderer.DeviceContext->OMSetDepthStencilState(NULL, 0);
   
   ZeroMemory(&DepthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
   DepthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -218,7 +218,7 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
 
   D3D11_RASTERIZER_DESC rasterizerState;
   rasterizerState.FillMode = D3D11_FILL_SOLID;
-  rasterizerState.CullMode = D3D11_CULL_NONE;
+  rasterizerState.CullMode = D3D11_CULL_BACK;
   rasterizerState.FrontCounterClockwise = false;
   rasterizerState.DepthBias = 0;
   rasterizerState.DepthBiasClamp = 0;
@@ -243,9 +243,9 @@ void BeginScene(CoreRenderBuffers& Renderer)
 {
   float color[4];
 
-  color[0] = 1.f;
+  color[0] = 0.f;
   color[1] = 0.f;
-  color[2] = 0.5f;
+  color[2] = 0.f;
   color[3] = 1.f;
 
   Renderer.DeviceContext->ClearRenderTargetView(Renderer.RenderTargetView, color);
