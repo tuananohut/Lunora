@@ -10,7 +10,7 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
   IDXGIOutput* Output = NULL;
   UINT numModes = 0;
   DXGI_MODE_DESC* displayModes = NULL;
-  DXGI_FORMAT format = DXGI_FORMAT_R32G32B32A32_FLOAT; 
+  DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM; 
   DXGI_SWAP_CHAIN_DESC SwapChainDesc;
   const D3D_FEATURE_LEVEL FeatureLevelsRequested[] = { D3D_FEATURE_LEVEL_11_1,
 						       D3D_FEATURE_LEVEL_11_0,
@@ -191,8 +191,7 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
       MessageBoxA(Window.hwnd, "Create Depth Stencil State", "Error", MB_OK | MB_ICONERROR);
     }
 
-  // Renderer.DeviceContext->OMSetDepthStencilState(Renderer.DepthStencilState, 1);
-  Renderer.DeviceContext->OMSetDepthStencilState(NULL, 0);
+  Renderer.DeviceContext->OMSetDepthStencilState(Renderer.DepthStencilState, 1);
   
   ZeroMemory(&DepthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
   DepthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -218,7 +217,7 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
 
   D3D11_RASTERIZER_DESC rasterizerState;
   rasterizerState.FillMode = D3D11_FILL_SOLID;
-  rasterizerState.CullMode = D3D11_CULL_BACK;
+  rasterizerState.CullMode = D3D11_CULL_NONE;
   rasterizerState.FrontCounterClockwise = false;
   rasterizerState.DepthBias = 0;
   rasterizerState.DepthBiasClamp = 0;
@@ -262,56 +261,48 @@ void ShutdownD3D(CoreRenderBuffers& Renderer)
 {
   if (Renderer.SwapChain)
     {
-      delete Renderer.SwapChain;
       Renderer.SwapChain->Release();
       Renderer.SwapChain = nullptr;
     }
 
   if (Renderer.Device)
     {
-      delete Renderer.Device;
       Renderer.Device->Release();
       Renderer.Device = nullptr; 
     }
       
   if (Renderer.DeviceContext)
     {
-      delete Renderer.DeviceContext;
       Renderer.DeviceContext->Release();
       Renderer.DeviceContext = nullptr; 
     }
       
   if (Renderer.BackBuffer)
     {
-      delete Renderer.BackBuffer;
       Renderer.BackBuffer->Release();
       Renderer.BackBuffer = nullptr; 
     }
 
   if (Renderer.RenderTargetView)
     {
-      delete Renderer.RenderTargetView;
       Renderer.RenderTargetView->Release();
       Renderer.RenderTargetView = nullptr; 
     }
       
   if (Renderer.DepthStencilBuffer)
     {
-      delete Renderer.DepthStencilBuffer;
       Renderer.DepthStencilBuffer->Release();
       Renderer.DepthStencilBuffer = nullptr; 
     }
       
   if (Renderer.DepthStencilState)
     {
-      delete Renderer.DepthStencilState;
       Renderer.DepthStencilState->Release();
       Renderer.DepthStencilState = nullptr; 
     }
       
   if (Renderer.DepthStencilView)
     {
-      delete Renderer.DepthStencilView;
       Renderer.DepthStencilView->Release();
       Renderer.DepthStencilView = nullptr; 
     }          

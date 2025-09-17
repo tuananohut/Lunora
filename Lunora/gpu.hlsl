@@ -7,7 +7,7 @@ cbuffer MatrixBuffer
 
 struct VS_INPUT
 {
-    float3 Pos : POSITION;
+    float4 Pos : POSITION;
     float4 Col : COLOR;
 };
 
@@ -32,7 +32,7 @@ PS_INPUT vertex_shader(VS_INPUT input)
     return output;
 }
 
-float4 pixel_shader(PS_INPUT input) : SV_TARGET
+float3 pixel_shader(PS_INPUT input) : SV_TARGET
 {
-    return input.Col;
+    return input.Col.rgb;
 }

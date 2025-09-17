@@ -101,7 +101,10 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      Running = false; 
 	    }
 
-	  IAStage(Renderer);
+	  if (FAILED(IAStage(Renderer)))
+	    {
+	      (Window->hwnd, "Something is wrong!", "Bad", MB_OK | MB_ICONERROR);
+	    }
 	  
 	  while(Running)
 	    {

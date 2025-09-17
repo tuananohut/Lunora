@@ -24,12 +24,12 @@ struct MeshVertexBuffer
   XMFLOAT3 color; 
 };
 
-ID3D11Buffer* g_pVertexBuffer;
+static ID3D11Buffer* g_pVertexBuffer;
 
-ID3D11VertexShader* m_vertexShader = nullptr;
-ID3D11PixelShader* m_pixelShader = nullptr;
+static ID3D11VertexShader* m_vertexShader = nullptr;
+static ID3D11PixelShader* m_pixelShader = nullptr;
 
-ID3D11Buffer* g_pMatrixBuffer;
+static ID3D11Buffer* g_pMatrixBuffer;
 
 struct MatrixBufferType
 {
@@ -40,49 +40,71 @@ struct MatrixBufferType
 
 struct SimpleVertexCombined
 {
-  XMFLOAT3 Pos;
-  XMFLOAT4 Col; 
-};
-
-SimpleVertexCombined verticesCombo[] =
-{
-  { XMFLOAT3(-1.f, -1.f, 0.f ), XMFLOAT4(1.f,0.f,0.f,1.f) }, 
-  { XMFLOAT3( 0.f, 1.f, 0.f ), XMFLOAT4(0.f,1.f,0.f,1.f) }, 
-  { XMFLOAT3( 1.f, -1.f, 0.f ), XMFLOAT4(0.f,0.f,1.f,1.f) }, 
+  XMFLOAT3 position;
+  XMFLOAT4 color; 
 };
 
 HRESULT CreateVertexBuffer(CoreRenderBuffers& RenderBuffers)
 {
-  HRESULT hr; 
+  HRESULT hr;
+
+  SimpleVertexCombined *vertices;;
+
+  vertices = new SimpleVertexCombined[3];
+  if (!vertices)
+    {
+      return false;
+    }
+
+  vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f); 
+  vertices[0].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+
+  vertices[1].position = XMFLOAT3(0.0f, 1.0f, 0.0f);
+  vertices[1].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+
+  vertices[2].position = XMFLOAT3(1.0f, -1.0f, 0.0f);
+  vertices[2].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
   
   D3D11_BUFFER_DESC bufferDesc;
   bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-  bufferDesc.ByteWidth = sizeof(SimpleVertexCombined) * _countof(verticesCombo);
+  bufferDesc.ByteWidth = sizeof(SimpleVertexCombined) * 3;
   bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
   bufferDesc.CPUAccessFlags = 0;
   bufferDesc.MiscFlags = 0;
 
   D3D11_SUBRESOURCE_DATA InitData;
-  InitData.pSysMem = verticesCombo;
+  InitData.pSysMem = vertices;
   InitData.SysMemPitch = 0;
   InitData.SysMemSlicePitch = 0;
 
   hr = RenderBuffers.Device->CreateBuffer( &bufferDesc, &InitData, &g_pVertexBuffer );
+
+  delete []vertices; 
   
   return hr; 
 }
 
 ID3D11Buffer *g_pIndexBuffer = NULL;
 
-unsigned int indices[] = { 0, 1, 2 };
-
 HRESULT CreateIndexBuffer(CoreRenderBuffers& RenderBuffers)
 {
-  HRESULT hr; 
+  HRESULT hr;
   
+  unsigned long *indices;
+
+  indices = new unsigned long[3];
+  if (!indices)
+    {
+      return false;
+    }
+  
+  indices[0] = 0;  
+  indices[1] = 1;  
+  indices[2] = 2;  
+ 
   D3D11_BUFFER_DESC bufferDesc;
   bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-  bufferDesc.ByteWidth = sizeof(unsigned int) * _countof(indices);
+  bufferDesc.ByteWidth = sizeof(unsigned long) * 3;
   bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
   bufferDesc.CPUAccessFlags = 0;
   bufferDesc.MiscFlags = 0;
@@ -93,11 +115,13 @@ HRESULT CreateIndexBuffer(CoreRenderBuffers& RenderBuffers)
   InitData.SysMemSlicePitch = 0;
 
   hr = RenderBuffers.Device->CreateBuffer( &bufferDesc, &InitData, &g_pIndexBuffer );
+
+  delete[] indices; 
   
   return hr; 
 }
 
-void IAStage(CoreRenderBuffers& RenderBuffers)
+HRESULT IAStage(CoreRenderBuffers& RenderBuffers)
 {
   HRESULT hr; 
   ID3D11InputLayout* layout;
@@ -109,10 +133,18 @@ void IAStage(CoreRenderBuffers& RenderBuffers)
 
   D3DCompileFromFile(L"../Lunora/gpu.hlsl", 0, 0, "vertex_shader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
   hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &m_vertexShader);
-
+  if (FAILED(hr))
+    {
+      return false; 
+    }
+  
   D3DCompileFromFile(L"../Lunora/gpu.hlsl", 0, 0, "pixel_shader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
-  RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &m_pixelShader);
-
+  hr = RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &m_pixelShader);
+  if (FAILED(hr))
+    {
+      return false; 
+    }
+ 
   matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
   matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
   matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -136,11 +168,17 @@ void IAStage(CoreRenderBuffers& RenderBuffers)
 					       vsBlob->GetBufferPointer(),
 					       vsBlob->GetBufferSize(),
 					       &layout);
+  if (FAILED(hr))
+    {
+      return false; 
+    }
   
   RenderBuffers.DeviceContext->IASetInputLayout( layout );
   
   vsBlob->Release();
   psBlob->Release();
+
+  return true; 
 }
 
 void Render(CoreRenderBuffers& RenderBuffers, Camera* Camera)
@@ -171,12 +209,12 @@ void Render(CoreRenderBuffers& RenderBuffers, Camera* Camera)
   Camera->Render(); 
   
   Camera->GetViewMatrix(view);
-
+  
   float fieldOfView = 3.141592654f / 4.0f;
   float screenAspect = (float)1080 / (float)720;
 
   const float SCREEN_DEPTH = 1000.f;
-  const float SCREEN_NEAR = 0.1f;
+  const float SCREEN_NEAR = 0.3f;
   
   XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
   
@@ -187,7 +225,7 @@ void Render(CoreRenderBuffers& RenderBuffers, Camera* Camera)
   RenderBuffers.DeviceContext->Map(g_pMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 
   dataPtr = (MatrixBufferType*)mappedResource.pData;
-
+  
   dataPtr->world = world;
   dataPtr->view = view;
   dataPtr->proj = proj;
