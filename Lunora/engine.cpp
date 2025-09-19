@@ -128,6 +128,22 @@ int WINAPI WinMain(HINSTANCE Instance,
 		}
 	      
 	      BeginScene(Renderer);
+
+	      XMMATRIX world = XMMatrixIdentity();
+	      XMMATRIX view;
+
+	      mCamera->Render(); 
+  
+	      mCamera->GetViewMatrix(view);
+  
+	      float fieldOfView = 3.141592654f / 4.0f;
+	      float screenAspect = (float)1080 / (float)720;
+
+	      const float SCREEN_DEPTH = 1000.f;
+	      const float SCREEN_NEAR = 0.3f;
+  
+	      XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
+
 	      
 	      Render(Renderer, mCamera);
 	      

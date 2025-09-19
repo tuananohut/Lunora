@@ -217,7 +217,7 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
 
   D3D11_RASTERIZER_DESC rasterizerState;
   rasterizerState.FillMode = D3D11_FILL_SOLID;
-  rasterizerState.CullMode = D3D11_CULL_NONE;
+  rasterizerState.CullMode = D3D11_CULL_BACK;
   rasterizerState.FrontCounterClockwise = false;
   rasterizerState.DepthBias = 0;
   rasterizerState.DepthBiasClamp = 0;

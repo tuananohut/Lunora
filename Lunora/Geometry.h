@@ -217,7 +217,7 @@ void Render(CoreRenderBuffers& RenderBuffers, Camera* Camera)
   const float SCREEN_NEAR = 0.3f;
   
   XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
-  
+
   world = XMMatrixTranspose(world);
   view = XMMatrixTranspose(view);
   proj = XMMatrixTranspose(proj);
