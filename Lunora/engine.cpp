@@ -77,8 +77,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  Running = true;
 
 	  CoreRenderBuffers Renderer;
-	  Window->Width = 1080;
-	  Window->Height = 720;
+	  Window->Width = 800;
+	  Window->Height = 600;
 	  Renderer = InitializeD3D(*Window, false);
 
 	  Time Timer;
@@ -131,21 +131,24 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	      XMMATRIX world = XMMatrixIdentity();
 	      XMMATRIX view;
-
+	      
 	      mCamera->Render(); 
-  
+	      
 	      mCamera->GetViewMatrix(view);
   
 	      float fieldOfView = 3.141592654f / 4.0f;
-	      float screenAspect = (float)1080 / (float)720;
+	      float screenAspect = (float)Window->Width / (float)Window->Height;
 
 	      const float SCREEN_DEPTH = 1000.f;
 	      const float SCREEN_NEAR = 0.3f;
-  
+	      
 	      XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
 
-	      
-	      Render(Renderer, mCamera);
+	      result = Render(Renderer, mCamera, world, view, proj);
+	      if (FAILED(result))
+		{
+		  Running = false; 
+		}
 	      
 	      EndScene(Renderer);
 	    }  

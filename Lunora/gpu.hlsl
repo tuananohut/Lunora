@@ -32,7 +32,7 @@ PS_INPUT vertex_shader(VS_INPUT input)
     return output;
 }
 
-float3 pixel_shader(PS_INPUT input) : SV_TARGET
+float4 pixel_shader(PS_INPUT input) : SV_TARGET
 {
-    return input.Col.rgb;
+    return input.Col;
 }

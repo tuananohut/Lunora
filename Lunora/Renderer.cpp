@@ -12,13 +12,7 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
   DXGI_MODE_DESC* displayModes = NULL;
   DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM; 
   DXGI_SWAP_CHAIN_DESC SwapChainDesc;
-  const D3D_FEATURE_LEVEL FeatureLevelsRequested[] = { D3D_FEATURE_LEVEL_11_1,
-						       D3D_FEATURE_LEVEL_11_0,
-						       D3D_FEATURE_LEVEL_10_1,
-						       D3D_FEATURE_LEVEL_10_0,
-						       D3D_FEATURE_LEVEL_9_3 ,
-						       D3D_FEATURE_LEVEL_9_2 ,
-						       D3D_FEATURE_LEVEL_9_1 };
+  D3D_FEATURE_LEVEL FeatureLevelsRequested = D3D_FEATURE_LEVEL_11_0;
   UINT createDeviceFlags = 0; 
   D3D_FEATURE_LEVEL FeatureLevelsSupported;
   D3D11_TEXTURE2D_DESC DepthStencilDesc;
@@ -26,10 +20,6 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
   D3D11_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc;
   D3D11_RENDER_TARGET_VIEW_DESC RenderTargetViewDesc;
   HRESULT result;
-
-#ifdef _DEBUG
-  createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif 
   
   result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&DXFactory);
   if (FAILED(result))
@@ -92,30 +82,14 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
 					 D3D_DRIVER_TYPE_HARDWARE,
 					 NULL,
 					 createDeviceFlags,
-					 FeatureLevelsRequested,
-					 ARRAYSIZE(FeatureLevelsRequested),
+					 &FeatureLevelsRequested,
+					 1,
 					 D3D11_SDK_VERSION,
 					 &SwapChainDesc,
 					 &Renderer.SwapChain,
 					 &Renderer.Device,
 					 &FeatureLevelsSupported,
 					 &Renderer.DeviceContext);
-  if (result == E_INVALIDARG)
-    {
-      result = D3D11CreateDeviceAndSwapChain(NULL,
-					     D3D_DRIVER_TYPE_HARDWARE,
-					     NULL,
-					     createDeviceFlags,
-					     &FeatureLevelsRequested[1],
-					     ARRAYSIZE(FeatureLevelsRequested) - 1,
-					     D3D11_SDK_VERSION,
-					     &SwapChainDesc,
-					     &Renderer.SwapChain,
-					     &Renderer.Device,
-					     &FeatureLevelsSupported,
-					     &Renderer.DeviceContext);
-    }
-  
   if (FAILED(result))
     {
       MessageBoxA(Window.hwnd, "Could not create Device and Swap Chain", "Error", MB_OK | MB_ICONERROR);
@@ -128,7 +102,15 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
     {
       MessageBoxA(Window.hwnd, "Get Buffer", "Error", MB_OK | MB_ICONERROR);
     }
- 
+  
+  result = Renderer.Device->CreateRenderTargetView(Renderer.BackBuffer,
+						   NULL,
+						   &Renderer.RenderTargetView);
+  if (FAILED(result))
+    {
+      MessageBoxA(Window.hwnd, "Create Render Target View", "Error", MB_OK | MB_ICONERROR);
+    }
+  
   ZeroMemory(&Renderer.Viewport, sizeof(D3D11_VIEWPORT));
   Renderer.Viewport.Width = Window.Width;
   Renderer.Viewport.Height = Window.Height;
@@ -206,15 +188,7 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
       MessageBoxA(Window.hwnd, "Create Depth Stencil State", "Error", MB_OK | MB_ICONERROR);
     }
 
-  
-  result = Renderer.Device->CreateRenderTargetView(Renderer.BackBuffer,
-						   NULL,
-						   &Renderer.RenderTargetView);
-  if (FAILED(result))
-    {
-      MessageBoxA(Window.hwnd, "Create Render Target View", "Error", MB_OK | MB_ICONERROR);
-    }
-
+ 
   D3D11_RASTERIZER_DESC rasterizerState;
   rasterizerState.FillMode = D3D11_FILL_SOLID;
   rasterizerState.CullMode = D3D11_CULL_BACK;
@@ -254,7 +228,7 @@ void BeginScene(CoreRenderBuffers& Renderer)
 
 void EndScene(CoreRenderBuffers& Renderer)
 {
-  Renderer.SwapChain->Present(1, 0);
+  Renderer.SwapChain->Present(0, 0);
 }
 
 void ShutdownD3D(CoreRenderBuffers& Renderer)

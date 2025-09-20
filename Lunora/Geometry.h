@@ -121,10 +121,11 @@ HRESULT CreateIndexBuffer(CoreRenderBuffers& RenderBuffers)
   return hr; 
 }
 
+static ID3D11InputLayout* layout = nullptr;
+
 HRESULT IAStage(CoreRenderBuffers& RenderBuffers)
 {
   HRESULT hr; 
-  ID3D11InputLayout* layout;
   D3D11_SAMPLER_DESC samplerDesc;
   D3D11_BUFFER_DESC matrixBufferDesc;
   ID3DBlob *vsBlob;
@@ -181,7 +182,7 @@ HRESULT IAStage(CoreRenderBuffers& RenderBuffers)
   return true; 
 }
 
-void Render(CoreRenderBuffers& RenderBuffers, Camera* Camera)
+bool Render(CoreRenderBuffers& RenderBuffers, Camera* Camera, XMMATRIX world, XMMATRIX view, XMMATRIX proj)
 {
   UINT stride = sizeof( SimpleVertexCombined );
   UINT offset = 0;
@@ -199,31 +200,23 @@ void Render(CoreRenderBuffers& RenderBuffers, Camera* Camera)
   RenderBuffers.DeviceContext->RSSetViewports(1, &RenderBuffers.Viewport);
   
   RenderBuffers.DeviceContext->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+  RenderBuffers.DeviceContext->IASetInputLayout(layout);
 
+  HRESULT hr; 
   D3D11_MAPPED_SUBRESOURCE mappedResource;
   MatrixBufferType* dataPtr;
   unsigned int bufferNumber;
-  XMMATRIX world = XMMatrixIdentity();
-  XMMATRIX view;
-
-  Camera->Render(); 
   
-  Camera->GetViewMatrix(view);
-  
-  float fieldOfView = 3.141592654f / 4.0f;
-  float screenAspect = (float)1080 / (float)720;
-
-  const float SCREEN_DEPTH = 1000.f;
-  const float SCREEN_NEAR = 0.3f;
-  
-  XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
-
   world = XMMatrixTranspose(world);
   view = XMMatrixTranspose(view);
   proj = XMMatrixTranspose(proj);
   
-  RenderBuffers.DeviceContext->Map(g_pMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-
+  hr = RenderBuffers.DeviceContext->Map(g_pMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+  if (FAILED(hr))
+    {
+      return false;
+    }
+  
   dataPtr = (MatrixBufferType*)mappedResource.pData;
   
   dataPtr->world = world;
@@ -236,7 +229,7 @@ void Render(CoreRenderBuffers& RenderBuffers, Camera* Camera)
 
   RenderBuffers.DeviceContext->VSSetConstantBuffers(bufferNumber, 1, &g_pMatrixBuffer); 
 
- 
+  
   RenderBuffers.DeviceContext->OMSetRenderTargets(
 						  1,
 						  &RenderBuffers.RenderTargetView,
@@ -248,5 +241,7 @@ void Render(CoreRenderBuffers& RenderBuffers, Camera* Camera)
   
   
   RenderBuffers.DeviceContext->DrawIndexed(3, 0, 0);
+
+  return true; 
 }
 

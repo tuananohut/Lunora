@@ -20,7 +20,7 @@ bool Application::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 				  FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
   if (!result)
     {
-      MessageBox(hwnd, L"Could not initialize Direct3D", L"Error", MB_OK);
+      MessageBoxA(hwnd, "Could not initialize Direct3D", "Error", MB_OK);
       return false; 
     }
   
