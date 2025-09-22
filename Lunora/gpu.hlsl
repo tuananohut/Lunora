@@ -1,38 +1,38 @@
 cbuffer MatrixBuffer
 {
-    matrix world;
-    matrix view;
-    matrix proj;
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix; 
 };
 
-struct VS_INPUT
+struct VertexInputType
 {
-    float3 Pos : POSITION;
-    float4 Col : COLOR;
+    float4 position: POSITION;
+    float4 color: COLOR; 
 };
 
-struct PS_INPUT
+struct PixelInputType
 {
-    float4 Pos : SV_POSITION;
-    float4 Col : COLOR;
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
 };
 
-PS_INPUT vertex_shader(VS_INPUT input)
+PixelInputType ColorVertexShader(VertexInputType input)
 {
-    PS_INPUT output;
+    PixelInputType output;
+    
+    input.position.w = 1.0f;
 
-    float4 pos = float4(input.Pos, 1.0f);
-
-    output.Pos = mul(pos, world);
-    output.Pos = mul(output.Pos, view);
-    output.Pos = mul(output.Pos, proj);
-
-    output.Col = input.Col;
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+    
+    output.color = input.color;
     
     return output;
 }
 
-float4 pixel_shader(PS_INPUT input) : SV_TARGET
+float4 ColorPixelShader(PixelInputType input): SV_TARGET
 {
-    return input.Col;
+    return input.color; 
 }

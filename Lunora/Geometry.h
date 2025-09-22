@@ -145,15 +145,7 @@ HRESULT IAStage(CoreRenderBuffers& RenderBuffers)
     {
       return false; 
     }
- 
-  matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-  matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
-  matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-  matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-  matrixBufferDesc.MiscFlags = 0;
-  matrixBufferDesc.StructureByteStride = 0; 
-  RenderBuffers.Device->CreateBuffer(&matrixBufferDesc, NULL, &g_pMatrixBuffer);
-  
+
   D3D11_INPUT_ELEMENT_DESC input_layout[] =
     {
       { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
@@ -174,15 +166,29 @@ HRESULT IAStage(CoreRenderBuffers& RenderBuffers)
       return false; 
     }
   
-  RenderBuffers.DeviceContext->IASetInputLayout( layout );
-  
   vsBlob->Release();
-  psBlob->Release();
+  vsBlob = nullptr; 
 
+  psBlob->Release();
+  psBlob = nullptr;
+  
+  matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+  matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  matrixBufferDesc.MiscFlags = 0;
+  matrixBufferDesc.StructureByteStride = 0; 
+
+  hr = RenderBuffers.Device->CreateBuffer(&matrixBufferDesc, NULL, &g_pMatrixBuffer);
+  if (FAILED(hr))
+    {
+      return false; 
+    }
+  
   return true; 
 }
 
-bool Render(CoreRenderBuffers& RenderBuffers, Camera* Camera, XMMATRIX world, XMMATRIX view, XMMATRIX proj)
+void RenderModel(CoreRenderBuffers& RenderBuffers)
 {
   UINT stride = sizeof( SimpleVertexCombined );
   UINT offset = 0;
@@ -192,7 +198,7 @@ bool Render(CoreRenderBuffers& RenderBuffers, Camera* Camera, XMMATRIX world, XM
 						  &g_pVertexBuffer,
 						  &stride, 
 						  &offset );
-
+  
   RenderBuffers.DeviceContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
   
   
@@ -200,8 +206,10 @@ bool Render(CoreRenderBuffers& RenderBuffers, Camera* Camera, XMMATRIX world, XM
   RenderBuffers.DeviceContext->RSSetViewports(1, &RenderBuffers.Viewport);
   
   RenderBuffers.DeviceContext->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-  RenderBuffers.DeviceContext->IASetInputLayout(layout);
+}
 
+bool Render(CoreRenderBuffers& RenderBuffers, XMMATRIX world, XMMATRIX view, XMMATRIX proj)
+{
   HRESULT hr; 
   D3D11_MAPPED_SUBRESOURCE mappedResource;
   MatrixBufferType* dataPtr;
@@ -224,21 +232,15 @@ bool Render(CoreRenderBuffers& RenderBuffers, Camera* Camera, XMMATRIX world, XM
   dataPtr->proj = proj;
 
   RenderBuffers.DeviceContext->Unmap(g_pMatrixBuffer, 0);
-
+  
   bufferNumber = 0;
 
   RenderBuffers.DeviceContext->VSSetConstantBuffers(bufferNumber, 1, &g_pMatrixBuffer); 
 
+  RenderBuffers.DeviceContext->IASetInputLayout(layout);
   
-  RenderBuffers.DeviceContext->OMSetRenderTargets(
-						  1,
-						  &RenderBuffers.RenderTargetView,
-						  RenderBuffers.DepthStencilView
-						  );
-
   RenderBuffers.DeviceContext->VSSetShader(m_vertexShader, NULL, 0);
   RenderBuffers.DeviceContext->PSSetShader(m_pixelShader, NULL, 0);
-  
   
   RenderBuffers.DeviceContext->DrawIndexed(3, 0, 0);
 

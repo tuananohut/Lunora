@@ -6,6 +6,9 @@
 #include "Camera/Camera.cpp"
 #include "Geometry.h"
 
+const float SCREEN_DEPTH = 1000.f;
+const float SCREEN_NEAR = 0.3f;
+
 static bool Running; 
 
 LRESULT CALLBACK WindowProc(HWND Window, 
@@ -129,22 +132,21 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      
 	      BeginScene(Renderer);
 
+	      mCamera->Render(); 
+	      
 	      XMMATRIX world = XMMatrixIdentity();
 	      XMMATRIX view;
-	      
-	      mCamera->Render(); 
 	      
 	      mCamera->GetViewMatrix(view);
   
 	      float fieldOfView = 3.141592654f / 4.0f;
 	      float screenAspect = (float)Window->Width / (float)Window->Height;
-
-	      const float SCREEN_DEPTH = 1000.f;
-	      const float SCREEN_NEAR = 0.3f;
 	      
 	      XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
 
-	      result = Render(Renderer, mCamera, world, view, proj);
+	      RenderModel(Renderer); 
+
+	      result = Render(Renderer, world, view, proj);
 	      if (FAILED(result))
 		{
 		  Running = false; 
