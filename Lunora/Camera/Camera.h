@@ -18,18 +18,10 @@ struct Camera
 
   void Render();
   void GetViewMatrix(XMMATRIX&);
-
-  void RenderBaseViewMatrix();
-  void GetBaseViewMatrix(XMMATRIX&);
-
-  void RenderReflection(float);
-  void GetReflectionViewMatrix(XMMATRIX&);
   
   float m_positionX, m_positionY, m_positionZ;
   float m_rotationX, m_rotationY, m_rotationZ;
   XMMATRIX m_viewMatrix;
-  XMMATRIX m_baseViewMatrix;
-  XMMATRIX m_reflectionViewMatrix; 
 }; 
 
 #endif

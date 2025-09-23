@@ -1,7 +1,10 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
+#include "../Lunora/Camera/Camera.h"
 #include "D3d.h"
+#include "Model.h"
+#include "ColorShader.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -23,7 +26,10 @@ class Application
   bool Render();
 
  private:
-  D3D *m_Direct3D;  
+  D3D *m_Direct3D;
+  Camera *m_Camera;
+  Model *m_Model;
+  ColorShader *m_ColorShader; 
 };
 
 #endif

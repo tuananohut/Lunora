@@ -12,6 +12,7 @@ System::~System() {}
 
 bool System::Initialize()
 {
+  bool result; 
   int screenWidth, screenHeight;
 
   screenWidth = 0;
@@ -24,7 +25,7 @@ bool System::Initialize()
   m_Input->Initialize();
 
   m_Application = new Application;
-
+  
   result = m_Application->Initialize(screenWidth, screenHeight, m_hwnd);
   if (!result)
     {
@@ -87,7 +88,7 @@ bool System::Frame()
 {
   bool result;
 
-  if (m_Input->IsKeydown(VK_ESCAPE))
+  if (m_Input->IsKeyDown(VK_ESCAPE))
     {
       return false; 
     }
@@ -122,8 +123,9 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPA
 
 void System::InitializeWindows(int& screenWidth, int& screenHeight)
 {
-  WNDCLASSEX wc;
+  WNDCLASSEXW wc;
   DEVMODE dmScreenSettings;
+  int posX, posY;
 
   ApplicationHandle = this;
 
@@ -144,7 +146,7 @@ void System::InitializeWindows(int& screenWidth, int& screenHeight)
   wc.lpszClassName = m_applicationName;
   wc.cbSize = sizeof(WNDCLASSEX);
 
-  RegisterClassEx(&wc);
+  RegisterClassExW(&wc);
 
   screenWidth = GetSystemMetrics(SM_CXSCREEN);
   screenHeight = GetSystemMetrics(SM_CYSCREEN);
@@ -171,10 +173,10 @@ void System::InitializeWindows(int& screenWidth, int& screenHeight)
       posY = (GetSystemMetrics(SM_CYSCREEN) - screenHeight) / 2;
     }
 
-  m_hwnd = CreateWindowEx(WS_EX_APPWINDOW, m_applicationName, m_applicationName,
+  m_hwnd = CreateWindowExW(WS_EX_APPWINDOW, m_applicationName, m_applicationName,
 			  WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP,
 			  posX, posY, screenWidth, screenHeight,
-			  NULL, NULL, m_histance, NULL);
+			  NULL, NULL, m_hinstance, NULL);
 
   ShowWindow(m_hwnd, SW_SHOW);
   SetForegroundWindow(m_hwnd);
@@ -195,7 +197,7 @@ void System::ShutdownWindows()
   DestroyWindow(m_hwnd);
   m_hwnd = NULL;
 
-  UnregisterClass(m_applicationName, m_hinstance);
+  UnregisterClassW(m_applicationName, m_hinstance);
   m_hinstance = NULL;
 
   ApplicationHandle = NULL;

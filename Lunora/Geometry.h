@@ -132,14 +132,14 @@ HRESULT IAStage(CoreRenderBuffers& RenderBuffers)
   ID3DBlob *psBlob;
   ID3DBlob *errorMessage;
 
-  D3DCompileFromFile(L"../Lunora/gpu.hlsl", 0, 0, "vertex_shader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
+  D3DCompileFromFile(L"../Lunora/gpu.hlsl", 0, 0, "ColorVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
   hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &m_vertexShader);
   if (FAILED(hr))
     {
       return false; 
     }
   
-  D3DCompileFromFile(L"../Lunora/gpu.hlsl", 0, 0, "pixel_shader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
+  D3DCompileFromFile(L"../Lunora/gpu.hlsl", 0, 0, "ColorPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
   hr = RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &m_pixelShader);
   if (FAILED(hr))
     {

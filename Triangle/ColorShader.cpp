@@ -31,7 +31,7 @@ bool ColorShader::Initialize(ID3D11Device *device, HWND hwnd)
       return false; 
     }
 
-  result InitializeShader(device, hwnd, vsFilename, psFilename);
+  result = InitializeShader(device, hwnd, vsFilename, psFilename);
   if (!result)
     {
       return false; 
@@ -233,13 +233,13 @@ bool ColorShader::SetShaderParameters(ID3D11DeviceContext *deviceContext,
 {
   HRESULT result;
   D3D11_MAPPED_SUBRESOURCE mappedResource;
-  MatrixBufferType *dataPtr;
+  MatrixBufferType *dataPtr = nullptr;
   unsigned int bufferNumber;
 
   worldMatrix = XMMatrixTranspose(worldMatrix);
   viewMatrix = XMMatrixTranspose(viewMatrix);
   projectionMatrix = XMMatrixTranspose(projectionMatrix);
-
+  
   result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
   if (FAILED(result))
     {

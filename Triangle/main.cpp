@@ -5,20 +5,20 @@ int WINAPI WinMain(HINSTANCE hInstance,
 		   PSTR pScmdline,
 		   int iCmdshow)
 {
-  System *System;
+  System *system;
   bool result;
+  
+  system = new System;
 
-  System = new System;
-
-  result = System->Initialize();
+  result = system->Initialize();
   if (result)
     {
-      System->Run();
+      system->Run();
     }
 
-  System->Shutdown();
-  delete System;
-  System = nullptr; 
+  system->Shutdown();
+  delete system;
+  system = nullptr; 
 }
 
 

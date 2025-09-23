@@ -403,7 +403,7 @@ void D3D::GetOrthoMatrix(XMMATRIX& orthoMatrix)
 void D3D::GetVideoCardInfo(char *cardName, int &memory)
 {
   strcpy_s(cardName, 128, m_videoCardDescription);
-  memory = m_videoCardDescription;
+  memory = m_videoCardMemory;
 }
 
 void D3D::SetBackBufferRenderTarget()
@@ -413,5 +413,5 @@ void D3D::SetBackBufferRenderTarget()
 
 void D3D::ResetViewport()
 {
-  m_deviceContext->RSSetViewports(1, m_viewport); 
+  m_deviceContext->RSSetViewports(1, &m_viewport); 
 }
