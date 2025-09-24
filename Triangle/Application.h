@@ -1,8 +1,8 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include "../Lunora/Camera/Camera.h"
 #include "D3d.h"
+#include "Camera.h"
 #include "Model.h"
 #include "ColorShader.h"
 
