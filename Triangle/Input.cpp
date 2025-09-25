@@ -16,6 +16,11 @@ void Input::Initialize()
     }
 }
 
+void Input::KeyDown(unsigned int key)
+{
+  
+}
+
 void Input::KeyUp(unsigned int input)
 {
   m_keys[input] = false; 
