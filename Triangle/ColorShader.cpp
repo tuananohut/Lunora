@@ -19,13 +19,13 @@ bool ColorShader::Initialize(ID3D11Device *device, HWND hwnd)
   wchar_t psFilename[128];
   int error;
 
-  error = wcscpy_s(vsFilename, 128, L"../Lunora/Triangle/color.vs");
+  error = wcscpy_s(vsFilename, 128, L"../Triangle/color.vs");
   if (error != 0)
     {
       return false; 
     }
 
-  error = wcscpy_s(psFilename, 128, L"../Lunora/Triangle/color.ps");
+  error = wcscpy_s(psFilename, 128, L"../Triangle/color.ps");
   if (error != 0)
     {
       return false; 
@@ -93,7 +93,7 @@ bool ColorShader::InitializeShader(ID3D11Device *device, HWND hwnd,
       return false; 
     }
 
-  result = D3DCompileFromFile(vsFilename, NULL, NULL, "ColorPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &pixelShaderBuffer, &errorMessage);
+  result = D3DCompileFromFile(psFilename, NULL, NULL, "ColorPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &pixelShaderBuffer, &errorMessage);
   if (FAILED(result))
     {
       if (errorMessage)
