@@ -166,8 +166,8 @@ bool ColorShader::InitializeShader(ID3D11Device *device, HWND hwnd,
 
   result = device->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
   if (FAILED(result))
-    {
-      return false; 
+    { 
+      return false;
     }
 
   return true; 
@@ -233,7 +233,7 @@ bool ColorShader::SetShaderParameters(ID3D11DeviceContext *deviceContext,
 {
   HRESULT result;
   D3D11_MAPPED_SUBRESOURCE mappedResource;
-  MatrixBufferType *dataPtr = nullptr;
+  MatrixBufferType *dataPtr;
   unsigned int bufferNumber;
 
   worldMatrix = XMMatrixTranspose(worldMatrix);
@@ -245,6 +245,8 @@ bool ColorShader::SetShaderParameters(ID3D11DeviceContext *deviceContext,
     {
       return false; 
     }
+
+  dataPtr = (MatrixBufferType*)mappedResource.pData; 
 
   dataPtr->world = worldMatrix;
   dataPtr->view = viewMatrix;

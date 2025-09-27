@@ -5,6 +5,8 @@
 #include "Time.cpp"
 #include "Camera/Camera.cpp"
 #include "Geometry.h"
+#include "../Triangle/Model.h"
+#include "../Triangle/ColorShader.h"
 
 const float SCREEN_DEPTH = 1000.f;
 const float SCREEN_NEAR = 0.3f;
@@ -79,32 +81,38 @@ int WINAPI WinMain(HINSTANCE Instance,
 	{	  
 	  Running = true;
 
-	  CoreRenderBuffers Renderer;
+	  CoreRenderBuffers *Renderer = new CoreRenderBuffers;
 	  Window->Width = 800;
 	  Window->Height = 600;
-	  Renderer = InitializeD3D(*Window, false);
+	  *Renderer = InitializeD3D(*Window, false);
 
 	  Time Timer;
 	  Reset(Timer);
 
-	  Camera* mCamera = new Camera;
+	  Camera *mCamera = new Camera;
 	  mCamera->SetPosition(0.0f, 0.0f, -5.0f);
+
+	  Model *mModel = new Model;
+	  mModel->Initialize(Renderer->Device);
+
+	  ColorShader *mColorShader = new ColorShader;
+	  mColorShader->Initialize(Renderer->Device, Window->hwnd); 
 	  
-	  result = CreateVertexBuffer(Renderer); 
+	  result = CreateVertexBuffer(*Renderer); 
 	  if (FAILED(result))
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
 	      Running = false; 
 	    }
 	  
-	  result = CreateIndexBuffer(Renderer);
+	  result = CreateIndexBuffer(*Renderer);
 	  if (FAILED(result))
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
 	      Running = false; 
 	    }
 
-	  if (FAILED(IAStage(Renderer)))
+	  if (FAILED(IAStage(*Renderer)))
 	    {
 	      (Window->hwnd, "Something is wrong!", "Bad", MB_OK | MB_ICONERROR);
 	    }
@@ -122,7 +130,24 @@ int WINAPI WinMain(HINSTANCE Instance,
 			  delete mCamera;
 			  mCamera = nullptr; 
 			}
-		      ShutdownD3D(Renderer);
+		      if (mModel)
+			{
+			  mModel->Shutdown();
+			  delete mModel;
+			  mModel = nullptr; 
+			}
+		      if (mColorShader)
+			{
+			  mColorShader->Shutdown();
+			  delete mColorShader;
+			  mColorShader = nullptr;
+			}
+		      if (Renderer)
+			{
+			  delete Renderer;
+			  Renderer = nullptr; 
+			}
+		      ShutdownD3D(*Renderer);
 		      Running = false;
 		    }
 		  
@@ -130,7 +155,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 		  DispatchMessageA(&Message);
 		}
 	      
-	      BeginScene(Renderer);
+	      BeginScene(*Renderer);
 
 	      mCamera->Render(); 
 	      
@@ -144,15 +169,23 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      
 	      XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
 
-	      RenderModel(Renderer); 
-
-	      result = Render(Renderer, world, view, proj);
-	      if (FAILED(result))
+	      mModel->Render(Renderer->DeviceContext);
+  
+	      result = mColorShader->Render(Renderer->DeviceContext, mModel->GetIndexCount(), world, view, proj);
+	      if (!result)
 		{
-		  Running = false; 
+		  return false;
 		}
 	      
-	      EndScene(Renderer);
+	      // RenderModel(Renderer);
+
+	      // result = Render(Renderer, world, view, proj);
+	      // if (FAILED(result))
+	      // {
+	      //  Running = false; 
+	      // }
+	      
+	      EndScene(*Renderer);
 	    }  
 	} 
     }

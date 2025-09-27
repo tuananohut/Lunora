@@ -98,7 +98,7 @@ bool Application::Render()
   XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
   bool result;
   
-  m_Direct3D->BeginScene(0.5f, 0.5f, 0.5f, 1.f);
+  m_Direct3D->BeginScene(0.f, 0.f, 0.f, 1.f);
 
   m_Camera->Render();
 
@@ -107,7 +107,7 @@ bool Application::Render()
   m_Direct3D->GetProjectionMatrix(projectionMatrix);
 
   m_Model->Render(m_Direct3D->GetDeviceContext());
-
+  
   result = m_ColorShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix);
   if (!result)
     {
