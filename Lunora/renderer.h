@@ -18,6 +18,11 @@ struct CoreRenderBuffers
 {
   ID3D11Device *Device;
   ID3D11DeviceContext *DeviceContext;
+  ID3D11RenderTargetView *RenderTargetView;
+  ID3D11Texture2D *DepthStencilBuffer;
+  ID3D11DepthStencilView *DepthStencilView;
+  IDXGISwapChain *SwapChain;
+  D3D11_VIEWPORT Viewport;
 };
 
 CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window, 

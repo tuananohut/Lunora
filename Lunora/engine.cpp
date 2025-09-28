@@ -5,8 +5,6 @@
 #include "Time.cpp"
 #include "Camera/Camera.cpp"
 #include "Geometry.h"
-#include "../Triangle/Model.h"
-#include "../Triangle/ColorShader.h"
 
 const float SCREEN_DEPTH = 1000.f;
 const float SCREEN_NEAR = 0.3f;
@@ -91,12 +89,6 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	  Camera *mCamera = new Camera;
 	  mCamera->SetPosition(0.0f, 0.0f, -5.0f);
-
-	  Model *mModel = new Model;
-	  mModel->Initialize(Renderer->Device);
-
-	  ColorShader *mColorShader = new ColorShader;
-	  mColorShader->Initialize(Renderer->Device, Window->hwnd); 
 	  
 	  result = CreateVertexBuffer(*Renderer); 
 	  if (FAILED(result))
@@ -130,18 +122,6 @@ int WINAPI WinMain(HINSTANCE Instance,
 			  delete mCamera;
 			  mCamera = nullptr; 
 			}
-		      if (mModel)
-			{
-			  mModel->Shutdown();
-			  delete mModel;
-			  mModel = nullptr; 
-			}
-		      if (mColorShader)
-			{
-			  mColorShader->Shutdown();
-			  delete mColorShader;
-			  mColorShader = nullptr;
-			}
 		      if (Renderer)
 			{
 			  delete Renderer;
@@ -168,22 +148,14 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      float screenAspect = (float)Window->Width / (float)Window->Height;
 	      
 	      XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
-
-	      mModel->Render(Renderer->DeviceContext);
-  
-	      result = mColorShader->Render(Renderer->DeviceContext, mModel->GetIndexCount(), world, view, proj);
-	      if (!result)
-		{
-		  return false;
-		}
 	      
-	      // RenderModel(Renderer);
-
-	      // result = Render(Renderer, world, view, proj);
-	      // if (FAILED(result))
-	      // {
-	      //  Running = false; 
-	      // }
+	      RenderModel(*Renderer);
+	      
+	      result = Render(*Renderer, world, view, proj);
+	      if (FAILED(result))
+		{
+	       Running = false; 
+	      }
 	      
 	      EndScene(*Renderer);
 	    }  

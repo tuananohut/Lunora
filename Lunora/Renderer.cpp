@@ -21,17 +21,11 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
   D3D11_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc;
   D3D11_RASTERIZER_DESC rasterDesc; 
   HRESULT result;
-
   bool vsync_enabled;
   int videoCardMemory;
   char videoCardDescription[128];
-  IDXGISwapChain *SwapChain;
-  ID3D11RenderTargetView *RenderTargetView;
-  ID3D11Texture2D *DepthStencilBuffer;
   ID3D11DepthStencilState *DepthStencilState; 
-  ID3D11DepthStencilView *DepthStencilView; 
   ID3D11RasterizerState *RasterState;
-  D3D11_VIEWPORT Viewport;
 
   vsync_enabled = false; 
   
@@ -73,9 +67,9 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
 
   for (i = 0; i < numModes; i++)
     {
-      if (displayModeList[i].Width == (unsigned int)screenWidth)
+      if (displayModeList[i].Width == (unsigned int)Window.Width)
 	{
-	  if (displayModeList[i].Height == (unsigned int)screenHeight)
+	  if (displayModeList[i].Height == (unsigned int)Window.Height)
 	    {
 	      numerator = displayModeList[i].RefreshRate.Numerator;
 	      denominator = displayModeList[i].RefreshRate.Denominator; 
@@ -157,7 +151,7 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
 					 1,
 					 D3D11_SDK_VERSION,
 					 &SwapChainDesc,
-					 &SwapChain,
+					 &Renderer.SwapChain,
 					 &Renderer.Device,
 					 NULL,
 					 &Renderer.DeviceContext);
@@ -165,8 +159,8 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
     {
       MessageBoxA(Window.hwnd, "Could not create Device and Swap Chain", "Error", MB_OK | MB_ICONERROR);
     }
-
-  result = SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&BackBuffer);
+  
+  result = Renderer.SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&BackBuffer);
   if (FAILED(result))
     {
       MessageBoxA(Window.hwnd, "Get Buffer", "Error", MB_OK | MB_ICONERROR);
@@ -174,7 +168,7 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
   
   result = Renderer.Device->CreateRenderTargetView(BackBuffer,
 						   NULL,
-						   &RenderTargetView);
+						   &Renderer.RenderTargetView);
   if (FAILED(result))
     {
       MessageBoxA(Window.hwnd, "Create Render Target View", "Error", MB_OK | MB_ICONERROR);
@@ -197,33 +191,33 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
   DepthBufferDesc.CPUAccessFlags = 0;
   DepthBufferDesc.MiscFlags = 0;
 
-  result = Renderer.Device->CreateTexture2D(&DepthStencilDesc, 0, &DepthStencilBuffer);
+  result = Renderer.Device->CreateTexture2D(&DepthBufferDesc, 0, &Renderer.DepthStencilBuffer);
   if (FAILED(result))
     {
       MessageBoxA(Window.hwnd, "Create Texture 2D", "Error", MB_OK | MB_ICONERROR);
     }
 
-  ZeroMemory(&DepthStencilStateDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+  ZeroMemory(&DepthStencilDesc, sizeof(DepthStencilDesc));
   
-  DepthStencilStateDesc.DepthEnable = true;
-  DepthStencilStateDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-  DepthStencilStateDesc.DepthFunc = D3D11_COMPARISON_LESS;
+  DepthStencilDesc.DepthEnable = true;
+  DepthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+  DepthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+  
+  DepthStencilDesc.StencilEnable = true;
+  DepthStencilDesc.StencilReadMask = 0xFF;
+  DepthStencilDesc.StencilWriteMask = 0xFF;
 
-  DepthStencilStateDesc.StencilEnable = true;
-  DepthStencilStateDesc.StencilReadMask = 0xFF;
-  DepthStencilStateDesc.StencilWriteMask = 0xFF;
+  DepthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+  DepthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+  DepthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+  DepthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS; 
 
-  DepthStencilStateDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-  DepthStencilStateDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-  DepthStencilStateDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-  DepthStencilStateDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS; 
+  DepthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+  DepthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+  DepthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+  DepthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS; 
 
-  DepthStencilStateDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-  DepthStencilStateDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-  DepthStencilStateDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-  DepthStencilStateDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS; 
-
-  result = Renderer.Device->CreateDepthStencilState(&DepthStencilStateDesc,
+  result = Renderer.Device->CreateDepthStencilState(&DepthStencilDesc,
 						    &DepthStencilState);
   if (FAILED(result))
     {
@@ -238,15 +232,15 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
   DepthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
   DepthStencilViewDesc.Texture2D.MipSlice = 0;
     
-  result = Renderer.Device->CreateDepthStencilView(DepthStencilBuffer,
+  result = Renderer.Device->CreateDepthStencilView(Renderer.DepthStencilBuffer,
 						   &DepthStencilViewDesc,
-						   &DepthStencilView);
+						   &Renderer.DepthStencilView);
   if (FAILED(result))
     {
       MessageBoxA(Window.hwnd, "Create Depth Stencil State", "Error", MB_OK | MB_ICONERROR);
     }
 
-  Renderer.DeviceContext->OMSetRenderTargets(1, &RenderTargetView, DepthStencilView);
+  Renderer.DeviceContext->OMSetRenderTargets(1, &Renderer.RenderTargetView, Renderer.DepthStencilView);
 
   rasterDesc.AntialiasedLineEnable = false;
   rasterDesc.CullMode = D3D11_CULL_BACK;
@@ -267,14 +261,14 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
 
   Renderer.DeviceContext->RSSetState(RasterState); 
   
-  Viewport.Width = (float)Window.Width;
-  Viewport.Height = (float)Window.Height;
-  Viewport.MinDepth = 0.f;
-  Viewport.MaxDepth = 1.f;
-  Viewport.TopLeftX = 0.f;
-  Viewport.TopLeftY = 0.f;
+  Renderer.Viewport.Width = (float)Window.Width;
+  Renderer.Viewport.Height = (float)Window.Height;
+  Renderer.Viewport.MinDepth = 0.f;
+  Renderer.Viewport.MaxDepth = 1.f;
+  Renderer.Viewport.TopLeftX = 0.f;
+  Renderer.Viewport.TopLeftY = 0.f;
 
-  Renderer.DeviceContext->RSSetViewports(1, &Viewport);
+  Renderer.DeviceContext->RSSetViewports(1, &Renderer.Viewport);
 
   return Renderer; 
 }
