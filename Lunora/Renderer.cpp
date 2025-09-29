@@ -103,7 +103,7 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
   DXFactory = nullptr; 
   
   ZeroMemory(&SwapChainDesc, sizeof(SwapChainDesc));
-
+  
   SwapChainDesc.BufferCount = 1;
   
   SwapChainDesc.BufferDesc.Width = Window.Width;

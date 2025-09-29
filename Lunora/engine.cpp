@@ -1,10 +1,10 @@
 #include <windows.h>
 
 #include "resource.h"
-#include "Renderer.cpp"
-#include "Time.cpp"
-#include "Camera/Camera.cpp"
+#include "Renderer.h"
+#include "Camera/Camera.h"
 #include "Geometry.h"
+#include "Shader.h"
 
 const float SCREEN_DEPTH = 1000.f;
 const float SCREEN_NEAR = 0.3f;
@@ -83,10 +83,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  Window->Width = 800;
 	  Window->Height = 600;
 	  *Renderer = InitializeD3D(*Window, false);
-
-	  Time Timer;
-	  Reset(Timer);
-
+	  
 	  Camera *mCamera = new Camera;
 	  mCamera->SetPosition(0.0f, 0.0f, -5.0f);
 	  
@@ -104,7 +101,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      Running = false; 
 	    }
 
-	  if (FAILED(IAStage(*Renderer)))
+	  if (FAILED(InitializeShaderResources(*Renderer)))
 	    {
 	      (Window->hwnd, "Something is wrong!", "Bad", MB_OK | MB_ICONERROR);
 	    }
