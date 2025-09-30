@@ -24,8 +24,16 @@ struct MeshVertexBuffer
   XMFLOAT3 color; 
 };
 
+struct SimpleVertexCombined
+{
+  XMFLOAT3 position;
+  XMFLOAT4 color; 
+};
+
 HRESULT CreateVertexBuffer(CoreRenderBuffers& RenderBuffers);
 HRESULT CreateIndexBuffer(CoreRenderBuffers& RenderBuffers);
+
+bool InitializeModel(CoreRenderBuffers& RenderBuffers); 
 
 void RenderModel(CoreRenderBuffers& RenderBuffers); 
 

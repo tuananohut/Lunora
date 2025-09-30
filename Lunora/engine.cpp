@@ -78,7 +78,7 @@ int WINAPI WinMain(HINSTANCE Instance,
       if (Window->hwnd)
 	{	  
 	  Running = true;
-
+	  
 	  CoreRenderBuffers *Renderer = new CoreRenderBuffers;
 	  Window->Width = 800;
 	  Window->Height = 600;
@@ -87,15 +87,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  Camera *mCamera = new Camera;
 	  mCamera->SetPosition(0.0f, 0.0f, -5.0f);
 	  
-	  result = CreateVertexBuffer(*Renderer); 
-	  if (FAILED(result))
-	    {
-	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
-	      Running = false; 
-	    }
-	  
-	  result = CreateIndexBuffer(*Renderer);
-	  if (FAILED(result))
+	  Running = InitializeModel(*Renderer);
+	  if (FAILED(Running))
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
 	      Running = false; 

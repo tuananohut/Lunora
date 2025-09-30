@@ -15,14 +15,14 @@ HRESULT CreateVertexBuffer(CoreRenderBuffers& RenderBuffers)
       return false;
     }
 
-  vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f); 
-  vertices[0].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+  vertices[0].position = XMFLOAT3(-1.f, -1.f, 0.f); 
+  vertices[0].color = XMFLOAT4(1.f, 1.f, 0.f, 1.f);
 
-  vertices[1].position = XMFLOAT3(0.0f, 1.0f, 0.0f);
-  vertices[1].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+  vertices[1].position = XMFLOAT3(0.f, 1.f, 0.f);
+  vertices[1].color = XMFLOAT4(0.f, 1.f, 1.f, 1.f);
 
-  vertices[2].position = XMFLOAT3(1.0f, -1.0f, 0.0f);
-  vertices[2].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+  vertices[2].position = XMFLOAT3(1.f, -1.f, 0.f);
+  vertices[2].color = XMFLOAT4(1.f, 0.f, 1.f, 1.f);
   
   D3D11_BUFFER_DESC bufferDesc;
   bufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -98,3 +98,21 @@ void RenderModel(CoreRenderBuffers& RenderBuffers)
   RenderBuffers.DeviceContext->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 }
 
+bool InitializeModel(CoreRenderBuffers& RenderBuffers)
+{
+  HRESULT result;
+  
+  result = CreateVertexBuffer(RenderBuffers); 
+  if (FAILED(result))
+    {
+      return false; 
+    }
+	  
+  result = CreateIndexBuffer(RenderBuffers);
+  if (FAILED(result))
+    {
+      return false; 
+    }
+
+  return true;
+}
