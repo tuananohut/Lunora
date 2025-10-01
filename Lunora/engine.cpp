@@ -86,8 +86,10 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  
 	  Camera *mCamera = new Camera;
 	  mCamera->SetPosition(0.0f, 0.0f, -5.0f);
+
+	  ModelBuffer mModelBuffer = new ModelBuffer;
 	  
-	  Running = InitializeModel(*Renderer);
+	  Running = InitializeModel(*Renderer, *mModelBuffer);
 	  if (FAILED(Running))
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
@@ -112,6 +114,14 @@ int WINAPI WinMain(HINSTANCE Instance,
 			  delete mCamera;
 			  mCamera = nullptr; 
 			}
+
+		      if (mModelBuffer)
+			{
+			  ReleaseModel(mModelBuffer); 
+			  delete mModelBuffer;
+			  mModelBuffer = nullptr; 
+			} 
+		      
 		      if (Renderer)
 			{
 			  delete Renderer;

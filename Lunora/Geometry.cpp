@@ -1,9 +1,6 @@
 #include "Geometry.h"
 
-static ID3D11Buffer* g_pVertexBuffer = NULL;
-static ID3D11Buffer *g_pIndexBuffer = NULL;
-
-HRESULT CreateVertexBuffer(CoreRenderBuffers& RenderBuffers)
+HRESULT CreateVertexBuffer(ID3D11Device& Device, ID3D11Buffer &VertexBuffer)
 {
   HRESULT hr;
 
@@ -36,14 +33,14 @@ HRESULT CreateVertexBuffer(CoreRenderBuffers& RenderBuffers)
   InitData.SysMemPitch = 0;
   InitData.SysMemSlicePitch = 0;
 
-  hr = RenderBuffers.Device->CreateBuffer( &bufferDesc, &InitData, &g_pVertexBuffer );
+  hr = Device->CreateBuffer( &bufferDesc, &InitData, &VertexBuffer );
 
   delete []vertices; 
   
   return hr; 
 }
 
-HRESULT CreateIndexBuffer(CoreRenderBuffers& RenderBuffers)
+HRESULT CreateIndexBuffer(ID3D11Device& Device, ID3D11Buffer &IndexBuffer)
 {
   HRESULT hr;
   
@@ -71,25 +68,25 @@ HRESULT CreateIndexBuffer(CoreRenderBuffers& RenderBuffers)
   InitData.SysMemPitch = 0;
   InitData.SysMemSlicePitch = 0;
 
-  hr = RenderBuffers.Device->CreateBuffer( &bufferDesc, &InitData, &g_pIndexBuffer );
+  hr = Device->CreateBuffer( &bufferDesc, &InitData, &IndexBuffer );
 
   delete[] indices; 
   
   return hr; 
 }
 
-void RenderModel(CoreRenderBuffers& RenderBuffers)
+void RenderModel(CoreRenderBuffers& RenderBuffers, ModelBuffer& Buffer)
 {
   UINT stride = sizeof( SimpleVertexCombined );
   UINT offset = 0;
   
   RenderBuffers.DeviceContext->IASetVertexBuffers(0, 
 						  1,
-						  &g_pVertexBuffer,
+						  &Buffer.VertexBuffer,
 						  &stride, 
 						  &offset );
   
-  RenderBuffers.DeviceContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+  RenderBuffers.DeviceContext->IASetIndexBuffer(Buffer.IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
   
   
   
@@ -115,4 +112,23 @@ bool InitializeModel(CoreRenderBuffers& RenderBuffers)
     }
 
   return true;
+}
+
+void ReleaseModel(ModelBuffer& Buffer)
+{
+  if (ModelBuffer)
+    {
+      if (ModelBuffer.VertexBuffer)
+	{
+	  ModelBuffer.VertexBuffer->Release();
+	  delete ModelBuffer.VertexBuffer;
+	  ModelBuffer.VertexBuffer = nullptr; 
+	}
+      if (ModelBuffer.IndexBuffer)
+	{
+	  ModelBuffer.IndexBuffer->Release();
+	  delete ModelBuffer.IndexBuffer;
+	  ModelBuffer.IndexBuffer = nullptr; 
+	}
+    }
 }

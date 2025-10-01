@@ -30,10 +30,17 @@ struct SimpleVertexCombined
   XMFLOAT4 color; 
 };
 
-HRESULT CreateVertexBuffer(CoreRenderBuffers& RenderBuffers);
-HRESULT CreateIndexBuffer(CoreRenderBuffers& RenderBuffers);
+struct ModelBuffer
+{  
+  ID3D11Buffer *VertexBuffer = NULL;
+  ID3D11Buffer *IndexBuffer = NULL;
+};
 
-bool InitializeModel(CoreRenderBuffers& RenderBuffers); 
+HRESULT CreateVertexBuffer(ID3D11Device& Device, ID3D11Buffer &VertexBuffer);
+HRESULT CreateIndexBuffer(ID3D11Device& Device, ID3D11Buffer &IndexBuffer);
 
-void RenderModel(CoreRenderBuffers& RenderBuffers); 
+bool InitializeModel(ID3D11Device& Device, ModelBuffer& Buffer); 
 
+void RenderModel(CoreRenderBuffers& RenderBuffers, ModelBuffer& Buffer); 
+
+void ReleaseModel(ModelBuffer& Buffer); 
