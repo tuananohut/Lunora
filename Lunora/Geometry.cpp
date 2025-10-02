@@ -1,6 +1,6 @@
 #include "Geometry.h"
 
-HRESULT CreateVertexBuffer(ID3D11Device& Device, ID3D11Buffer &VertexBuffer)
+HRESULT CreateVertexBuffer(ID3D11Device* Device, ID3D11Buffer &VertexBuffer)
 {
   HRESULT hr;
 
@@ -40,7 +40,7 @@ HRESULT CreateVertexBuffer(ID3D11Device& Device, ID3D11Buffer &VertexBuffer)
   return hr; 
 }
 
-HRESULT CreateIndexBuffer(ID3D11Device& Device, ID3D11Buffer &IndexBuffer)
+HRESULT CreateIndexBuffer(ID3D11Device* Device, ID3D11Buffer &IndexBuffer)
 {
   HRESULT hr;
   
@@ -99,13 +99,13 @@ bool InitializeModel(CoreRenderBuffers& RenderBuffers)
 {
   HRESULT result;
   
-  result = CreateVertexBuffer(RenderBuffers); 
+  result = CreateVertexBuffer(RenderBuffers.Device); 
   if (FAILED(result))
     {
       return false; 
     }
 	  
-  result = CreateIndexBuffer(RenderBuffers);
+  result = CreateIndexBuffer(RenderBuffers.Device);
   if (FAILED(result))
     {
       return false; 

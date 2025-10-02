@@ -1,6 +1,9 @@
+#ifndef GEOMETRY_H
+#define GEOMETRY_H
+
+#include <d3d11.h>
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
-#include <string>
 
 #include "Renderer.h"
 
@@ -36,11 +39,13 @@ struct ModelBuffer
   ID3D11Buffer *IndexBuffer = NULL;
 };
 
-HRESULT CreateVertexBuffer(ID3D11Device& Device, ID3D11Buffer &VertexBuffer);
-HRESULT CreateIndexBuffer(ID3D11Device& Device, ID3D11Buffer &IndexBuffer);
+HRESULT CreateVertexBuffer(ID3D11Device *Device, ID3D11Buffer &VertexBuffer);
+HRESULT CreateIndexBuffer(ID3D11Device *Device, ID3D11Buffer &IndexBuffer);
 
-bool InitializeModel(ID3D11Device& Device, ModelBuffer& Buffer); 
+bool InitializeModel(ID3D11Device *Device, ModelBuffer& Buffer); 
 
 void RenderModel(CoreRenderBuffers& RenderBuffers, ModelBuffer& Buffer); 
 
 void ReleaseModel(ModelBuffer& Buffer); 
+
+#endif

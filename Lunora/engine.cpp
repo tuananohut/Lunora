@@ -87,9 +87,9 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  Camera *mCamera = new Camera;
 	  mCamera->SetPosition(0.0f, 0.0f, -5.0f);
 
-	  ModelBuffer mModelBuffer = new ModelBuffer;
+	  ModelBuffer *mModelBuffer = new ModelBuffer;
 	  
-	  Running = InitializeModel(*Renderer, *mModelBuffer);
+	  Running = InitializeModel(*Renderer->Device, *mModelBuffer);
 	  if (FAILED(Running))
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
@@ -117,7 +117,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 		      if (mModelBuffer)
 			{
-			  ReleaseModel(mModelBuffer); 
+			  ReleaseModel(*mModelBuffer); 
 			  delete mModelBuffer;
 			  mModelBuffer = nullptr; 
 			} 
@@ -149,7 +149,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      
 	      XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
 	      
-	      RenderModel(*Renderer);
+	      RenderModel(*Renderer, *mModelBuffer);
 	      
 	      result = Render(*Renderer, world, view, proj);
 	      if (FAILED(result))
