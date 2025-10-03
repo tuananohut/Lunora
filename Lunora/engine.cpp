@@ -89,7 +89,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	  ModelBuffer *mModelBuffer = new ModelBuffer;
 	  
-	  Running = InitializeModel(*Renderer->Device, *mModelBuffer);
+	  Running = InitializeModel(Renderer->Device, *mModelBuffer);
 	  if (FAILED(Running))
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);

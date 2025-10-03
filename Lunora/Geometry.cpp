@@ -1,6 +1,6 @@
 #include "Geometry.h"
 
-HRESULT CreateVertexBuffer(ID3D11Device* Device, ID3D11Buffer &VertexBuffer)
+HRESULT CreateVertexBuffer(ID3D11Device *Device, ID3D11Buffer **VertexBuffer)
 {
   HRESULT hr;
 
@@ -33,14 +33,14 @@ HRESULT CreateVertexBuffer(ID3D11Device* Device, ID3D11Buffer &VertexBuffer)
   InitData.SysMemPitch = 0;
   InitData.SysMemSlicePitch = 0;
 
-  hr = Device->CreateBuffer( &bufferDesc, &InitData, &VertexBuffer );
+  hr = Device->CreateBuffer( &bufferDesc, &InitData, VertexBuffer );
 
   delete []vertices; 
   
   return hr; 
 }
 
-HRESULT CreateIndexBuffer(ID3D11Device* Device, ID3D11Buffer &IndexBuffer)
+HRESULT CreateIndexBuffer(ID3D11Device* Device, ID3D11Buffer** IndexBuffer)
 {
   HRESULT hr;
   
@@ -68,7 +68,7 @@ HRESULT CreateIndexBuffer(ID3D11Device* Device, ID3D11Buffer &IndexBuffer)
   InitData.SysMemPitch = 0;
   InitData.SysMemSlicePitch = 0;
 
-  hr = Device->CreateBuffer( &bufferDesc, &InitData, &IndexBuffer );
+  hr = Device->CreateBuffer( &bufferDesc, &InitData, IndexBuffer );
 
   delete[] indices; 
   
@@ -95,17 +95,17 @@ void RenderModel(CoreRenderBuffers& RenderBuffers, ModelBuffer& Buffer)
   RenderBuffers.DeviceContext->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 }
 
-bool InitializeModel(CoreRenderBuffers& RenderBuffers)
+bool InitializeModel(CoreRenderBuffers& RenderBuffers, ModelBuffer* ModelBuffer)
 {
   HRESULT result;
   
-  result = CreateVertexBuffer(RenderBuffers.Device); 
+  result = CreateVertexBuffer(*RenderBuffers.Device, ModelBuffer); 
   if (FAILED(result))
     {
       return false; 
     }
 	  
-  result = CreateIndexBuffer(RenderBuffers.Device);
+  result = CreateIndexBuffer(*RenderBuffers.Device, ModelBuffer);
   if (FAILED(result))
     {
       return false; 
