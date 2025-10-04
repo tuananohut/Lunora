@@ -1,0 +1,15 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <d3d11.h>
+#include <DirectXMath.h>
+using namespace DirectX;
+
+typedef struct {
+    XMFLOAT3 position;
+    XMFLOAT4 color;
+} SimpleVertexCombined;
+
+bool LoadModelFromFile(const char* filename,
+		       SimpleVertexCombined** outVertices,
+		       int* outVertexCount);

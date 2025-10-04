@@ -35,14 +35,14 @@ struct SimpleVertexCombined
 
 struct ModelBuffer
 {  
-  ID3D11Buffer *VertexBuffer = NULL;
-  ID3D11Buffer *IndexBuffer = NULL;
+  ID3D11Buffer *VertexBuffer = nullptr;
+  ID3D11Buffer *IndexBuffer = nullptr;
 };
 
-HRESULT CreateVertexBuffer(ID3D11Device *Device, ID3D11Buffer &VertexBuffer);
-HRESULT CreateIndexBuffer(ID3D11Device *Device, ID3D11Buffer &IndexBuffer);
+HRESULT CreateVertexBuffer(ID3D11Device *Device, ID3D11Buffer** VertexBuffer);
+HRESULT CreateIndexBuffer(ID3D11Device *Device, ID3D11Buffer** IndexBuffer);
 
-bool InitializeModel(ID3D11Device *Device, ModelBuffer& Buffer); 
+bool InitializeModel(CoreRenderBuffers& RenderBuffers, ModelBuffer* Buffer); 
 
 void RenderModel(CoreRenderBuffers& RenderBuffers, ModelBuffer& Buffer); 
 

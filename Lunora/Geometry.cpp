@@ -13,13 +13,13 @@ HRESULT CreateVertexBuffer(ID3D11Device *Device, ID3D11Buffer **VertexBuffer)
     }
 
   vertices[0].position = XMFLOAT3(-1.f, -1.f, 0.f); 
-  vertices[0].color = XMFLOAT4(1.f, 1.f, 0.f, 1.f);
+  vertices[0].color = XMFLOAT4(1.f, 0.f, 0.f, 1.f);
 
   vertices[1].position = XMFLOAT3(0.f, 1.f, 0.f);
   vertices[1].color = XMFLOAT4(0.f, 1.f, 1.f, 1.f);
 
   vertices[2].position = XMFLOAT3(1.f, -1.f, 0.f);
-  vertices[2].color = XMFLOAT4(1.f, 0.f, 1.f, 1.f);
+  vertices[2].color = XMFLOAT4(0.f, 0.f, 1.f, 1.f);
   
   D3D11_BUFFER_DESC bufferDesc;
   bufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -99,13 +99,13 @@ bool InitializeModel(CoreRenderBuffers& RenderBuffers, ModelBuffer* ModelBuffer)
 {
   HRESULT result;
   
-  result = CreateVertexBuffer(*RenderBuffers.Device, ModelBuffer); 
+  result = CreateVertexBuffer(RenderBuffers.Device, &ModelBuffer->VertexBuffer); 
   if (FAILED(result))
     {
       return false; 
     }
 	  
-  result = CreateIndexBuffer(*RenderBuffers.Device, ModelBuffer);
+  result = CreateIndexBuffer(RenderBuffers.Device, &ModelBuffer->IndexBuffer);
   if (FAILED(result))
     {
       return false; 
@@ -116,19 +116,14 @@ bool InitializeModel(CoreRenderBuffers& RenderBuffers, ModelBuffer* ModelBuffer)
 
 void ReleaseModel(ModelBuffer& Buffer)
 {
-  if (ModelBuffer)
+  if (Buffer.VertexBuffer)
     {
-      if (ModelBuffer.VertexBuffer)
-	{
-	  ModelBuffer.VertexBuffer->Release();
-	  delete ModelBuffer.VertexBuffer;
-	  ModelBuffer.VertexBuffer = nullptr; 
-	}
-      if (ModelBuffer.IndexBuffer)
-	{
-	  ModelBuffer.IndexBuffer->Release();
-	  delete ModelBuffer.IndexBuffer;
-	  ModelBuffer.IndexBuffer = nullptr; 
-	}
+      Buffer.VertexBuffer->Release();
+      Buffer.VertexBuffer = nullptr; 
+    }
+  if (Buffer.IndexBuffer)
+    {
+      Buffer.IndexBuffer->Release();
+      Buffer.IndexBuffer = nullptr; 
     }
 }
