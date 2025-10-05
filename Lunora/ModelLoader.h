@@ -1,3 +1,6 @@
+#ifndef MODELLOADER_H
+#define MODELLOADER_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,3 +16,5 @@ typedef struct {
 bool LoadModelFromFile(const char* filename,
 		       SimpleVertexCombined** outVertices,
 		       int* outVertexCount);
+
+#endif 

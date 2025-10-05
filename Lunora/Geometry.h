@@ -6,6 +6,7 @@
 #include <d3dcompiler.h>
 
 #include "Renderer.h"
+#include "ModelLoader.h"
 
 struct HexMeshVertexBuffer
 {
@@ -26,13 +27,13 @@ struct MeshVertexBuffer
   XMFLOAT3 binormal; 
   XMFLOAT3 color; 
 };
-
+/*
 struct SimpleVertexCombined
 {
   XMFLOAT3 position;
   XMFLOAT4 color; 
 };
-
+*/
 struct ModelBuffer
 {  
   ID3D11Buffer *VertexBuffer = nullptr;

@@ -4,14 +4,22 @@ HRESULT CreateVertexBuffer(ID3D11Device *Device, ID3D11Buffer **VertexBuffer)
 {
   HRESULT hr;
 
-  SimpleVertexCombined *vertices;;
+  int vertexCount = 0;
+  SimpleVertexCombined *vertices = nullptr;
 
   vertices = new SimpleVertexCombined[3];
   if (!vertices)
     {
       return false;
     }
-
+  
+  bool result = LoadModelFromFile("../Lunora/cube.txt", &vertices, &vertexCount);
+  if (!result)
+    {
+      return false; 
+    }
+  
+  /*
   vertices[0].position = XMFLOAT3(-1.f, -1.f, 0.f); 
   vertices[0].color = XMFLOAT4(1.f, 0.f, 0.f, 1.f);
 
@@ -20,10 +28,11 @@ HRESULT CreateVertexBuffer(ID3D11Device *Device, ID3D11Buffer **VertexBuffer)
 
   vertices[2].position = XMFLOAT3(1.f, -1.f, 0.f);
   vertices[2].color = XMFLOAT4(0.f, 0.f, 1.f, 1.f);
+  */
   
   D3D11_BUFFER_DESC bufferDesc;
   bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-  bufferDesc.ByteWidth = sizeof(SimpleVertexCombined) * 3;
+  bufferDesc.ByteWidth = sizeof(SimpleVertexCombined) * vertexCount;
   bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
   bufferDesc.CPUAccessFlags = 0;
   bufferDesc.MiscFlags = 0;
@@ -44,7 +53,7 @@ HRESULT CreateIndexBuffer(ID3D11Device* Device, ID3D11Buffer** IndexBuffer)
 {
   HRESULT hr;
   
-  unsigned long *indices;
+  /*unsigned long *indices;
 
   indices = new unsigned long[3];
   if (!indices)
@@ -54,11 +63,31 @@ HRESULT CreateIndexBuffer(ID3D11Device* Device, ID3D11Buffer** IndexBuffer)
   
   indices[0] = 0;  
   indices[1] = 1;  
-  indices[2] = 2;  
- 
+  indices[2] = 2;  */
+
+  unsigned long indices[] = {
+        0, 1, 2,
+        0, 2, 3,
+
+        4, 6, 5,
+        4, 7, 6,
+
+        4, 5, 1,
+        4, 1, 0,
+
+        3, 2, 6,
+        3, 6, 7,
+
+        1, 5, 6,
+        1, 6, 2,
+	
+        4, 0, 3,
+        4, 3, 7
+    };
+  
   D3D11_BUFFER_DESC bufferDesc;
   bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-  bufferDesc.ByteWidth = sizeof(unsigned long) * 3;
+  bufferDesc.ByteWidth = sizeof(indices);
   bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
   bufferDesc.CPUAccessFlags = 0;
   bufferDesc.MiscFlags = 0;
@@ -69,8 +98,8 @@ HRESULT CreateIndexBuffer(ID3D11Device* Device, ID3D11Buffer** IndexBuffer)
   InitData.SysMemSlicePitch = 0;
 
   hr = Device->CreateBuffer( &bufferDesc, &InitData, IndexBuffer );
-
-  delete[] indices; 
+  
+  // delete[] indices; 
   
   return hr; 
 }
