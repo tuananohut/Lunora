@@ -1,11 +1,13 @@
 #include "Geometry.h"
 
+SimpleVertexCombined *vertices = nullptr;
+unsigned long *indices;
+int vertexCount = 0;
+int indexCount = 0;
+
 HRESULT CreateVertexBuffer(ID3D11Device *Device, ID3D11Buffer **VertexBuffer)
 {
   HRESULT hr;
-
-  int vertexCount = 0;
-  SimpleVertexCombined *vertices = nullptr;
 
   vertices = new SimpleVertexCombined[3];
   if (!vertices)
@@ -13,7 +15,7 @@ HRESULT CreateVertexBuffer(ID3D11Device *Device, ID3D11Buffer **VertexBuffer)
       return false;
     }
   
-  bool result = LoadModelFromFile("../Lunora/cube.txt", &vertices, &vertexCount);
+  bool result = LoadModelFromFile("../Lunora/cube.txt", &vertices, &vertexCount, &indices, &indexCount);
   if (!result)
     {
       return false; 

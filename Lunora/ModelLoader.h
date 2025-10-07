@@ -14,7 +14,9 @@ typedef struct {
 } SimpleVertexCombined;
 
 bool LoadModelFromFile(const char* filename,
-		       SimpleVertexCombined** outVertices,
-		       int* outVertexCount);
+                       SimpleVertexCombined** outVertices,
+                       int* outVertexCount,
+                       unsigned long** outIndices,
+                       int* outIndexCount);
 
 #endif 
