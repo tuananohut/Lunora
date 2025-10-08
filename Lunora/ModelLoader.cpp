@@ -1,10 +1,10 @@
 #include "ModelLoader.h"
 
-bool LoadModelFromFile(const char* filename,
-                       SimpleVertexCombined** outVertices,
-                       int* outVertexCount,
-                       unsigned long** outIndices,
-                       int* outIndexCount)
+HRESULT LoadModelFromFile(const char* filename,
+			  SimpleVertexCombined** outVertices,
+			  int* outVertexCount,
+			  unsigned long** outIndices,
+			  int* outIndexCount)
 {
     FILE* file = fopen(filename, "r");
     if (!file)

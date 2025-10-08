@@ -99,7 +99,7 @@ bool Render(CoreRenderBuffers& RenderBuffers, XMMATRIX world, XMMATRIX view, XMM
   RenderBuffers.DeviceContext->VSSetShader(m_vertexShader, NULL, 0);
   RenderBuffers.DeviceContext->PSSetShader(m_pixelShader, NULL, 0);
   
-  RenderBuffers.DeviceContext->DrawIndexed(36, 0, 0);
+  RenderBuffers.DeviceContext->DrawIndexed(3, 0, 0);
 
   return true; 
 }

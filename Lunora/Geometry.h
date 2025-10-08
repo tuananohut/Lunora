@@ -43,7 +43,8 @@ struct ModelBuffer
 HRESULT CreateVertexBuffer(ID3D11Device *Device, ID3D11Buffer** VertexBuffer);
 HRESULT CreateIndexBuffer(ID3D11Device *Device, ID3D11Buffer** IndexBuffer);
 
-bool InitializeModel(CoreRenderBuffers& RenderBuffers, ModelBuffer* Buffer); 
+bool InitializeModel(CoreRenderBuffers& RenderBuffers, ModelBuffer* Buffer,
+		     const char* filename); 
 
 void RenderModel(CoreRenderBuffers& RenderBuffers, ModelBuffer& Buffer); 
 

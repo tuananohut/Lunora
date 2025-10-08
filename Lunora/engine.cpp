@@ -88,14 +88,16 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  mCamera->SetPosition(0.0f, 0.0f, -5.0f);
 
 	  ModelBuffer *mModelBuffer = new ModelBuffer;
+
+	  const char* filename = "../Lunora/cube.txt";
 	  
-	  Running = InitializeModel(*Renderer, mModelBuffer);
+	  Running = InitializeModel(*Renderer, mModelBuffer, filename); 
 	  if (FAILED(Running))
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
 	      Running = false; 
 	    }
-
+	  
 	  if (FAILED(InitializeShaderResources(*Renderer)))
 	    {
 	      (Window->hwnd, "Something is wrong!", "Bad", MB_OK | MB_ICONERROR);
