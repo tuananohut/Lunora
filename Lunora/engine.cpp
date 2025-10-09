@@ -89,7 +89,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	  ModelBuffer *mModelBuffer = new ModelBuffer;
 
-	  const char* filename = "../Lunora/cube.txt";
+	  char filename[] = "../Lunora/triangle.txt";
 	  
 	  Running = InitializeModel(*Renderer, mModelBuffer, filename); 
 	  if (FAILED(Running))

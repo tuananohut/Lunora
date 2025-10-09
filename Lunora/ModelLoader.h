@@ -13,10 +13,10 @@ typedef struct {
     XMFLOAT4 color;
 } SimpleVertexCombined;
 
-HRESULT LoadModelFromFile(const char* filename,
-			  SimpleVertexCombined** outVertices,
-			  int* outVertexCount,
-			  unsigned long** outIndices,
-			  int* outIndexCount);
+bool LoadModelFromFile(char filename[],
+		       SimpleVertexCombined** outVertices,
+		       int* outVertexCount,
+		       unsigned long** outIndices,
+		       int* outIndexCount);
 
 #endif 
