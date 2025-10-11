@@ -62,12 +62,12 @@ int WINAPI WinMain(HINSTANCE Instance,
     {
       int x = CW_USEDEFAULT;
       int y = CW_USEDEFAULT;
-     
+ 
       Window->hwnd = CreateWindowExA(0,                   
 				     wc.lpszClassName,          
 				     "Lunora",  
 				     WS_OVERLAPPEDWINDOW | WS_VISIBLE,        
-				     x, y, CW_USEDEFAULT, CW_USEDEFAULT,
+				     CW_USEDEFAULT, CW_USEDEFAULT, x, y, 
 				     NULL,       
 				     NULL,       
 				     Instance,  
@@ -102,6 +102,13 @@ int WINAPI WinMain(HINSTANCE Instance,
 	    {
 	      (Window->hwnd, "Something is wrong!", "Bad", MB_OK | MB_ICONERROR);
 	    }
+
+	  LARGE_INTEGER frequency;
+	  LARGE_INTEGER startTime;
+	  QueryPerformanceFrequency(&frequency); 
+	  QueryPerformanceCounter(&startTime);
+
+	  float rotationSpeed = 2.0f;
 	  
 	  while(Running)
 	    {
@@ -139,11 +146,26 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      
 	      BeginScene(*Renderer);
 
-	      mCamera->Render(); 
-	      
-	      XMMATRIX world = XMMatrixIdentity();
-	      XMMATRIX view;
-	      
+	      mCamera->Render();
+
+	      RECT clientRect;
+	      GetClientRect(Window->hwnd, &clientRect);
+	      long windowWidth = clientRect.right - clientRect.left;
+	      long windowHeight = clientRect.bottom - clientRect.top;
+
+	      Renderer->Viewport.Width = (float)windowWidth;
+	      Renderer->Viewport.Height = (float)windowHeight;
+	      Renderer->DeviceContext->RSSetViewports(1, &Renderer->Viewport);
+
+	      LARGE_INTEGER currentTime;
+	      QueryPerformanceCounter(&currentTime);
+
+	      float elapsedTime = (float)(currentTime.QuadPart - startTime.QuadPart) / (float)frequency.QuadPart;
+
+	      XMMATRIX world = XMMatrixRotationX(elapsedTime * 0.7f) * XMMatrixRotationY(elapsedTime);
+
+	      // XMMATRIX world = XMMatrixIdentity();
+	      XMMATRIX view;	      
 	      mCamera->GetViewMatrix(view);
   
 	      float fieldOfView = 3.141592654f / 4.0f;
@@ -157,7 +179,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      if (FAILED(result))
 		{
 	       Running = false; 
-	      }
+		}
 	      
 	      EndScene(*Renderer);
 	    }  
