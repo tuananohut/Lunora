@@ -44,7 +44,10 @@ int WINAPI WinMain(HINSTANCE Instance,
 		   LPSTR CommandLine,
 		   int ShowCode)
 {
-  Win32WindowProperties* Window = new Win32WindowProperties; 
+  Win32WindowProperties* Window = new Win32WindowProperties;
+  Window->Width = 800;
+  Window->Height = 600;
+	  
   
   WNDCLASSEXA wc = {};
   
@@ -60,8 +63,8 @@ int WINAPI WinMain(HINSTANCE Instance,
   
   if (RegisterClassExA(&wc))
     {
-      int x = CW_USEDEFAULT;
-      int y = CW_USEDEFAULT;
+      int x = Window->Width;
+      int y = Window->Height;
  
       Window->hwnd = CreateWindowExA(0,                   
 				     wc.lpszClassName,          
@@ -80,12 +83,10 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  Running = true;
 	  
 	  CoreRenderBuffers *Renderer = new CoreRenderBuffers;
-	  Window->Width = 800;
-	  Window->Height = 600;
 	  *Renderer = InitializeD3D(*Window, false);
 	  
 	  Camera *mCamera = new Camera;
-	  mCamera->SetPosition(0.0f, 0.0f, -5.0f);
+	  mCamera->SetPosition(0.0f, 0.0f, -10.0f);
 
 	  ModelBuffer *mModelBuffer = new ModelBuffer;
 
@@ -102,7 +103,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	    {
 	      (Window->hwnd, "Something is wrong!", "Bad", MB_OK | MB_ICONERROR);
 	    }
-
+	  
 	  LARGE_INTEGER frequency;
 	  LARGE_INTEGER startTime;
 	  QueryPerformanceFrequency(&frequency); 
