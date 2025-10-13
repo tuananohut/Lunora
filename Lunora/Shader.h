@@ -9,11 +9,23 @@ using namespace DirectX;
 
 #include "Renderer.h"
 
-static ID3D11Buffer *g_pMatrixBuffer;
-static ID3D11VertexShader* m_vertexShader = nullptr;
-static ID3D11PixelShader* m_pixelShader = nullptr;
-static ID3D11InputLayout* layout = NULL;
+struct ColorShader
+{
+  ID3D11Buffer *m_matrixBuffer = nullptr;
+  ID3D11VertexShader *m_vertexShader = nullptr;
+  ID3D11PixelShader *m_pixelShader = nullptr;
+  ID3D11InputLayout *m_layout = nullptr;
+};
 
+struct TextureShader
+{
+  ID3D11Buffer *m_matrixBuffer = nullptr;
+  ID3D11VertexShader *m_vertexShader = nullptr;
+  ID3D11PixelShader *m_pixelShader = nullptr;
+  ID3D11InputLayout *m_layout = nullptr;
+  ID11SamplerState *m_sampleState = nullptr; 
+};
+  
 struct MatrixBufferType
 {
   XMMATRIX world;
@@ -25,6 +37,8 @@ HRESULT InitializeShaderResources(CoreRenderBuffers& RenderBuffers);
 
 bool Render(CoreRenderBuffers& RenderBuffers,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj);
+
+
 
 #endif
  
