@@ -1,10 +1,10 @@
 #include "Renderer.h"
 
-CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
-				bool fullscreen)
+bool InitializeRenderer(RendererContext& context,
+			HWND hwnd,
+			int width,
+			int height)
 { 
-  CoreRenderBuffers Renderer; 
-
   IDXGIFactory* DXFactory = NULL;
   IDXGIAdapter* Adapter;
   IDXGIOutput* Output = NULL;
@@ -32,19 +32,22 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
   result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&DXFactory);
   if (FAILED(result))
     {
-      MessageBoxA(Window.hwnd, "DXGI Factory", "Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(hwnd, "DXGI Factory", "Error", MB_OK | MB_ICONERROR);
+      return false; 
     }
   
   result = DXFactory->EnumAdapters(0, &Adapter);
   if (FAILED(result))
     {
-      MessageBoxA(Window.hwnd, "Enum Adapters", "Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(hwnd, "Enum Adapters", "Error", MB_OK | MB_ICONERROR);
+      return false; 
     }
 
   result = Adapter->EnumOutputs(0, &Output);    
   if (FAILED(result))
     {
-      MessageBoxA(Window.hwnd, "Enum Outputs", "Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(hwnd, "Enum Outputs", "Error", MB_OK | MB_ICONERROR);
+      return false; 
     }
  
   result = Output->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM,
@@ -52,7 +55,8 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
 				      &numModes, NULL);
   if (FAILED(result))
     {
-      MessageBoxA(Window.hwnd, "Get Display Mode List", "Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(hwnd, "Get Display Mode List", "Error", MB_OK | MB_ICONERROR);
+      return false; 
     }
  
   displayModeList = new DXGI_MODE_DESC[numModes];
@@ -62,7 +66,8 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
 				      &numModes, displayModeList);
   if (FAILED(result))
     {
-      MessageBoxA(Window.hwnd, "Get Display Mode List", "Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(hwnd, "Get Display Mode List", "Error", MB_OK | MB_ICONERROR);
+      return false; 
     }
 
   for (i = 0; i < numModes; i++)
@@ -80,14 +85,15 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
   result = Adapter->GetDesc(&adapterDesc);
   if (FAILED(result))
     {
-      MessageBoxA(Window.hwnd, "Get Adapter Desc", "Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(hwnd, "Get Adapter Desc", "Error", MB_OK | MB_ICONERROR);
+      return false; 
     }
 
   videoCardMemory = (int)(adapterDesc.DedicatedVideoMemory / 1024 / 1024);
   error = wcstombs_s(&stringLength, videoCardDescription, 128, adapterDesc.Description, 128);
   if (error != 0)
     {
-      MessageBoxA(Window.hwnd, "Video Card Memory", "Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(hwnd, "Video Card Memory", "Error", MB_OK | MB_ICONERROR);
     }
 
   delete []displayModeList;
@@ -106,8 +112,8 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
   
   SwapChainDesc.BufferCount = 1;
   
-  SwapChainDesc.BufferDesc.Width = Window.Width;
-  SwapChainDesc.BufferDesc.Height = Window.Height;
+  SwapChainDesc.BufferDesc.Width = width;
+  SwapChainDesc.BufferDesc.Height = height;
 
   SwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
@@ -124,7 +130,7 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
 
   SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 
-  SwapChainDesc.OutputWindow = Window.hwnd;
+  SwapChainDesc.OutputWindow = hwnd;
   
   SwapChainDesc.SampleDesc.Count = 1;
   SwapChainDesc.SampleDesc.Quality = 0;
@@ -151,27 +157,30 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
 					 1,
 					 D3D11_SDK_VERSION,
 					 &SwapChainDesc,
-					 &Renderer.SwapChain,
-					 &Renderer.Device,
+					 &context.SwapChain,
+					 &context.Device,
 					 NULL,
-					 &Renderer.DeviceContext);
+					 &context.DeviceContext);
   if (FAILED(result))
     {
-      MessageBoxA(Window.hwnd, "Could not create Device and Swap Chain", "Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(hwnd, "Could not create Device and Swap Chain", "Error", MB_OK | MB_ICONERROR);
+      return false; 
     }
   
-  result = Renderer.SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&BackBuffer);
+  result = context.SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&BackBuffer);
   if (FAILED(result))
     {
-      MessageBoxA(Window.hwnd, "Get Buffer", "Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(hwnd, "Get Buffer", "Error", MB_OK | MB_ICONERROR);
+      return false;
     }
   
-  result = Renderer.Device->CreateRenderTargetView(BackBuffer,
-						   NULL,
-						   &Renderer.RenderTargetView);
+  result = context.Device->CreateRenderTargetView(BackBuffer,
+						  NULL,
+						  &context.RenderTargetView);
   if (FAILED(result))
     {
-      MessageBoxA(Window.hwnd, "Create Render Target View", "Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(hwnd, "Create Render Target View", "Error", MB_OK | MB_ICONERROR);
+      return false;
     }
 
   BackBuffer->Release();
@@ -179,8 +188,8 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
 
   ZeroMemory(&DepthBufferDesc, sizeof(DepthBufferDesc));
   
-  DepthBufferDesc.Width = Window.Width;
-  DepthBufferDesc.Height = Window.Height;
+  DepthBufferDesc.Width = width;
+  DepthBufferDesc.Height = height;
   DepthBufferDesc.MipLevels = 1;
   DepthBufferDesc.ArraySize = 1;
   DepthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -191,10 +200,11 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
   DepthBufferDesc.CPUAccessFlags = 0;
   DepthBufferDesc.MiscFlags = 0;
 
-  result = Renderer.Device->CreateTexture2D(&DepthBufferDesc, 0, &Renderer.DepthStencilBuffer);
+  result = context.Device->CreateTexture2D(&DepthBufferDesc, 0, &context.DepthStencilBuffer);
   if (FAILED(result))
     {
-      MessageBoxA(Window.hwnd, "Create Texture 2D", "Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(hwnd, "Create Texture 2D", "Error", MB_OK | MB_ICONERROR);
+      return false; 
     }
 
   ZeroMemory(&DepthStencilDesc, sizeof(DepthStencilDesc));
@@ -217,14 +227,15 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
   DepthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
   DepthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS; 
 
-  result = Renderer.Device->CreateDepthStencilState(&DepthStencilDesc,
-						    &DepthStencilState);
+  result = context.Device->CreateDepthStencilState(&DepthStencilDesc,
+						   &DepthStencilState);
   if (FAILED(result))
     {
-      MessageBoxA(Window.hwnd, "Create Depth Stencil State", "Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(hwnd, "Create Depth Stencil State", "Error", MB_OK | MB_ICONERROR);
+      return false; 
     }
 
-  Renderer.DeviceContext->OMSetDepthStencilState(DepthStencilState, 1);
+  context.DeviceContext->OMSetDepthStencilState(DepthStencilState, 1);
   
   ZeroMemory(&DepthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
 
@@ -232,15 +243,16 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
   DepthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
   DepthStencilViewDesc.Texture2D.MipSlice = 0;
     
-  result = Renderer.Device->CreateDepthStencilView(Renderer.DepthStencilBuffer,
-						   &DepthStencilViewDesc,
-						   &Renderer.DepthStencilView);
+  result = context.Device->CreateDepthStencilView(context.DepthStencilBuffer,
+						  &DepthStencilViewDesc,
+						  &context.DepthStencilView);
   if (FAILED(result))
     {
-      MessageBoxA(Window.hwnd, "Create Depth Stencil State", "Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(hwnd, "Create Depth Stencil State", "Error", MB_OK | MB_ICONERROR);
+      return false; 
     }
 
-  Renderer.DeviceContext->OMSetRenderTargets(1, &Renderer.RenderTargetView, Renderer.DepthStencilView);
+  context.DeviceContext->OMSetRenderTargets(1, &context.RenderTargetView, context.DepthStencilView);
 
   rasterDesc.AntialiasedLineEnable = false;
   rasterDesc.CullMode = D3D11_CULL_BACK;
@@ -253,57 +265,53 @@ CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window,
   rasterDesc.ScissorEnable = false;
   rasterDesc.SlopeScaledDepthBias = 0;
   
-  Renderer.Device->CreateRasterizerState(&rasterDesc, &RasterState);
+  context.Device->CreateRasterizerState(&rasterDesc, &RasterState);
   if (FAILED(result))
     {
-      MessageBoxA(Window.hwnd, "Create Raster Desc", "Error", MB_OK | MB_ICONERROR);
+      MessageBoxA(hwnd, "Create Raster Desc", "Error", MB_OK | MB_ICONERROR);
+      return false; 
     }
 
-  Renderer.DeviceContext->RSSetState(RasterState); 
+  context.DeviceContext->RSSetState(RasterState); 
   
-  Renderer.Viewport.Width = (float)Window.Width;
-  Renderer.Viewport.Height = (float)Window.Height;
-  Renderer.Viewport.MinDepth = 0.f;
-  Renderer.Viewport.MaxDepth = 1.f;
-  Renderer.Viewport.TopLeftX = 0.f;
-  Renderer.Viewport.TopLeftY = 0.f;
+  context.Viewport.Width = (float)width;
+  context.Viewport.Height = (float)height;
+  context.Viewport.MinDepth = 0.f;
+  context.Viewport.MaxDepth = 1.f;
+  context.Viewport.TopLeftX = 0.f;
+  context.Viewport.TopLeftY = 0.f;
 
-  Renderer.DeviceContext->RSSetViewports(1, &Renderer.Viewport);
+  context.DeviceContext->RSSetViewports(1, &context.Viewport);
 
-  return Renderer; 
+  return true; 
 }
 
-void BeginScene(CoreRenderBuffers& Renderer)
+void RendererBeginScene(RendererContext& context, float r, float g, float b, float a)
 {
-  float color[4];
+  float color[4] = {r, g, b, a}
+  
+  context.DeviceContext->ClearRenderTargetView(context.RenderTargetView, color);
 
-  color[0] = 0.f;
-  color[1] = 0.f;
-  color[2] = 0.f;
-  color[3] = 1.f;
-
-  Renderer.DeviceContext->ClearRenderTargetView(Renderer.RenderTargetView, color);
-
-  Renderer.DeviceContext->ClearDepthStencilView(Renderer.DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+  context.DeviceContext->ClearDepthStencilView(context.DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
-void EndScene(CoreRenderBuffers& Renderer)
+void RendererEndScene(RendererContext& context); 
 {
-  Renderer.SwapChain->Present(0, 0);
+  context.SwapChain->Present(0, 0);
 }
 
-void ShutdownD3D(CoreRenderBuffers& Renderer)
+void ShutdownRenderer(RendererContext& context)
 {
-  if (Renderer.Device)
+  if (context.Device)
     {
-      Renderer.Device->Release();
-      Renderer.Device = nullptr; 
+      context.Device->Release();
+      context.Device = nullptr; 
     }
       
-  if (Renderer.DeviceContext)
+  if (context.DeviceContext)
     {
-      Renderer.DeviceContext->Release();
-      Renderer.DeviceContext = nullptr; 
+      context.DeviceContext->Release();
+      context.DeviceContext = nullptr; 
     }
 }
  

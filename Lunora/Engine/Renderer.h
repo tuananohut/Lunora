@@ -1,5 +1,5 @@
-#ifndef _RENDERER_H_
-#define _RENDERER_H_
+#ifndef RENDERER_H
+#define RENDERER_H
 
 #include <d3d11.h>
 #include <DirectXMath.h>
@@ -7,14 +7,7 @@
 
 using namespace DirectX;
 
-struct Win32WindowProperties
-{
-  HWND hwnd;
-  int32_t Width;
-  int32_t Height;
-};
-
-struct CoreRenderBuffers
+struct RendererContext
 {
   ID3D11Device *Device;
   ID3D11DeviceContext *DeviceContext;
@@ -25,10 +18,13 @@ struct CoreRenderBuffers
   D3D11_VIEWPORT Viewport;
 };
 
-CoreRenderBuffers InitializeD3D(Win32WindowProperties& Window, 
-				bool fullscreen);
-void ShutdownD3D(CoreRenderBuffers& Renderer);
-void BeginScene(CoreRenderBuffers& Renderer); 
-void EndScene(CoreRenderBuffers& Renderer); 
+bool InitializeRenderer(RendererContext& context,
+			HWND hwnd,
+			int width,
+			int height);
+void ShutdownRenderer(RendererContext& context);
+
+void RendererBeginScene(RendererContext& context, float r, float g, float b, float a); 
+void RendererEndScene(RendererContext& context); 
 
 #endif
