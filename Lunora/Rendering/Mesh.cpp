@@ -1,4 +1,4 @@
-#include "Entity.h"
+#include "Mesh.h"
 
 HRESULT CreateVertexBuffer(ID3D11Device *Device, SimpleVertexCombined* vertices,
 			   int vertexCount, ID3D11Buffer** VertexBuffer)
@@ -38,13 +38,13 @@ HRESULT CreateIndexBuffer(ID3D11Device *Device, unsigned long* indices,
   InitData.pSysMem = indices;
   InitData.SysMemPitch = 0;
   InitData.SysMemSlicePitch = 0;
-
+  
   hr = Device->CreateBuffer( &bufferDesc, &InitData, IndexBuffer );
 
   return hr; 
 }
 
-void RenderModel(CoreRenderBuffers& RenderBuffers, ModelBuffer& Buffer)
+void RenderModel(RendererContext& context, Mesh& Buffer)
 {
   UINT stride = sizeof( SimpleVertexCombined );
   UINT offset = 0;
@@ -57,12 +57,12 @@ void RenderModel(CoreRenderBuffers& RenderBuffers, ModelBuffer& Buffer)
 
   RenderBuffers.DeviceContext->IASetIndexBuffer(Buffer.IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-  RenderBuffers.DeviceContext->RSSetViewports(1, &RenderBuffers.Viewport);
+  RenderBuffers.DeviceContext->RSSetViewports(1, &context.Viewport);
 
   RenderBuffers.DeviceContext->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 }
 
-bool InitializeModel(CoreRenderBuffers& RenderBuffers, ModelBuffer* ModelBuffer,
+bool InitializeModel(RendererContext& context, Mesh* ModelBuffer,
 		     char filename[])
 {
   HRESULT result; 
@@ -78,14 +78,14 @@ bool InitializeModel(CoreRenderBuffers& RenderBuffers, ModelBuffer* ModelBuffer,
       return false; 
     }
   
-  result = CreateVertexBuffer(RenderBuffers.Device, localVertices, localVertexCount,
+  result = CreateVertexBuffer(context.Device, localVertices, localVertexCount,
 			      &ModelBuffer->VertexBuffer); 
   if (FAILED(result))
     {
       return false; 
     }
 	  
-  result = CreateIndexBuffer(RenderBuffers.Device, localIndices, localIndexCount,
+  result = CreateIndexBuffer(context.Device, localIndices, localIndexCount,
 			     &ModelBuffer->IndexBuffer);
   if (FAILED(result))
     {
@@ -100,7 +100,7 @@ bool InitializeModel(CoreRenderBuffers& RenderBuffers, ModelBuffer* ModelBuffer,
   return true;
 }
 
-void ReleaseModel(ModelBuffer& Buffer)
+void ReleaseModel(Mesh& Buffer)
 {
   if (Buffer.VertexBuffer)
     {

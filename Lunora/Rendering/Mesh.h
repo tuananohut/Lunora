@@ -4,8 +4,8 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 
-#include "Renderer.h"
-#include "ModelLoader.h"
+#include "../Engine/Renderer.h"
+#include "../Game/ModelLoader.h"
 
 using namespace DirectX; 
 
@@ -38,11 +38,11 @@ HRESULT CreateVertexBuffer(ID3D11Device *Device, SimpleVertexCombined* vertices,
 HRESULT CreateIndexBuffer(ID3D11Device *Device, unsigned long* indices,
 			  int indexCount, ID3D11Buffer** IndexBuffer);
 
-bool InitializeModel(CoreRenderBuffers& RenderBuffers, ModelBuffer* Buffer,
+bool InitializeModel(RendererContext& context, Mesh* Buffer,
 		     char filename[]); 
 
-void RenderModel(CoreRenderBuffers& RenderBuffers, ModelBuffer& Buffer); 
+void RenderModel(RendererContext& context, Mesh& Buffer); 
 
-void ReleaseModel(ModelBuffer& Buffer); 
+void ReleaseModel(Mesh& Buffer); 
 
 #endif

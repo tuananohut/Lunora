@@ -7,6 +7,13 @@
 
 using namespace DirectX;
 
+struct Win32WindowProperties
+{
+  HWND hwnd;
+  int32_t Width;
+  int32_t Height;
+};
+
 struct RendererContext
 {
   ID3D11Device *Device;

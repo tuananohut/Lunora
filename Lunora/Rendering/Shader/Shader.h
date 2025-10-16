@@ -7,7 +7,7 @@
 
 using namespace DirectX; 
 
-#include "Renderer.h"
+#include "../../Engine/Renderer.h"
 
 struct ColorShader
 {
@@ -23,7 +23,7 @@ struct TextureShader
   ID3D11VertexShader *m_vertexShader = nullptr;
   ID3D11PixelShader *m_pixelShader = nullptr;
   ID3D11InputLayout *m_layout = nullptr;
-  ID11SamplerState *m_sampleState = nullptr; 
+  ID3D11SamplerState *m_sampleState = nullptr; 
 };
   
 struct MatrixBufferType
@@ -33,9 +33,9 @@ struct MatrixBufferType
   XMMATRIX proj;
 };
 
-HRESULT InitializeShaderResources(CoreRenderBuffers& RenderBuffers);
+HRESULT InitializeShaderResources(RendererContext& RenderBuffers);
 
-bool Render(CoreRenderBuffers& RenderBuffers,
+bool Render(RendererContext& RenderBuffers,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj);
 
 

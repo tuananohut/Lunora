@@ -1,10 +1,10 @@
 #include <windows.h>
 
 #include "resource.h"
-#include "Engine/Renderer.h"
-#include "Camera/Camera.h"
-#include "Geometry.h"
-#include "Shader.h"
+#include "../Lunora/Engine/Renderer.h"
+#include "../Lunora/Game/Camera/Camera.h"
+#include "../Lunora/Rendering/Mesh.h"
+#include "../Lunora/Rendering/Shader/Shader.h"
 
 const float SCREEN_DEPTH = 1000.f;
 const float SCREEN_NEAR = 0.3f;
@@ -82,17 +82,17 @@ int WINAPI WinMain(HINSTANCE Instance,
 	{	  
 	  Running = true;
 	  
-	  CoreRenderBuffers *Renderer = new CoreRenderBuffers;
-	  *Renderer = InitializeD3D(*Window, false);
+	  RendererContext *Renderer = new RendererContext;
+	  Running = InitializeRenderer(*Renderer, Window->hwnd, Window->Width, Window->Height);
 	  
 	  Camera *mCamera = new Camera;
 	  mCamera->SetPosition(0.0f, 0.0f, -10.0f);
-
-	  ModelBuffer *mModelBuffer = new ModelBuffer;
-
-	  char filename[] = "../Lunora/cube.txt";
 	  
-	  Running = InitializeModel(*Renderer, mModelBuffer, filename); 
+	  Mesh *mModelBuffer = new Mesh;
+
+	  char filename[] = "../Assets/Models/cube.txt";
+
+	  Running = InitializeModel(*Renderer, mModelBuffer, filename);
 	  if (FAILED(Running))
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
@@ -137,7 +137,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 			  delete Renderer;
 			  Renderer = nullptr; 
 			}
-		      ShutdownD3D(*Renderer);
+		      ShutdownRenderer(*Renderer);
 		      Running = false;
 		    }
 		  
@@ -145,7 +145,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 		  DispatchMessageA(&Message);
 		}
 	      
-	      BeginScene(*Renderer);
+	      RendererBeginScene(*Renderer, 0.f, 0.f, 0.f, 1.f);
 
 	      mCamera->Render();
 
@@ -182,7 +182,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	       Running = false; 
 		}
 	      
-	      EndScene(*Renderer);
+	      RendererEndScene(*Renderer);
 	    }  
 	} 
     }
