@@ -1,6 +1,7 @@
 #include "Shader.h"
 
-HRESULT InitializeShaderResources(CoreRenderBuffers& RenderBuffers)
+HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
+				  ColorShader& shader)
 {
   HRESULT hr; 
   D3D11_SAMPLER_DESC samplerDesc;
@@ -9,15 +10,15 @@ HRESULT InitializeShaderResources(CoreRenderBuffers& RenderBuffers)
   ID3DBlob *psBlob;
   ID3DBlob *errorMessage;
 
-  D3DCompileFromFile(L"../Lunora/gpu.hlsl", 0, 0, "ColorVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
-  hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &m_vertexShader);
+  D3DCompileFromFile(L"../../Lunora/Shaders/gpu.hlsl", 0, 0, "ColorVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
+  hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &shader.m_vertexShader);
   if (FAILED(hr))
     {
       return false; 
     }
   
-  D3DCompileFromFile(L"../Lunora/gpu.hlsl", 0, 0, "ColorPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
-  hr = RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &m_pixelShader);
+  D3DCompileFromFile(L"../../Lunora/Shaders/gpu.hlsl", 0, 0, "ColorPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
+  hr = RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &shader.m_pixelShader);
   if (FAILED(hr))
     {
       return false; 
@@ -37,7 +38,7 @@ HRESULT InitializeShaderResources(CoreRenderBuffers& RenderBuffers)
 					       num_elements,
 					       vsBlob->GetBufferPointer(),
 					       vsBlob->GetBufferSize(),
-					       &layout);
+					       &shader.m_layout);
   if (FAILED(hr))
     {
       return false; 
@@ -56,7 +57,7 @@ HRESULT InitializeShaderResources(CoreRenderBuffers& RenderBuffers)
   matrixBufferDesc.MiscFlags = 0;
   matrixBufferDesc.StructureByteStride = 0; 
 
-  hr = RenderBuffers.Device->CreateBuffer(&matrixBufferDesc, NULL, &g_pMatrixBuffer);
+  hr = RenderBuffers.Device->CreateBuffer(&matrixBufferDesc, NULL, &shader.m_matrixBuffer);
   if (FAILED(hr))
     {
       return false; 
@@ -65,7 +66,9 @@ HRESULT InitializeShaderResources(CoreRenderBuffers& RenderBuffers)
   return true; 
 }
 
-bool Render(CoreRenderBuffers& RenderBuffers, XMMATRIX world, XMMATRIX view, XMMATRIX proj)
+bool Render(RendererContext& RenderBuffers,
+	    ColorShader& shader,
+	    XMMATRIX world, XMMATRIX view, XMMATRIX proj)
 {
   HRESULT hr; 
   D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -76,7 +79,7 @@ bool Render(CoreRenderBuffers& RenderBuffers, XMMATRIX world, XMMATRIX view, XMM
   view = XMMatrixTranspose(view);
   proj = XMMatrixTranspose(proj);
   
-  hr = RenderBuffers.DeviceContext->Map(g_pMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+  hr = RenderBuffers.DeviceContext->Map(shader.m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
   if (FAILED(hr))
     {
       return false;
@@ -88,16 +91,16 @@ bool Render(CoreRenderBuffers& RenderBuffers, XMMATRIX world, XMMATRIX view, XMM
   dataPtr->view = view;
   dataPtr->proj = proj;
 
-  RenderBuffers.DeviceContext->Unmap(g_pMatrixBuffer, 0);
+  RenderBuffers.DeviceContext->Unmap(shader.m_matrixBuffer, 0);
   
   bufferNumber = 0;
 
-  RenderBuffers.DeviceContext->VSSetConstantBuffers(bufferNumber, 1, &g_pMatrixBuffer); 
+  RenderBuffers.DeviceContext->VSSetConstantBuffers(bufferNumber, 1, &shader.m_matrixBuffer); 
 
-  RenderBuffers.DeviceContext->IASetInputLayout(layout);
+  RenderBuffers.DeviceContext->IASetInputLayout(shader.m_layout);
   
-  RenderBuffers.DeviceContext->VSSetShader(m_vertexShader, NULL, 0);
-  RenderBuffers.DeviceContext->PSSetShader(m_pixelShader, NULL, 0);
+  RenderBuffers.DeviceContext->VSSetShader(shader.m_vertexShader, NULL, 0);
+  RenderBuffers.DeviceContext->PSSetShader(shader.m_pixelShader, NULL, 0);
   
   RenderBuffers.DeviceContext->DrawIndexed(36, 0, 0);
 

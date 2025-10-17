@@ -69,12 +69,12 @@ bool InitializeRenderer(RendererContext& context,
       MessageBoxA(hwnd, "Get Display Mode List", "Error", MB_OK | MB_ICONERROR);
       return false; 
     }
-
+  
   for (i = 0; i < numModes; i++)
     {
-      if (displayModeList[i].Width == (unsigned int)Window.Width)
+      if (displayModeList[i].Width == (unsigned int)width)
 	{
-	  if (displayModeList[i].Height == (unsigned int)Window.Height)
+	  if (displayModeList[i].Height == (unsigned int)height)
 	    {
 	      numerator = displayModeList[i].RefreshRate.Numerator;
 	      denominator = displayModeList[i].RefreshRate.Denominator; 
@@ -135,10 +135,10 @@ bool InitializeRenderer(RendererContext& context,
   SwapChainDesc.SampleDesc.Count = 1;
   SwapChainDesc.SampleDesc.Quality = 0;
 
-  if (fullscreen)
-    SwapChainDesc.Windowed = false;
-  else
-    SwapChainDesc.Windowed = true;
+  // if (fullscreen)
+  // SwapChainDesc.Windowed = false;
+  // else
+  SwapChainDesc.Windowed = true;
   
   SwapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
   SwapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
@@ -288,14 +288,14 @@ bool InitializeRenderer(RendererContext& context,
 
 void RendererBeginScene(RendererContext& context, float r, float g, float b, float a)
 {
-  float color[4] = {r, g, b, a}
+  float color[4] = {r, g, b, a};
   
   context.DeviceContext->ClearRenderTargetView(context.RenderTargetView, color);
 
   context.DeviceContext->ClearDepthStencilView(context.DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
-void RendererEndScene(RendererContext& context); 
+void RendererEndScene(RendererContext& context)
 {
   context.SwapChain->Present(0, 0);
 }

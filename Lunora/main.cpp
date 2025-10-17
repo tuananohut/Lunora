@@ -98,8 +98,10 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
 	      Running = false; 
 	    }
+
+	  ColorShader shader; 
 	  
-	  if (FAILED(InitializeShaderResources(*Renderer)))
+	  if (FAILED(InitializeShaderResources(*Renderer, shader)))
 	    {
 	      (Window->hwnd, "Something is wrong!", "Bad", MB_OK | MB_ICONERROR);
 	    }
@@ -134,10 +136,11 @@ int WINAPI WinMain(HINSTANCE Instance,
 		      
 		      if (Renderer)
 			{
+			  ShutdownRenderer(*Renderer);
 			  delete Renderer;
 			  Renderer = nullptr; 
 			}
-		      ShutdownRenderer(*Renderer);
+		      
 		      Running = false;
 		    }
 		  
@@ -176,7 +179,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      
 	      RenderModel(*Renderer, *mModelBuffer);
 	      
-	      result = Render(*Renderer, world, view, proj);
+	      result = Render(*Renderer, shader, world, view, proj);
 	      if (FAILED(result))
 		{
 	       Running = false; 

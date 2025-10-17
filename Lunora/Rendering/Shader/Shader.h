@@ -33,12 +33,10 @@ struct MatrixBufferType
   XMMATRIX proj;
 };
 
-HRESULT InitializeShaderResources(RendererContext& RenderBuffers);
+HRESULT InitializeShaderResources(RendererContext& RenderBuffers, ColorShader& shader);
 
-bool Render(RendererContext& RenderBuffers,
+bool Render(RendererContext& RenderBuffers, ColorShader& shader,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj);
-
-
 
 #endif
  

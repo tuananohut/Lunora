@@ -44,25 +44,25 @@ HRESULT CreateIndexBuffer(ID3D11Device *Device, unsigned long* indices,
   return hr; 
 }
 
-void RenderModel(RendererContext& context, Mesh& Buffer)
+void RenderModel(RendererContext& RenderBuffers, Mesh& Buffer)
 {
   UINT stride = sizeof( SimpleVertexCombined );
   UINT offset = 0;
 
   RenderBuffers.DeviceContext->IASetVertexBuffers(0, 
 						  1,
-						  &Buffer.VertexBuffer,
+						  &Buffer.vertexBuffer,
 						  &stride, 
 						  &offset );
+  
+  RenderBuffers.DeviceContext->IASetIndexBuffer(Buffer.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-  RenderBuffers.DeviceContext->IASetIndexBuffer(Buffer.IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
-  RenderBuffers.DeviceContext->RSSetViewports(1, &context.Viewport);
+  RenderBuffers.DeviceContext->RSSetViewports(1, &RenderBuffers.Viewport);
 
   RenderBuffers.DeviceContext->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 }
 
-bool InitializeModel(RendererContext& context, Mesh* ModelBuffer,
+bool InitializeModel(RendererContext& RenderBuffers, Mesh* ModelBuffer,
 		     char filename[])
 {
   HRESULT result; 
@@ -78,15 +78,15 @@ bool InitializeModel(RendererContext& context, Mesh* ModelBuffer,
       return false; 
     }
   
-  result = CreateVertexBuffer(context.Device, localVertices, localVertexCount,
-			      &ModelBuffer->VertexBuffer); 
+  result = CreateVertexBuffer(RenderBuffers.Device, localVertices, localVertexCount,
+			      &ModelBuffer->vertexBuffer); 
   if (FAILED(result))
     {
       return false; 
     }
 	  
-  result = CreateIndexBuffer(context.Device, localIndices, localIndexCount,
-			     &ModelBuffer->IndexBuffer);
+  result = CreateIndexBuffer(RenderBuffers.Device, localIndices, localIndexCount,
+			     &ModelBuffer->indexBuffer);
   if (FAILED(result))
     {
       return false; 
@@ -102,14 +102,14 @@ bool InitializeModel(RendererContext& context, Mesh* ModelBuffer,
 
 void ReleaseModel(Mesh& Buffer)
 {
-  if (Buffer.VertexBuffer)
+  if (Buffer.vertexBuffer)
     {
-      Buffer.VertexBuffer->Release();
-      Buffer.VertexBuffer = nullptr; 
+      Buffer.vertexBuffer->Release();
+      Buffer.vertexBuffer = nullptr; 
     }
-  if (Buffer.IndexBuffer)
+  if (Buffer.indexBuffer)
     {
-      Buffer.IndexBuffer->Release();
-      Buffer.IndexBuffer = nullptr; 
+      Buffer.indexBuffer->Release();
+      Buffer.indexBuffer = nullptr; 
     }
 }
