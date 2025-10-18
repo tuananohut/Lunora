@@ -86,13 +86,20 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  Running = InitializeRenderer(*Renderer, Window->hwnd, Window->Width, Window->Height);
 	  
 	  Camera *mCamera = new Camera;
-	  mCamera->SetPosition(0.0f, 0.0f, -10.0f);
+	  mCamera->SetPosition(0.0f, 0.0f, -20.0f);
 	  
-	  Mesh *mModelBuffer = new Mesh;
+	  Mesh *triangle = new Mesh;
+	  char filename[] = "../Assets/Models/triangle.txt";	  
+	  Running = InitializeModel(*Renderer, triangle, filename);
+	  if (FAILED(Running))
+	    {
+	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
+	      Running = false; 
+	    }
 
-	  char filename[] = "../Assets/Models/cube.txt";
-
-	  Running = InitializeModel(*Renderer, mModelBuffer, filename);
+	  Mesh *cube = new Mesh;
+	  char filename1[] = "../Assets/Models/cube.txt";
+	  Running = InitializeModel(*Renderer, cube, filename1);
 	  if (FAILED(Running))
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
@@ -100,7 +107,6 @@ int WINAPI WinMain(HINSTANCE Instance,
 	    }
 
 	  ColorShader shader; 
-	  
 	  if (FAILED(InitializeShaderResources(*Renderer, shader)))
 	    {
 	      (Window->hwnd, "Something is wrong!", "Bad", MB_OK | MB_ICONERROR);
@@ -127,11 +133,18 @@ int WINAPI WinMain(HINSTANCE Instance,
 			  mCamera = nullptr; 
 			}
 
-		      if (mModelBuffer)
+		      if (triangle)
 			{
-			  ReleaseModel(*mModelBuffer); 
-			  delete mModelBuffer;
-			  mModelBuffer = nullptr; 
+			  ReleaseModel(*triangle); 
+			  delete triangle;
+			  triangle = nullptr; 
+			} 
+
+		      if (cube)
+			{
+			  ReleaseModel(*cube); 
+			  delete cube;
+			  cube = nullptr; 
 			} 
 		      
 		      if (Renderer)
@@ -140,6 +153,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 			  delete Renderer;
 			  Renderer = nullptr; 
 			}
+		      
+		      ReleaseShaderResources(shader);
 		      
 		      Running = false;
 		    }
@@ -177,8 +192,18 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      
 	      XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
 	      
-	      RenderModel(*Renderer, *mModelBuffer);
+	      RenderModel(*Renderer, *cube);
+	      result = Render(*Renderer, shader, world, view, proj);
+	      if (FAILED(result))
+		{
+	       Running = false; 
+		}
+
+	      world = XMMatrixIdentity();
+	      world *= XMMatrixTranslation(-8.f, 0.f, 0.f);
+	      world *= XMMatrixRotationY(elapsedTime * 0.7f) * XMMatrixRotationX(elapsedTime);
 	      
+	      RenderModel(*Renderer, *triangle);	      
 	      result = Render(*Renderer, shader, world, view, proj);
 	      if (FAILED(result))
 		{

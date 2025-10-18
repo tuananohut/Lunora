@@ -34,9 +34,15 @@ struct MatrixBufferType
 };
 
 HRESULT InitializeShaderResources(RendererContext& RenderBuffers, ColorShader& shader);
+HRESULT InitializeShaderResources(RendererContext& RenderBuffers, TextureShader& shader);
 
 bool Render(RendererContext& RenderBuffers, ColorShader& shader,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj);
+bool Render(RendererContext& RenderBuffers, TextureShader& shader,
+	    XMMATRIX world, XMMATRIX view, XMMATRIX proj);
+
+void ReleaseShaderResources(ColorShader& shader);
+void ReleaseShaderResources(TextureShader& shader);
 
 #endif
  

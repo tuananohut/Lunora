@@ -4,7 +4,6 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
 				  ColorShader& shader)
 {
   HRESULT hr; 
-  D3D11_SAMPLER_DESC samplerDesc;
   D3D11_BUFFER_DESC matrixBufferDesc;
   ID3DBlob *vsBlob;
   ID3DBlob *psBlob;
@@ -66,6 +65,91 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
   return true; 
 }
 
+HRESULT InitializeShaderResources(RendererContext& RenderBuffers, TextureShader& shader)
+{
+  HRESULT hr; 
+  D3D11_BUFFER_DESC matrixBufferDesc;
+  ID3DBlob *vsBlob;
+  ID3DBlob *psBlob;
+  ID3DBlob *errorMessage;
+
+  D3DCompileFromFile(L"../../Lunora/Shaders/texture.hlsl", 0, 0, "TextureVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
+  hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &shader.m_vertexShader);
+  if (FAILED(hr))
+    {
+      return false; 
+    }
+  
+  D3DCompileFromFile(L"../../Lunora/Shaders/texture.hlsl", 0, 0, "TexturePixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
+  hr = RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &shader.m_pixelShader);
+  if (FAILED(hr))
+    {
+      return false; 
+    }
+
+  D3D11_INPUT_ELEMENT_DESC input_layout[] =
+    {
+      { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
+	D3D11_INPUT_PER_VERTEX_DATA, 0 },
+      { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,
+	D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    };
+
+  UINT num_elements = sizeof(input_layout) / sizeof(input_layout)[0];
+  
+  hr = RenderBuffers.Device->CreateInputLayout(input_layout,
+					       num_elements,
+					       vsBlob->GetBufferPointer(),
+					       vsBlob->GetBufferSize(),
+					       &shader.m_layout);
+  if (FAILED(hr))
+    {
+      return false; 
+    }
+  
+  vsBlob->Release();
+  vsBlob = nullptr; 
+
+  psBlob->Release();
+  psBlob = nullptr;
+  
+  matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+  matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  matrixBufferDesc.MiscFlags = 0;
+  matrixBufferDesc.StructureByteStride = 0; 
+
+  hr = RenderBuffers.Device->CreateBuffer(&matrixBufferDesc, NULL, &shader.m_matrixBuffer);
+  if (FAILED(hr))
+    {
+      return false; 
+    }
+
+  D3D11_SAMPLER_DESC samplerDesc;
+  samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+  samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+  samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+  samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+  samplerDesc.MipLODBias = 0.f;
+  samplerDesc.MaxAnisotropy = 1;
+  samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+  samplerDesc.BorderColor[0] = 0;
+  samplerDesc.BorderColor[1] = 0;
+  samplerDesc.BorderColor[2] = 0;
+  samplerDesc.BorderColor[3] = 0;
+  samplerDesc.MinLOD = 0;
+  samplerDesc.MaxLOD = D3D11_FLOAT32_MAX; 
+
+  hr = RenderBuffers.Device->CreateSamplerState(&samplerDesc, &shader.m_sampleState);
+  if (FAILED(hr))
+    {
+      return false; 
+    }
+  
+  return true;
+}
+
 bool Render(RendererContext& RenderBuffers,
 	    ColorShader& shader,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj)
@@ -107,3 +191,68 @@ bool Render(RendererContext& RenderBuffers,
   return true; 
 }
 
+bool Render(RendererContext& RenderBuffers, TextureShader& shader,
+	    XMMATRIX world, XMMATRIX view, XMMATRIX proj)
+{
+  return true;
+}
+
+void ReleaseShaderResources(ColorShader& shader)
+{
+  if (shader.m_matrixBuffer)
+    {
+      shader.m_matrixBuffer->Release();
+      shader.m_matrixBuffer = nullptr; 
+    }
+
+  if (shader.m_vertexShader)
+    {
+      shader.m_vertexShader->Release();
+      shader.m_vertexShader = nullptr;
+    }
+
+  if (shader.m_pixelShader)
+    {
+      shader.m_pixelShader->Release();
+      shader.m_pixelShader = nullptr; 
+    }
+
+  if (shader.m_layout)
+    {
+      shader.m_layout->Release();
+      shader.m_layout = nullptr;
+    }
+}
+
+void ReleaseShaderResources(TextureShader& shader)
+{
+    if (shader.m_matrixBuffer)
+    {
+      shader.m_matrixBuffer->Release();
+      shader.m_matrixBuffer = nullptr; 
+    }
+
+  if (shader.m_vertexShader)
+    {
+      shader.m_vertexShader->Release();
+      shader.m_vertexShader = nullptr;
+    }
+
+  if (shader.m_pixelShader)
+    {
+      shader.m_pixelShader->Release();
+      shader.m_pixelShader = nullptr; 
+    }
+
+  if (shader.m_layout)
+    {
+      shader.m_layout->Release();
+      shader.m_layout = nullptr;
+    }
+
+  if (shader.m_sampleState)
+    {
+      shader.m_sampleState->Release();
+      shader.m_sampleState = nullptr; 
+    }
+}
