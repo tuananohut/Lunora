@@ -152,6 +152,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, TextureShader&
 
 bool Render(RendererContext& RenderBuffers,
 	    ColorShader& shader,
+	    UINT indexCount,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj)
 {
   HRESULT hr; 
@@ -186,12 +187,13 @@ bool Render(RendererContext& RenderBuffers,
   RenderBuffers.DeviceContext->VSSetShader(shader.m_vertexShader, NULL, 0);
   RenderBuffers.DeviceContext->PSSetShader(shader.m_pixelShader, NULL, 0);
   
-  RenderBuffers.DeviceContext->DrawIndexed(36, 0, 0);
+  RenderBuffers.DeviceContext->DrawIndexed(indexCount, 0, 0);
 
   return true; 
 }
 
 bool Render(RendererContext& RenderBuffers, TextureShader& shader,
+	    UINT indexCount,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj)
 {
   return true;

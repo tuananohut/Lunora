@@ -2,9 +2,9 @@
 
 bool LoadModelFromFile(char filename[],
                        SimpleVertexCombined** outVertices,
-                       int* outVertexCount,
+                       UINT* outVertexCount,
                        unsigned long** outIndices,
-                       int* outIndexCount)
+                       UINT* outIndexCount)
 {
     FILE* file = fopen(filename, "r");
     if (!file)

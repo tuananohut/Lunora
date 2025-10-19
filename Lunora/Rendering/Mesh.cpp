@@ -66,26 +66,24 @@ bool InitializeModel(RendererContext& RenderBuffers, Mesh* ModelBuffer,
 		     char filename[])
 {
   HRESULT result; 
-  SimpleVertexCombined* localVertices = nullptr;
+  SimpleVertexCombined* localVertices; 
   unsigned long* localIndices = nullptr;
-  int localVertexCount = 0;
-  int localIndexCount = 0;
   
-  bool loaded = LoadModelFromFile(filename, &localVertices, &localVertexCount,
-				  &localIndices, &localIndexCount);
+  bool loaded = LoadModelFromFile(filename, &localVertices, &ModelBuffer->vertexCount,
+				  &localIndices, &ModelBuffer->indexCount);
   if (!loaded)
     {
       return false; 
     }
   
-  result = CreateVertexBuffer(RenderBuffers.Device, localVertices, localVertexCount,
+  result = CreateVertexBuffer(RenderBuffers.Device, localVertices, ModelBuffer->vertexCount,
 			      &ModelBuffer->vertexBuffer); 
   if (FAILED(result))
     {
       return false; 
     }
 	  
-  result = CreateIndexBuffer(RenderBuffers.Device, localIndices, localIndexCount,
+  result = CreateIndexBuffer(RenderBuffers.Device, localIndices, ModelBuffer->indexCount,
 			     &ModelBuffer->indexBuffer);
   if (FAILED(result))
     {
