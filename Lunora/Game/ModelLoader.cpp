@@ -1,7 +1,7 @@
 #include "ModelLoader.h"
 
 bool LoadModelFromFile(char filename[],
-                       SimpleVertexCombined** outVertices,
+                       Vertex** outVertices,
                        UINT* outVertexCount,
                        unsigned long** outIndices,
                        UINT* outIndexCount)
@@ -47,7 +47,7 @@ bool LoadModelFromFile(char filename[],
     int vertexCount = (posCount < colCount) ? posCount : colCount;
     *outVertexCount = vertexCount;
 
-    *outVertices = (SimpleVertexCombined*)malloc(sizeof(SimpleVertexCombined) * vertexCount);
+    *outVertices = (Vertex*)malloc(sizeof(Vertex) * vertexCount);
     if (!*outVertices)
         return false;
 

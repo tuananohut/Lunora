@@ -135,14 +135,14 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 		      if (triangle)
 			{
-			  ReleaseModel(*triangle); 
+			  ReleaseModel(triangle); 
 			  delete triangle;
 			  triangle = nullptr; 
 			} 
 
 		      if (cube)
 			{
-			  ReleaseModel(*cube); 
+			  ReleaseModel(cube); 
 			  delete cube;
 			  cube = nullptr; 
 			} 
@@ -192,7 +192,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      
 	      XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
 	      
-	      RenderModel(*Renderer, *cube);
+	      RenderModel(*Renderer, cube);
 	      result = Render(*Renderer, shader, cube->indexCount, world, view, proj);
 	      if (FAILED(result))
 		{
@@ -203,7 +203,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      world *= XMMatrixTranslation(-8.f, 0.f, 0.f);
 	      world *= XMMatrixRotationY(elapsedTime * 0.7f) * XMMatrixRotationX(elapsedTime);
 	      
-	      RenderModel(*Renderer, *triangle);	      
+	      RenderModel(*Renderer, triangle);	      
 	      result = Render(*Renderer, shader, triangle->indexCount, world, view, proj);
 	      if (FAILED(result))
 		{

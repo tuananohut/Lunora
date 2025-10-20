@@ -3,17 +3,16 @@
 
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include <stdio.h>
 
 #include "../Engine/Renderer.h"
-#include "../Game/ModelLoader.h"
 
 using namespace DirectX; 
 
 struct Vertex
 {
   XMFLOAT3 position;
-  XMFLOAT2 texCoord;
-  XMFLOAT3 normal; 
+  XMFLOAT4 color; 
 };
 
 struct Mesh 
@@ -24,25 +23,23 @@ struct Mesh
   UINT indexCount = 0;
   UINT stride = sizeof(Vertex);
   UINT offset = 0;
+  Vertex* vertices;
+  unsigned long* indices; 
 };
 
-bool MeshInitialize(Mesh &mesh,
-		    ID3D11Device *device,
-		    const Vertex* vertices,
-		    UINT vertexCount,
-		    const unsigned long* indices,
-		    UINT indexCount);
+bool MeshInitialize(Mesh* Mesh,
+		    ID3D11Device *device);
 
-HRESULT CreateVertexBuffer(ID3D11Device *Device, SimpleVertexCombined* vertices,
-			   int vertexCount, ID3D11Buffer** VertexBuffer);
-HRESULT CreateIndexBuffer(ID3D11Device *Device, unsigned long* indices,
-			  int indexCount, ID3D11Buffer** IndexBuffer);
+HRESULT CreateVertexBuffer(ID3D11Device *Device, Mesh* Mesh);
+HRESULT CreateIndexBuffer(ID3D11Device *Device, Mesh* Mesh);
 
 bool InitializeModel(RendererContext& context, Mesh* Buffer,
 		     char filename[]); 
 
-void RenderModel(RendererContext& context, Mesh& Buffer); 
+void RenderModel(RendererContext& context, Mesh* Buffer); 
 
-void ReleaseModel(Mesh& Buffer); 
+void ReleaseModel(Mesh* Buffer); 
+
+bool LoadModelFromFile(char filename[], Mesh* Buffer);
 
 #endif
