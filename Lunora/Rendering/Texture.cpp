@@ -33,7 +33,25 @@ bool InitializeTexture(ID3D11Device* device,
   if (FAILED(hr))
     return false;
 
-  
+  rowPitch = (texture.m_width * 4) * sizeof(unsigned char);
+
+  deviceContext->UpdateSubresource(texture->m_texture, 0, NULL, texture->m_targaData, rowPitch, 0);
+
+  srvDesc.Format = textureDesc.Format;
+  srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+  srvDesc.Texture2D.MostDetailedMip = 0;
+  srvDesc.Texture2D.MipLevels = -1;
+
+  hr = device->CreateShaderResourceView(texture->m_texture, &srvDesc, &texture->m_textureView);
+  if (FAILED(hr))
+    return false;
+
+  deviceContext->GenerateMips(texture->m_textureView);
+
+  delete[] texture->m_targaData;
+  texture->m_targaData = nullptr;
+
+  return true;
 }
 
 void ReleaseTexture(Texture*)
