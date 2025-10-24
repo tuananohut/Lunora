@@ -24,6 +24,6 @@ struct Texture
 bool InitializeTexture(ID3D11Device*, ID3D11DeviceContext*, Texture*, char*);
 void ReleaseTexture(Texture*);
 
-bool LoadTarga32Bit(char*); 
+bool LoadTarga32Bit(Texture*, char*); 
 
 #endif

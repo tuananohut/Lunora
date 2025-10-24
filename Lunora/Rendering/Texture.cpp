@@ -10,7 +10,7 @@ bool InitializeTexture(ID3D11Device* device,
   HRESULT hr;
   unsigned int rowPitch;
   D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-
+  
   result = LoadTarga32Bit(filename);
   if (!result)
     {
@@ -54,13 +54,55 @@ bool InitializeTexture(ID3D11Device* device,
   return true;
 }
 
-void ReleaseTexture(Texture*)
+void ReleaseTexture(Texture* texture)
 {
-  
+  if (texture->m_textureView)
+    {
+      texture->m_textureView->Release();
+      texture->m_textureView = nullptr; 
+    }
+
+  if (texture->m_texture)
+    {
+      texture->m_texture->Release();
+      texture->m_texture = nullptr; 
+    }
+
+  if (texture->m_targaData)
+    {
+      delete[] texture->m_targaData;
+      texture->m_targaData = nullptr; 
+    }
 }
 
-bool LoadTarga32Bit(char*)
+bool LoadTarga32Bit(Texture* texture, char* filename)
 {
+  int error, bpp, imageSize, index, i, j, k;
+  FILE* filePtr;
+  unsigned int count;
+  TargaHeader targaFileHeader;
+  unsigned char* targaImage;
+  
+  error = fopen_s(&filePtr, filename, "rb");
+  if (error != 0)
+    {
+      return false; 
+    }
+  
+  count = (unsigned int)fread(&targaFileHeader, sizeof(TargaHeader), 1, filePtr);
+  if (count != 1)
+    {
+      return false; 
+    }
+  
+  texture->m_height = (int)targaFileHeader.height;
+  texture->m_width = (int)targaFileHeader.width;
+  bpp = (int)targaFileHeader.bpp;
+
+  if (bpp != 32)
+    {
+      return false; 
+    }
   
 } 
 
