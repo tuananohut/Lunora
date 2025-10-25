@@ -103,6 +103,8 @@ bool LoadTarga32Bit(Texture* texture, char* filename)
     {
       return false; 
     }
+
+  imageSize = texture->m_width * texture->m_height * 4;  
   
 } 
 
