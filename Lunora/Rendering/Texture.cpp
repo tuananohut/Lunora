@@ -105,6 +105,26 @@ bool LoadTarga32Bit(Texture* texture, char* filename)
     }
 
   imageSize = texture->m_width * texture->m_height * 4;  
-  
+
+  for (j = 0; j < texture->m_height; j++)
+    {
+      for (i = 0; i < texture->m_width; i++)
+	{
+	  texture->m_targaData[index + 0] = targaImage[k + 2];
+	  texture->m_targaData[index + 1] = targaImage[k + 1];
+	  texture->m_targaData[index + 2] = targaImage[k + 0];
+	  texture->m_targaData[index + 3] = targaImage[k + 3];
+
+	  k += 4;
+	  index += 4;
+	}
+
+      k -= (texture->m_width * 8);
+    }
+
+  delete[] targaImage;
+  targaImage = nullptr;
+
+  return true;
 } 
 
