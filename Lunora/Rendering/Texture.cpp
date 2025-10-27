@@ -11,14 +11,14 @@ bool InitializeTexture(ID3D11Device* device,
   unsigned int rowPitch;
   D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
   
-  result = LoadTarga32Bit(filename);
+  result = LoadTarga32Bit(texture, filename);
   if (!result)
     {
       return false; 
     }
 
-  textureDesc.Height = texture.m_height;
-  textureDesc.Width = texture.m_width;
+  textureDesc.Height = texture->m_height;
+  textureDesc.Width = texture->m_width;
   textureDesc.MipLevels = 0;
   textureDesc.ArraySize = 1;
   textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -29,11 +29,11 @@ bool InitializeTexture(ID3D11Device* device,
   textureDesc.CPUAccessFlags = 0;
   textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
-  hr = device->CreateTexture2D(&textureDesc, NULL, &m_texture);
+  hr = device->CreateTexture2D(&textureDesc, NULL, &texture->m_texture);
   if (FAILED(hr))
     return false;
 
-  rowPitch = (texture.m_width * 4) * sizeof(unsigned char);
+  rowPitch = (texture->m_width * 4) * sizeof(unsigned char);
 
   deviceContext->UpdateSubresource(texture->m_texture, 0, NULL, texture->m_targaData, rowPitch, 0);
 
@@ -77,11 +77,11 @@ void ReleaseTexture(Texture* texture)
 
 bool LoadTarga32Bit(Texture* texture, char* filename)
 {
-  int error, bpp, imageSize, index, i, j, k;
+  int error, bpp, imageSize, index = 0, i, j, k;
   FILE* filePtr;
   unsigned int count;
   TargaHeader targaFileHeader;
-  unsigned char* targaImage;
+  unsigned char* targaImage = 0;
   
   error = fopen_s(&filePtr, filename, "rb");
   if (error != 0)
@@ -114,7 +114,7 @@ bool LoadTarga32Bit(Texture* texture, char* filename)
 	  texture->m_targaData[index + 1] = targaImage[k + 1];
 	  texture->m_targaData[index + 2] = targaImage[k + 0];
 	  texture->m_targaData[index + 3] = targaImage[k + 3];
-
+	  
 	  k += 4;
 	  index += 4;
 	}
