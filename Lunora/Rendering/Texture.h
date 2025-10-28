@@ -21,9 +21,9 @@ struct Texture
   int m_width, m_height; 
 };
 
-bool InitializeTexture(ID3D11Device*, ID3D11DeviceContext*, Texture*, char*);
+bool InitializeTexture(ID3D11Device*, ID3D11DeviceContext*, Texture*, const char*);
 void ReleaseTexture(Texture*);
 
-bool LoadTarga32Bit(Texture*, char*); 
+bool LoadTarga32Bit(Texture*, const char*); 
 
 #endif

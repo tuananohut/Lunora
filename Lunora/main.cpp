@@ -5,6 +5,7 @@
 #include "../Lunora/Game/Camera/Camera.h"
 #include "../Lunora/Rendering/Mesh.h"
 #include "../Lunora/Rendering/Shader/Shader.h"
+#include "../Lunora/Rendering/Texture.h"
 
 const float SCREEN_DEPTH = 1000.f;
 const float SCREEN_NEAR = 0.3f;
@@ -17,7 +18,8 @@ LRESULT CALLBACK WindowProc(HWND Window,
                             LPARAM LParam)
 {
   LRESULT Result = 0;
-  
+  bool result; 
+ 
   switch (Message)
     {  
     case WM_CLOSE: 
@@ -84,6 +86,12 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  
 	  RendererContext *Renderer = new RendererContext;
 	  Running = InitializeRenderer(*Renderer, Window->hwnd, Window->Width, Window->Height);
+	  if (FAILED(Running))
+	    {
+	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
+	      Running = false;
+	      return 0; 
+	    }
 	  
 	  Camera *mCamera = new Camera;
 	  mCamera->SetPosition(0.0f, 0.0f, -20.0f);
@@ -94,7 +102,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  if (FAILED(Running))
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
-	      Running = false; 
+	      Running = false;
+	      return 0; 
 	    }
 
 	  Mesh *cube = new Mesh;
@@ -103,13 +112,28 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  if (FAILED(Running))
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
-	      Running = false; 
+	      Running = false;
+	      return 0; 
 	    }
 
 	  ColorShader shader; 
 	  if (FAILED(InitializeShaderResources(*Renderer, shader)))
 	    {
-	      (Window->hwnd, "Something is wrong!", "Bad", MB_OK | MB_ICONERROR);
+	      MessageBoxA(Window->hwnd, "Something is wrong!", "Bad", MB_OK | MB_ICONERROR);
+	      Running = false;
+	      return 0; 
+	    }
+	  
+	  Texture* texture = new Texture;
+	  const char* texture_file = "../Assets/Textures/palestine.tga";  
+	  result = InitializeTexture(Renderer->Device,
+				     Renderer->DeviceContext,
+				     texture, texture_file);
+	  if (!result)
+	    {
+	      MessageBoxA(Window->hwnd, "Something is wrong about textures!", "Bad", MB_OK | MB_ICONERROR);
+	      Running = false;
+	      return 0; 
 	    }
 	  
 	  LARGE_INTEGER frequency;
@@ -133,6 +157,14 @@ int WINAPI WinMain(HINSTANCE Instance,
 			  mCamera = nullptr; 
 			}
 
+		      if (texture)
+			{
+			  ReleaseTexture(texture);
+			  delete texture;
+			  texture = nullptr; 
+			}
+		      
+		      
 		      if (triangle)
 			{
 			  ReleaseModel(triangle); 

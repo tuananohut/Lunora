@@ -2,7 +2,7 @@
 
 bool InitializeTexture(ID3D11Device* device,
 		       ID3D11DeviceContext* deviceContext,
-		       Texture* texture, char* filename)
+		       Texture* texture, const char* filename)
 {
   bool result;
   int height, width;
@@ -75,13 +75,13 @@ void ReleaseTexture(Texture* texture)
     }
 }
 
-bool LoadTarga32Bit(Texture* texture, char* filename)
+bool LoadTarga32Bit(Texture* texture, const char* filename)
 {
   int error, bpp, imageSize, index = 0, i, j, k;
   FILE* filePtr;
   unsigned int count;
   TargaHeader targaFileHeader;
-  unsigned char* targaImage = 0;
+  unsigned char* targaImage;
   
   error = fopen_s(&filePtr, filename, "rb");
   if (error != 0)
@@ -104,8 +104,29 @@ bool LoadTarga32Bit(Texture* texture, char* filename)
       return false; 
     }
 
-  imageSize = texture->m_width * texture->m_height * 4;  
+  imageSize = texture->m_width * texture->m_height * 4;
 
+  targaImage = new unsigned char[imageSize];
+
+  count = (unsigned int)fread(targaImage, 1, imageSize, filePtr);
+  if (count != imageSize)
+    {
+      return false; 
+    }
+
+  error = fclose(filePtr);
+  if (error != 0)
+    {
+      return false; 
+    }
+
+  texture->m_targaData = new unsigned char[imageSize];
+
+  index = 0;
+
+  k = (texture->m_width * texture->m_height * 4) - (texture->m_width * 4);
+
+  
   for (j = 0; j < texture->m_height; j++)
     {
       for (i = 0; i < texture->m_width; i++)
