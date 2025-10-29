@@ -39,7 +39,8 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, TextureShader&
 bool Render(RendererContext& RenderBuffers, ColorShader& shader, UINT indexCount,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj);
 bool Render(RendererContext& RenderBuffers, TextureShader& shader, UINT indexCount,
-	    XMMATRIX world, XMMATRIX view, XMMATRIX proj);
+	    XMMATRIX world, XMMATRIX view, XMMATRIX proj,
+	    ID3D11ShaderResourceView* texture);
 
 void ReleaseShaderResources(ColorShader& shader);
 void ReleaseShaderResources(TextureShader& shader);

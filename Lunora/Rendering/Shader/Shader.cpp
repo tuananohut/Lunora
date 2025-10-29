@@ -194,8 +194,47 @@ bool Render(RendererContext& RenderBuffers,
 
 bool Render(RendererContext& RenderBuffers, TextureShader& shader,
 	    UINT indexCount,
-	    XMMATRIX world, XMMATRIX view, XMMATRIX proj)
+	    XMMATRIX world, XMMATRIX view, XMMATRIX proj,
+	    ID3D11ShaderResourceView* texture)
 {
+  HRESULT hr; 
+  D3D11_MAPPED_SUBRESOURCE mappedResource;
+  MatrixBufferType* dataPtr;
+  unsigned int bufferNumber;
+  
+  world = XMMatrixTranspose(world);
+  view = XMMatrixTranspose(view);
+  proj = XMMatrixTranspose(proj);
+  
+  hr = RenderBuffers.DeviceContext->Map(shader.m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+  if (FAILED(hr))
+    {
+      return false;
+    }
+  
+  dataPtr = (MatrixBufferType*)mappedResource.pData;
+  
+  dataPtr->world = world;
+  dataPtr->view = view;
+  dataPtr->proj = proj;
+
+  RenderBuffers.DeviceContext->Unmap(shader.m_matrixBuffer, 0);
+  
+  bufferNumber = 0;
+
+  RenderBuffers.DeviceContext->VSSetConstantBuffers(bufferNumber, 1, &shader.m_matrixBuffer); 
+
+  RenderBuffers.DeviceContext->PSSetShaderResources(0, 1, &texture);
+  
+  RenderBuffers.IASetInputLayout(shader.m_layout);
+  
+  RenderBuffers.VSSetShader(shader.m_vertexShader, NULL, 0);
+  RenderBuffers.PSSetShader(shader.m_pixelShader, NULL, 0);
+  
+  RenderBuffers.PSSetSamplers(0, 1, &shader.m_sampleState);
+  
+  RenderBuffers.DrawIndexed(indexCount, 0, 0);
+    
   return true;
 }
 
@@ -228,7 +267,7 @@ void ReleaseShaderResources(ColorShader& shader)
 
 void ReleaseShaderResources(TextureShader& shader)
 {
-    if (shader.m_matrixBuffer)
+  if (shader.m_matrixBuffer)
     {
       shader.m_matrixBuffer->Release();
       shader.m_matrixBuffer = nullptr; 
