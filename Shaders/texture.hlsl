@@ -3,9 +3,9 @@ SamplerState SampleType: register(s0);
 
 cbuffer MatrixBuffer
 {
-	matrix worldMatrix;
-	matrix viewMatrix;
-	matrix projectMatrix; 
+	matrix world;
+	matrix view;
+	matrix proj; 
 };
 
 struct VertexInputType
@@ -18,7 +18,7 @@ struct PixelInputType
 {
 	float4 position: SV_POSITION;
 	float2 tex: TEXCOORD0;
-}
+};
 
 PixelInputType TextureVertexShader(VertexInputType input)
 {	       
@@ -26,9 +26,9 @@ PixelInputType TextureVertexShader(VertexInputType input)
 
 	input.position.w = 1.f;
 
-	output.position = mul(input.position, worldMatrix);
-	output.position = mul(output.position, viewMatrix);
-	output.position = mul(output.position, projectionMatrix);
+	output.position = mul(input.position, world);
+	output.position = mul(output.position, view);
+	output.position = mul(output.position, proj);
 
 	output.tex = input.tex;
 

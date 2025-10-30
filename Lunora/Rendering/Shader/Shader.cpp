@@ -5,9 +5,9 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
 {
   HRESULT hr; 
   D3D11_BUFFER_DESC matrixBufferDesc;
-  ID3DBlob *vsBlob;
-  ID3DBlob *psBlob;
-  ID3DBlob *errorMessage;
+  ID3DBlob *vsBlob = nullptr;
+  ID3DBlob *psBlob = nullptr;
+  ID3DBlob *errorMessage = nullptr;
 
   D3DCompileFromFile(L"../../Lunora/Shaders/gpu.hlsl", 0, 0, "ColorVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
   hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &shader.m_vertexShader);
@@ -69,9 +69,9 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, TextureShader&
 {
   HRESULT hr; 
   D3D11_BUFFER_DESC matrixBufferDesc;
-  ID3DBlob *vsBlob;
-  ID3DBlob *psBlob;
-  ID3DBlob *errorMessage;
+  ID3DBlob *vsBlob = nullptr;
+  ID3DBlob *psBlob = nullptr;
+  ID3DBlob *errorMessage = nullptr;
 
   D3DCompileFromFile(L"../../Lunora/Shaders/texture.hlsl", 0, 0, "TextureVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
   hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &shader.m_vertexShader);
@@ -226,14 +226,14 @@ bool Render(RendererContext& RenderBuffers, TextureShader& shader,
 
   RenderBuffers.DeviceContext->PSSetShaderResources(0, 1, &texture);
   
-  RenderBuffers.IASetInputLayout(shader.m_layout);
-  
-  RenderBuffers.VSSetShader(shader.m_vertexShader, NULL, 0);
-  RenderBuffers.PSSetShader(shader.m_pixelShader, NULL, 0);
-  
-  RenderBuffers.PSSetSamplers(0, 1, &shader.m_sampleState);
-  
-  RenderBuffers.DrawIndexed(indexCount, 0, 0);
+  RenderBuffers.DeviceContext->IASetInputLayout(shader.m_layout);
+  		
+  RenderBuffers.DeviceContext->VSSetShader(shader.m_vertexShader, NULL, 0);
+  RenderBuffers.DeviceContext->PSSetShader(shader.m_pixelShader, NULL, 0);
+  	
+  RenderBuffers.DeviceContext->PSSetSamplers(0, 1, &shader.m_sampleState);
+  	
+  RenderBuffers.DeviceContext->DrawIndexed(indexCount, 0, 0);
     
   return true;
 }

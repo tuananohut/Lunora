@@ -123,6 +123,15 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      Running = false;
 	      return 0; 
 	    }
+
+	  TextureShader texShader;
+	  if (FAILED(InitializeShaderResources(*Renderer, texShader)))
+	    {
+	      MessageBoxA(Window->hwnd, "Something is wrong!", "Bad", MB_OK | MB_ICONERROR);
+	      Running = false;
+	      return 0; 
+	    }
+
 	  
 	  Texture* texture = new Texture;
 	  const char* texture_file = "../Assets/Textures/palestine.tga";  
@@ -164,7 +173,6 @@ int WINAPI WinMain(HINSTANCE Instance,
 			  texture = nullptr; 
 			}
 		      
-		      
 		      if (triangle)
 			{
 			  ReleaseModel(triangle); 
@@ -187,6 +195,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 			}
 		      
 		      ReleaseShaderResources(shader);
+		      ReleaseShaderResources(texShader);
 		      
 		      Running = false;
 		    }
@@ -225,7 +234,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
 	      
 	      RenderModel(*Renderer, cube);
-	      result = Render(*Renderer, shader, cube->indexCount, world, view, proj);
+	      result = Render(*Renderer, texShader, cube->indexCount, world, view, proj, texture->m_textureView);
 	      if (FAILED(result))
 		{
 	       Running = false; 
