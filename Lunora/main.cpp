@@ -94,7 +94,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	    }
 	  
 	  Camera *mCamera = new Camera;
-	  mCamera->SetPosition(0.0f, 0.0f, -20.0f);
+	  mCamera->SetPosition(0.0f, 0.0f, -15.0f);
 	  
 	  Mesh *triangle = new Mesh;
 	  char filename[] = "../Assets/Models/triangle.txt";	  

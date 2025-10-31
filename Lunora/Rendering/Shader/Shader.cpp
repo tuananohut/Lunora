@@ -1,5 +1,66 @@
 #include "Shader.h"
 
+HRESULT CompileShaderFromFile(WCHAR* filename,
+			      const char* entryPoint,
+			      const char* shaderModel,
+			      ID3DBlob** outBlob)
+{
+  *outBlob = nullptr;
+  ID3DBlob* errorMessage = nullptr;
+
+  HRESULT hr = D3DCompileFromFile(filename, 0, 0, entryPoint, shaderModel,
+				  D3D10_SHADER_ENABLE_STRICTNESS, 0,
+				  outBlob, &errorMessage);
+  if (FAILED(hr))
+    {
+      if (errorMessage)
+	{
+	  MessageBoxA(NULL, (char*)errorMessage->GetBufferPointer(),
+		      "Shader compilation error.", MB_OK | MB_ICONERROR);
+	  errorMessage->Release();
+	}
+      else
+	{
+	  MessageBoxW(NULL, filename, L"Could not shader file", MB_OK | MB_ICONERROR);
+	}
+      return hr; 
+    }
+
+  if (errorMessage)
+    {
+      errorMessage->Release(); 
+    }
+
+  return S_OK;
+}
+
+void BaseShader::Release()
+{
+  if (m_matrixBuffer)
+    {
+      m_matrixBuffer->Release();
+      m_matrixBuffer = nullptr; 
+    }
+
+  if (m_vertexShader)
+    {
+      m_vertexShader->Release();
+      m_vertexShader = nullptr;
+    }
+
+  if (m_pixelShader)
+    {
+      m_pixelShader->Release();
+      m_pixelShader = nullptr; 
+    }
+
+  if (m_layout)
+    {
+      m_layout->Release();
+      m_layout = nullptr;
+    }
+}
+
 HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
 				  ColorShader& shader)
 {
@@ -9,15 +70,31 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
   ID3DBlob *psBlob = nullptr;
   ID3DBlob *errorMessage = nullptr;
 
-  D3DCompileFromFile(L"../../Lunora/Shaders/gpu.hlsl", 0, 0, "ColorVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
-  hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &shader.m_vertexShader);
+  hr = CompileShaderFromFile(L"../../Lunora/Shaders/gpu.hlsl",
+			     "ColorVertexShader",
+			     "vs_5_0",
+			     &vsBlob);
   if (FAILED(hr))
     {
       return false; 
     }
   
-  D3DCompileFromFile(L"../../Lunora/Shaders/gpu.hlsl", 0, 0, "ColorPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
-  hr = RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &shader.m_pixelShader);
+  hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &shader.baseShader.m_vertexShader);
+  if (FAILED(hr))
+    {
+      return false; 
+    }
+
+  hr = CompileShaderFromFile(L"../../Lunora/Shaders/gpu.hlsl",
+			     "ColorPixelShader",
+			     "ps_5_0",
+			     &psBlob);
+  if (FAILED(hr))
+    {
+      return false; 
+    }
+
+  hr = RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &shader.baseShader.m_pixelShader);
   if (FAILED(hr))
     {
       return false; 
@@ -37,7 +114,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
 					       num_elements,
 					       vsBlob->GetBufferPointer(),
 					       vsBlob->GetBufferSize(),
-					       &shader.m_layout);
+					       &shader.baseShader.m_layout);
   if (FAILED(hr))
     {
       return false; 
@@ -56,7 +133,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
   matrixBufferDesc.MiscFlags = 0;
   matrixBufferDesc.StructureByteStride = 0; 
 
-  hr = RenderBuffers.Device->CreateBuffer(&matrixBufferDesc, NULL, &shader.m_matrixBuffer);
+  hr = RenderBuffers.Device->CreateBuffer(&matrixBufferDesc, NULL, &shader.baseShader.m_matrixBuffer);
   if (FAILED(hr))
     {
       return false; 
@@ -74,14 +151,14 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, TextureShader&
   ID3DBlob *errorMessage = nullptr;
 
   D3DCompileFromFile(L"../../Lunora/Shaders/texture.hlsl", 0, 0, "TextureVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
-  hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &shader.m_vertexShader);
+  hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &shader.baseShader.m_vertexShader);
   if (FAILED(hr))
     {
       return false; 
     }
   
   D3DCompileFromFile(L"../../Lunora/Shaders/texture.hlsl", 0, 0, "TexturePixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
-  hr = RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &shader.m_pixelShader);
+  hr = RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &shader.baseShader.m_pixelShader);
   if (FAILED(hr))
     {
       return false; 
@@ -101,7 +178,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, TextureShader&
 					       num_elements,
 					       vsBlob->GetBufferPointer(),
 					       vsBlob->GetBufferSize(),
-					       &shader.m_layout);
+					       &shader.baseShader.m_layout);
   if (FAILED(hr))
     {
       return false; 
@@ -120,7 +197,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, TextureShader&
   matrixBufferDesc.MiscFlags = 0;
   matrixBufferDesc.StructureByteStride = 0; 
 
-  hr = RenderBuffers.Device->CreateBuffer(&matrixBufferDesc, NULL, &shader.m_matrixBuffer);
+  hr = RenderBuffers.Device->CreateBuffer(&matrixBufferDesc, NULL, &shader.baseShader.m_matrixBuffer);
   if (FAILED(hr))
     {
       return false; 
@@ -164,7 +241,7 @@ bool Render(RendererContext& RenderBuffers,
   view = XMMatrixTranspose(view);
   proj = XMMatrixTranspose(proj);
   
-  hr = RenderBuffers.DeviceContext->Map(shader.m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+  hr = RenderBuffers.DeviceContext->Map(shader.baseShader.m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
   if (FAILED(hr))
     {
       return false;
@@ -176,16 +253,16 @@ bool Render(RendererContext& RenderBuffers,
   dataPtr->view = view;
   dataPtr->proj = proj;
 
-  RenderBuffers.DeviceContext->Unmap(shader.m_matrixBuffer, 0);
+  RenderBuffers.DeviceContext->Unmap(shader.baseShader.m_matrixBuffer, 0);
   
   bufferNumber = 0;
 
-  RenderBuffers.DeviceContext->VSSetConstantBuffers(bufferNumber, 1, &shader.m_matrixBuffer); 
+  RenderBuffers.DeviceContext->VSSetConstantBuffers(bufferNumber, 1, &shader.baseShader.m_matrixBuffer); 
 
-  RenderBuffers.DeviceContext->IASetInputLayout(shader.m_layout);
+  RenderBuffers.DeviceContext->IASetInputLayout(shader.baseShader.m_layout);
   
-  RenderBuffers.DeviceContext->VSSetShader(shader.m_vertexShader, NULL, 0);
-  RenderBuffers.DeviceContext->PSSetShader(shader.m_pixelShader, NULL, 0);
+  RenderBuffers.DeviceContext->VSSetShader(shader.baseShader.m_vertexShader, NULL, 0);
+  RenderBuffers.DeviceContext->PSSetShader(shader.baseShader.m_pixelShader, NULL, 0);
   
   RenderBuffers.DeviceContext->DrawIndexed(indexCount, 0, 0);
 
@@ -206,7 +283,7 @@ bool Render(RendererContext& RenderBuffers, TextureShader& shader,
   view = XMMatrixTranspose(view);
   proj = XMMatrixTranspose(proj);
   
-  hr = RenderBuffers.DeviceContext->Map(shader.m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+  hr = RenderBuffers.DeviceContext->Map(shader.baseShader.m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
   if (FAILED(hr))
     {
       return false;
@@ -218,18 +295,18 @@ bool Render(RendererContext& RenderBuffers, TextureShader& shader,
   dataPtr->view = view;
   dataPtr->proj = proj;
 
-  RenderBuffers.DeviceContext->Unmap(shader.m_matrixBuffer, 0);
+  RenderBuffers.DeviceContext->Unmap(shader.baseShader.m_matrixBuffer, 0);
   
   bufferNumber = 0;
 
-  RenderBuffers.DeviceContext->VSSetConstantBuffers(bufferNumber, 1, &shader.m_matrixBuffer); 
+  RenderBuffers.DeviceContext->VSSetConstantBuffers(bufferNumber, 1, &shader.baseShader.m_matrixBuffer); 
 
   RenderBuffers.DeviceContext->PSSetShaderResources(0, 1, &texture);
   
-  RenderBuffers.DeviceContext->IASetInputLayout(shader.m_layout);
+  RenderBuffers.DeviceContext->IASetInputLayout(shader.baseShader.m_layout);
   		
-  RenderBuffers.DeviceContext->VSSetShader(shader.m_vertexShader, NULL, 0);
-  RenderBuffers.DeviceContext->PSSetShader(shader.m_pixelShader, NULL, 0);
+  RenderBuffers.DeviceContext->VSSetShader(shader.baseShader.m_vertexShader, NULL, 0);
+  RenderBuffers.DeviceContext->PSSetShader(shader.baseShader.m_pixelShader, NULL, 0);
   	
   RenderBuffers.DeviceContext->PSSetSamplers(0, 1, &shader.m_sampleState);
   	
@@ -240,57 +317,13 @@ bool Render(RendererContext& RenderBuffers, TextureShader& shader,
 
 void ReleaseShaderResources(ColorShader& shader)
 {
-  if (shader.m_matrixBuffer)
-    {
-      shader.m_matrixBuffer->Release();
-      shader.m_matrixBuffer = nullptr; 
-    }
-
-  if (shader.m_vertexShader)
-    {
-      shader.m_vertexShader->Release();
-      shader.m_vertexShader = nullptr;
-    }
-
-  if (shader.m_pixelShader)
-    {
-      shader.m_pixelShader->Release();
-      shader.m_pixelShader = nullptr; 
-    }
-
-  if (shader.m_layout)
-    {
-      shader.m_layout->Release();
-      shader.m_layout = nullptr;
-    }
+  shader.baseShader.Release();
 }
 
 void ReleaseShaderResources(TextureShader& shader)
 {
-  if (shader.m_matrixBuffer)
-    {
-      shader.m_matrixBuffer->Release();
-      shader.m_matrixBuffer = nullptr; 
-    }
-
-  if (shader.m_vertexShader)
-    {
-      shader.m_vertexShader->Release();
-      shader.m_vertexShader = nullptr;
-    }
-
-  if (shader.m_pixelShader)
-    {
-      shader.m_pixelShader->Release();
-      shader.m_pixelShader = nullptr; 
-    }
-
-  if (shader.m_layout)
-    {
-      shader.m_layout->Release();
-      shader.m_layout = nullptr;
-    }
-
+  shader.baseShader.Release();
+  
   if (shader.m_sampleState)
     {
       shader.m_sampleState->Release();

@@ -9,29 +9,38 @@ using namespace DirectX;
 
 #include "../../Engine/Renderer.h"
 
-struct ColorShader
+struct BaseShader
 {
   ID3D11Buffer *m_matrixBuffer = nullptr;
   ID3D11VertexShader *m_vertexShader = nullptr;
   ID3D11PixelShader *m_pixelShader = nullptr;
   ID3D11InputLayout *m_layout = nullptr;
+
+  void Release(); 
+};
+
+struct ColorShader
+{
+  BaseShader baseShader;
 };
 
 struct TextureShader
 {
-  ID3D11Buffer *m_matrixBuffer = nullptr;
-  ID3D11VertexShader *m_vertexShader = nullptr;
-  ID3D11PixelShader *m_pixelShader = nullptr;
-  ID3D11InputLayout *m_layout = nullptr;
+  BaseShader baseShader; 
   ID3D11SamplerState *m_sampleState = nullptr; 
 };
-  
+   
 struct MatrixBufferType
 {
   XMMATRIX world;
   XMMATRIX view;
   XMMATRIX proj;
 };
+
+HRESULT CompileShaderFromFile(WCHAR* filename,
+			      const char* entryPoint,
+			      const char* shaderModel,
+			      ID3DBlob** outBlob);
 
 HRESULT InitializeShaderResources(RendererContext& RenderBuffers, ColorShader& shader);
 HRESULT InitializeShaderResources(RendererContext& RenderBuffers, TextureShader& shader);
