@@ -47,7 +47,7 @@ void BaseShader::Release()
       m_vertexShader->Release();
       m_vertexShader = nullptr;
     }
-
+  
   if (m_pixelShader)
     {
       m_pixelShader->Release();
@@ -61,11 +61,23 @@ void BaseShader::Release()
     }
 }
 
+HRESULT CreateMatrixBuffer(ID3D11Device* device, ID3D11Buffer** matrixBuffer)
+{
+  D3D11_BUFFER_DESC matrixBufferDesc;
+  matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+  matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  matrixBufferDesc.MiscFlags = 0;
+  matrixBufferDesc.StructureByteStride = 0; 
+  
+  return device->CreateBuffer(&matrixBufferDesc, NULL, matrixBuffer);
+}
+
 HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
 				  ColorShader& shader)
 {
-  HRESULT hr; 
-  D3D11_BUFFER_DESC matrixBufferDesc;
+  HRESULT hr;
   ID3DBlob *vsBlob = nullptr;
   ID3DBlob *psBlob = nullptr;
   ID3DBlob *errorMessage = nullptr;
@@ -126,14 +138,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
   psBlob->Release();
   psBlob = nullptr;
   
-  matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-  matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
-  matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-  matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-  matrixBufferDesc.MiscFlags = 0;
-  matrixBufferDesc.StructureByteStride = 0; 
-
-  hr = RenderBuffers.Device->CreateBuffer(&matrixBufferDesc, NULL, &shader.baseShader.m_matrixBuffer);
+  hr = CreateMatrixBuffer(RenderBuffers.Device, &shader.baseShader.m_matrixBuffer);
   if (FAILED(hr))
     {
       return false; 
@@ -145,11 +150,10 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
 HRESULT InitializeShaderResources(RendererContext& RenderBuffers, TextureShader& shader)
 {
   HRESULT hr; 
-  D3D11_BUFFER_DESC matrixBufferDesc;
   ID3DBlob *vsBlob = nullptr;
   ID3DBlob *psBlob = nullptr;
   ID3DBlob *errorMessage = nullptr;
-
+  
   D3DCompileFromFile(L"../../Lunora/Shaders/texture.hlsl", 0, 0, "TextureVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
   hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &shader.baseShader.m_vertexShader);
   if (FAILED(hr))
@@ -190,14 +194,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, TextureShader&
   psBlob->Release();
   psBlob = nullptr;
   
-  matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-  matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
-  matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-  matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-  matrixBufferDesc.MiscFlags = 0;
-  matrixBufferDesc.StructureByteStride = 0; 
-
-  hr = RenderBuffers.Device->CreateBuffer(&matrixBufferDesc, NULL, &shader.baseShader.m_matrixBuffer);
+  hr = CreateMatrixBuffer(RenderBuffers.Device, &shader.baseShader.m_matrixBuffer);
   if (FAILED(hr))
     {
       return false; 

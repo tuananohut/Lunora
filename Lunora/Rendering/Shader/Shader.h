@@ -42,6 +42,8 @@ HRESULT CompileShaderFromFile(WCHAR* filename,
 			      const char* shaderModel,
 			      ID3DBlob** outBlob);
 
+HRESULT CreateMatrixBuffer(ID3D11Device* device, ID3D11Buffer** matrixBuffer);
+
 HRESULT InitializeShaderResources(RendererContext& RenderBuffers, ColorShader& shader);
 HRESULT InitializeShaderResources(RendererContext& RenderBuffers, TextureShader& shader);
 
