@@ -29,6 +29,7 @@ bool InitializeRenderer(RendererContext& context,
 			HWND hwnd,
 			int width,
 			int height);
+  
 void ShutdownRenderer(RendererContext& context);
 
 void RendererBeginScene(RendererContext& context, float r, float g, float b, float a); 

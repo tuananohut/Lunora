@@ -18,7 +18,6 @@ LRESULT CALLBACK WindowProc(HWND Window,
                             LPARAM LParam)
 {
   LRESULT Result = 0;
-  bool result; 
  
   switch (Message)
     {  
@@ -86,7 +85,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  
 	  RendererContext *Renderer = new RendererContext;
 	  Running = InitializeRenderer(*Renderer, Window->hwnd, Window->Width, Window->Height);
-	  if (FAILED(Running))
+	  if (!Running)
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
 	      Running = false;
@@ -99,7 +98,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  Mesh *triangle = new Mesh;
 	  char filename[] = "../Assets/Models/triangle.txt";	  
 	  Running = InitializeModel(*Renderer, triangle, filename);
-	  if (FAILED(Running))
+	  if (!Running)
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
 	      Running = false;
@@ -109,7 +108,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  Mesh *cube = new Mesh;
 	  char filename1[] = "../Assets/Models/cube.txt";
 	  Running = InitializeModel(*Renderer, cube, filename1);
-	  if (FAILED(Running))
+	  if (!Running)
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
 	      Running = false;
@@ -125,7 +124,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	    }
 
 	  TextureShader texShader;
-	  if (FAILED(InitializeShaderResources(*Renderer, texShader)))
+	  if (!InitializeShaderResources(*Renderer, texShader))
 	    {
 	      MessageBoxA(Window->hwnd, "Something is wrong!", "Bad", MB_OK | MB_ICONERROR);
 	      Running = false;
@@ -138,7 +137,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  result = InitializeTexture(Renderer->Device,
 				     Renderer->DeviceContext,
 				     texture, texture_file);
-	  if (!result)
+	  if (FAILED(result))
 	    {
 	      MessageBoxA(Window->hwnd, "Something is wrong about textures!", "Bad", MB_OK | MB_ICONERROR);
 	      Running = false;
@@ -229,7 +228,15 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      mCamera->GetViewMatrix(view);
   
 	      float fieldOfView = 3.141592654f / 4.0f;
-	      float screenAspect = (float)Window->Width / (float)Window->Height;
+	      float screenAspect = 1.f; 
+	      if (windowHeight > 0)
+		{
+		  screenAspect = (float)windowWidth / (float)windowHeight;
+		}
+	      else
+		{
+		  screenAspect = 1.0f; 
+		}
 	      
 	      XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
 	      
