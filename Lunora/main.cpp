@@ -30,7 +30,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
       {			
 	Running = false;		
       } break;
-      
+
     default:
       {
 	Result = DefWindowProc(Window, Message, WParam, LParam);
@@ -97,7 +97,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  
 	  Mesh *triangle = new Mesh;
 	  char filename[] = "../Assets/Models/triangle.txt";	  
-	  Running = InitializeModel(*Renderer, triangle, filename);
+	  Running = InitializeModel(Renderer->Device, triangle, filename);
 	  if (!Running)
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
@@ -107,7 +107,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	  Mesh *cube = new Mesh;
 	  char filename1[] = "../Assets/Models/cube.txt";
-	  Running = InitializeModel(*Renderer, cube, filename1);
+	  Running = InitializeModel(Renderer->Device, cube, filename1);
 	  if (!Running)
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
@@ -202,25 +202,16 @@ int WINAPI WinMain(HINSTANCE Instance,
 		  TranslateMessage(&Message);
 		  DispatchMessageA(&Message);
 		}
-	      
+	           
 	      RendererBeginScene(*Renderer, 0.f, 0.f, 0.f, 1.f);
 
 	      mCamera->Render();
-
-	      RECT clientRect;
-	      GetClientRect(Window->hwnd, &clientRect);
-	      long windowWidth = clientRect.right - clientRect.left;
-	      long windowHeight = clientRect.bottom - clientRect.top;
-
-	      Renderer->Viewport.Width = (float)windowWidth;
-	      Renderer->Viewport.Height = (float)windowHeight;
-	      Renderer->DeviceContext->RSSetViewports(1, &Renderer->Viewport);
 
 	      LARGE_INTEGER currentTime;
 	      QueryPerformanceCounter(&currentTime);
 
 	      float elapsedTime = (float)(currentTime.QuadPart - startTime.QuadPart) / (float)frequency.QuadPart;
-
+	      
 	      XMMATRIX world = XMMatrixRotationX(elapsedTime * 0.7f) * XMMatrixRotationY(elapsedTime);
 
 	      // XMMATRIX world = XMMatrixIdentity();

@@ -2,8 +2,15 @@
 
 bool InitializeEntity(Entity* Entity, ID3D11Device* device)
 {
-  // MeshInitialize(Entity->Mesh, )
-
+  size_t entity_num = sizeof(Entity) / sizeof(Entity[0]);
+  char triangle[] = "../Assets/Models/triangle.txt";
+  bool running; 
+  
+  for (size_t i = 0; i < entity_num; i++)
+    {
+      InitializeModel(device, Entity[i].mesh, triangle);
+    } 
+  
   return true; 
 }
 

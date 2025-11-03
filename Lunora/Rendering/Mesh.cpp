@@ -60,7 +60,7 @@ void RenderModel(RendererContext& RenderBuffers, Mesh* Buffer)
   RenderBuffers.DeviceContext->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 }
 
-bool InitializeModel(RendererContext& RenderBuffers, Mesh* ModelBuffer,
+bool InitializeModel(ID3D11Device *Device, Mesh* ModelBuffer,
 		     char filename[])
 {
   HRESULT result; 
@@ -71,13 +71,13 @@ bool InitializeModel(RendererContext& RenderBuffers, Mesh* ModelBuffer,
       return false; 
     }
   
-  result = CreateVertexBuffer(RenderBuffers.Device, ModelBuffer); 
+  result = CreateVertexBuffer(Device, ModelBuffer); 
   if (FAILED(result))
     {
       return false; 
     }
 	  
-  result = CreateIndexBuffer(RenderBuffers.Device, ModelBuffer);
+  result = CreateIndexBuffer(Device, ModelBuffer);
   if (FAILED(result))
     {
       return false; 

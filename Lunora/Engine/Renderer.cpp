@@ -253,7 +253,7 @@ bool InitializeRenderer(RendererContext& context,
     }
 
   context.DeviceContext->OMSetRenderTargets(1, &context.RenderTargetView, context.DepthStencilView);
-
+ 
   rasterDesc.AntialiasedLineEnable = false;
   rasterDesc.CullMode = D3D11_CULL_BACK;
   rasterDesc.DepthBias = 0;

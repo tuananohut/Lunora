@@ -7,7 +7,10 @@
 struct Entity
 {
   Mesh* mesh;
-  ColorShader* shader; 
+  ColorShader* color_shader;
+  TextureShader* texture_shader;
+
+   
 };
 
 bool InitializeEntity(Entity* Entity);

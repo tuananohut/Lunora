@@ -33,7 +33,7 @@ bool MeshInitialize(Mesh* Mesh,
 HRESULT CreateVertexBuffer(ID3D11Device *Device, Mesh* Mesh);
 HRESULT CreateIndexBuffer(ID3D11Device *Device, Mesh* Mesh);
 
-bool InitializeModel(RendererContext& context, Mesh* Buffer,
+bool InitializeModel(ID3D11Device *Device, Mesh* Buffer,
 		     char filename[]); 
 
 void RenderModel(RendererContext& context, Mesh* Buffer); 
