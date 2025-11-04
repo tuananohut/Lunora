@@ -24,7 +24,8 @@ struct Mesh
   UINT stride = sizeof(Vertex);
   UINT offset = 0;
   Vertex* vertices;
-  unsigned long* indices; 
+  unsigned long* indices;
+  char filename[];
 };
 
 bool MeshInitialize(Mesh* Mesh,
@@ -33,13 +34,12 @@ bool MeshInitialize(Mesh* Mesh,
 HRESULT CreateVertexBuffer(ID3D11Device *Device, Mesh* Mesh);
 HRESULT CreateIndexBuffer(ID3D11Device *Device, Mesh* Mesh);
 
-bool InitializeModel(ID3D11Device *Device, Mesh* Buffer,
-		     char filename[]); 
+bool InitializeModel(ID3D11Device *Device, Mesh* Buffer); 
 
 void RenderModel(RendererContext& context, Mesh* Buffer); 
 
 void ReleaseModel(Mesh* Buffer); 
 
-bool LoadModelFromFile(char filename[], Mesh* Buffer);
+bool LoadModelFromFile(Mesh* Buffer);
 
 #endif

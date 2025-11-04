@@ -8,9 +8,7 @@ struct Entity
 {
   Mesh* mesh;
   ColorShader* color_shader;
-  TextureShader* texture_shader;
-
-   
+  TextureShader* texture_shader;   
 };
 
 bool InitializeEntity(Entity* Entity);
