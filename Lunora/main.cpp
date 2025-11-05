@@ -96,8 +96,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  mCamera->SetPosition(0.0f, 0.0f, -15.0f);
 	  
 	  Mesh *triangle = new Mesh;
-	  char filename[] = "../Assets/Models/triangle.txt";	  
-	  Running = InitializeModel(Renderer->Device, triangle, filename);
+	  // char filename[] = "../Assets/Models/triangle.txt";	  
+	  Running = InitializeModel(Renderer->Device, triangle);
 	  if (!Running)
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
@@ -106,8 +106,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 	    }
 
 	  Mesh *cube = new Mesh;
-	  char filename1[] = "../Assets/Models/cube.txt";
-	  Running = InitializeModel(Renderer->Device, cube, filename1);
+	  // char filename1[] = "../Assets/Models/cube.txt";
+	  Running = InitializeModel(Renderer->Device, cube);
 	  if (!Running)
 	    {
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
@@ -122,7 +122,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      Running = false;
 	      return 0; 
 	    }
-
+	  
 	  TextureShader texShader;
 	  if (!InitializeShaderResources(*Renderer, texShader))
 	    {
@@ -220,9 +220,9 @@ int WINAPI WinMain(HINSTANCE Instance,
   
 	      float fieldOfView = 3.141592654f / 4.0f;
 	      float screenAspect = 1.f; 
-	      if (windowHeight > 0)
+	      if (Window->Height > 0)
 		{
-		  screenAspect = (float)windowWidth / (float)windowHeight;
+		  screenAspect = (float)Window->Width / (float)Window->Height;
 		}
 	      else
 		{

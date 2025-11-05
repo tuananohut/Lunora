@@ -25,7 +25,7 @@ struct Mesh
   UINT offset = 0;
   Vertex* vertices;
   unsigned long* indices;
-  char filename[];
+  char *filename;
 };
 
 bool MeshInitialize(Mesh* Mesh,

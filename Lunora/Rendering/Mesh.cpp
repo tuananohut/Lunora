@@ -60,14 +60,13 @@ void RenderModel(RendererContext& RenderBuffers, Mesh* Buffer)
   RenderBuffers.DeviceContext->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 }
 
-bool InitializeModel(ID3D11Device *Device, Mesh* ModelBuffer,
-		     )
+bool InitializeModel(ID3D11Device *Device, Mesh* ModelBuffer)
 {
   HRESULT result;
-
+  
   ModelBuffer->filename = "../Assets/Models/triangle.txt";
- 
-  bool loaded = LoadModelFromFile(ModelBuffer->filename, ModelBuffer);
+  
+  bool loaded = LoadModelFromFile(ModelBuffer);
   if (!loaded)
     {
       return false; 
