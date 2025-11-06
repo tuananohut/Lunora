@@ -64,8 +64,6 @@ bool InitializeModel(ID3D11Device *Device, Mesh* ModelBuffer)
 {
   HRESULT result;
   
-  ModelBuffer->filename = "../Assets/Models/triangle.txt";
-  
   bool loaded = LoadModelFromFile(ModelBuffer);
   if (!loaded)
     {
