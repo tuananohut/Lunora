@@ -1,13 +1,28 @@
 #include "Entity.h"
 
-bool InitializeEntity(Entity* Entity, ID3D11Device* device)
+bool InitializeEntity(Entity* Entity, RendererContext& RenderBuffers)
 {
   size_t entity_num = sizeof(Entity) / sizeof(Entity[0]);
-  bool running; 
+  bool running;
+  HRESULT hr;
   
   for (size_t i = 0; i < entity_num; i++)
     {
-      InitializeModel(device, Entity[i].mesh);
+      InitializeModel(RenderBuffers.Device, Entity[i].mesh);
+      if (Entity[i].texture_shader)
+	{
+	  hr = InitializeShaderResources(RenderBuffers, Entity[i].texture_shader);
+	  if (FAILED(hr))
+	    return false; 
+
+	}
+      else if (Entity[i].color_shader)
+	{
+	  hr = InitializeShaderResources(RenderBuffers, Entity[i].color_shader);
+	  if (FAILED(hr))
+	    return false; 
+
+	}
     } 
   
   return true; 
