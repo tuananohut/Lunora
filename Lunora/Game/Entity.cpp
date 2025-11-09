@@ -16,6 +16,7 @@ bool InitializeEntity(Entity* Entity, RendererContext& RenderBuffers)
 	    return false; 
 
 	}
+      
       else if (Entity[i].color_shader)
 	{
 	  hr = InitializeShaderResources(RenderBuffers, Entity[i].color_shader);

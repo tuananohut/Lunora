@@ -3,6 +3,7 @@
 
 #include "../Rendering/Mesh.h"
 #include "../Rendering/Shader/Shader.h"
+#include "../Engine/Renderer.h"
 
 struct Entity
 {
@@ -11,7 +12,7 @@ struct Entity
   TextureShader* texture_shader;   
 };
 
-bool InitializeEntity(Entity* Entity);
+bool InitializeEntity(Entity* Entity, RendererContext& RenderBuffers);
 bool RenderEntity(Entity* Entity);
 void ReleaseEntity(Entity* Entity);
 
