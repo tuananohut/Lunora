@@ -3,6 +3,7 @@
 #include "resource.h"
 #include "../Lunora/Engine/Renderer.h"
 #include "../Lunora/Game/Camera/Camera.h"
+#include "../Lunora/Game/Entity.h"
 #include "../Lunora/Rendering/Mesh.h"
 #include "../Lunora/Rendering/Shader/Shader.h"
 #include "../Lunora/Rendering/Texture.h"
@@ -95,42 +96,17 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  Camera *mCamera = new Camera;
 	  mCamera->SetPosition(0.0f, 0.0f, -15.0f);
 	  
-	  Mesh *triangle = new Mesh;
-	  // char filename[] = "../Assets/Models/triangle.txt";	  
-	  Running = InitializeModel(Renderer->Device, triangle);
-	  if (!Running)
-	    {
-	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
-	      Running = false;
-	      return 0; 
-	    }
-
-	  Mesh *cube = new Mesh;
-	  // char filename1[] = "../Assets/Models/cube.txt";
-	  Running = InitializeModel(Renderer->Device, cube);
-	  if (!Running)
-	    {
-	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
-	      Running = false;
-	      return 0; 
-	    }
-
-	  ColorShader shader; 
-	  if (FAILED(InitializeShaderResources(*Renderer, shader)))
-	    {
-	      MessageBoxA(Window->hwnd, "Something is wrong!", "Bad", MB_OK | MB_ICONERROR);
-	      Running = false;
-	      return 0; 
-	    }
+	  Entity* entities[1] = {0};
+	  Entity* triangle = new Entity;
+	  entites[0] = triangle; 
 	  
-	  TextureShader texShader;
-	  if (!InitializeShaderResources(*Renderer, texShader))
+	  Running = InitializeEntity(triangle, *Renderer);
+	  if (!Running)
 	    {
-	      MessageBoxA(Window->hwnd, "Something is wrong!", "Bad", MB_OK | MB_ICONERROR);
+	      MessageBoxA(Window->hwnd, "Does not worked!", "Entity", MB_OK);
 	      Running = false;
 	      return 0; 
 	    }
-
 	  
 	  Texture* texture = new Texture;
 	  const char* texture_file = "../Assets/Textures/palestine.tga";  
@@ -164,28 +140,14 @@ int WINAPI WinMain(HINSTANCE Instance,
 			  delete mCamera;
 			  mCamera = nullptr; 
 			}
-
-		      if (texture)
-			{
-			  ReleaseTexture(texture);
-			  delete texture;
-			  texture = nullptr; 
-			}
 		      
 		      if (triangle)
 			{
 			  ReleaseModel(triangle); 
 			  delete triangle;
 			  triangle = nullptr; 
-			} 
-
-		      if (cube)
-			{
-			  ReleaseModel(cube); 
-			  delete cube;
-			  cube = nullptr; 
-			} 
-		      
+			}
+        
 		      if (Renderer)
 			{
 			  ShutdownRenderer(*Renderer);
@@ -193,8 +155,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 			  Renderer = nullptr; 
 			}
 		      
-		      ReleaseShaderResources(shader);
-		      ReleaseShaderResources(texShader);
+		      
 		      
 		      Running = false;
 		    }
