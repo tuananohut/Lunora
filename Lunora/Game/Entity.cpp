@@ -6,9 +6,9 @@ bool InitializeEntity(Entity* Entity, RendererContext& RenderBuffers)
   bool running;
   HRESULT hr;
 
-  Entities->mesh = new Mesh; 
-  Entities->mesh->filename = "../Assets/Models/triangle.txt";
-
+  Entity->mesh = new Mesh; 
+  Entity->mesh->filename = "../Assets/Models/triangle.txt";
+  
   Entity->color_shader = new ColorShader; 
   
   for (size_t i = 0; i < entity_num; i++)
@@ -50,11 +50,11 @@ void ReleaseEntity(Entity* Entity)
 
   if (Entity->color_shader)
     {
-      ReleaseShaderResources(color_shader);
+      ReleaseShaderResources(*Entity->color_shader);
     }
   
   if (Entity->texture_shader)
     {
-      ReleaseShaderResources(texShader);
+      ReleaseShaderResources(*Entity->texture_shader);
     }
 }

@@ -98,9 +98,9 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  
 	  Entity* entities[1] = {0};
 	  Entity* triangle = new Entity;
-	  entites[0] = triangle; 
+	  entities[0] = triangle; 
 	  
-	  Running = InitializeEntity(triangle, *Renderer);
+	  Running = InitializeEntity(*entities, *Renderer);
 	  if (!Running)
 	    {
 	      MessageBoxA(Window->hwnd, "Does not worked!", "Entity", MB_OK);
@@ -143,11 +143,11 @@ int WINAPI WinMain(HINSTANCE Instance,
 		      
 		      if (triangle)
 			{
-			  ReleaseModel(triangle); 
+			  ReleaseEntity(triangle); 
 			  delete triangle;
 			  triangle = nullptr; 
 			}
-        
+		      
 		      if (Renderer)
 			{
 			  ShutdownRenderer(*Renderer);
@@ -192,19 +192,12 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      
 	      XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
 	      
-	      RenderModel(*Renderer, cube);
-	      result = Render(*Renderer, texShader, cube->indexCount, world, view, proj, texture->m_textureView);
-	      if (FAILED(result))
-		{
-	       Running = false; 
-		}
-
 	      world = XMMatrixIdentity();
 	      world *= XMMatrixTranslation(-8.f, 0.f, 0.f);
 	      world *= XMMatrixRotationY(elapsedTime * 0.7f) * XMMatrixRotationX(elapsedTime);
 	      
-	      RenderModel(*Renderer, triangle);	      
-	      result = Render(*Renderer, shader, triangle->indexCount, world, view, proj);
+	      RenderModel(*Renderer, triangle->mesh);	      
+	      result = Render(*Renderer, *triangle->color_shader, triangle->mesh->indexCount, world, view, proj);
 	      if (FAILED(result))
 		{
 	       Running = false; 
