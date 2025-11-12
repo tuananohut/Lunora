@@ -107,7 +107,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      Running = false;
 	      return 0; 
 	    }
-	  
+	  /*
 	  Texture* texture = new Texture;
 	  const char* texture_file = "../Assets/Textures/palestine.tga";  
 	  result = InitializeTexture(Renderer->Device,
@@ -119,7 +119,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      Running = false;
 	      return 0; 
 	    }
-	  
+	  */
 	  LARGE_INTEGER frequency;
 	  LARGE_INTEGER startTime;
 	  QueryPerformanceFrequency(&frequency); 

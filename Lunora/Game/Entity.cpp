@@ -2,7 +2,7 @@
 
 bool InitializeEntity(Entity* Entity, RendererContext& RenderBuffers)
 {
-  size_t entity_num = sizeof(Entity) / sizeof(Entity[0]);
+  // size_t entity_num = sizeof(Entity) / sizeof(Entity[0]);
   bool running;
   HRESULT hr;
 
@@ -10,26 +10,27 @@ bool InitializeEntity(Entity* Entity, RendererContext& RenderBuffers)
   Entity->mesh->filename = "../Assets/Models/triangle.txt";
   
   Entity->color_shader = new ColorShader; 
+  Entity->texture_shader = nullptr; 
   
-  for (size_t i = 0; i < entity_num; i++)
-    {
-      InitializeModel(RenderBuffers.Device, Entity[i].mesh);
-      if (Entity[i].texture_shader)
+  // for (size_t i = 0; i < entity_num; i++)
+  // {
+      InitializeModel(RenderBuffers.Device, Entity->mesh);
+      if (Entity->texture_shader)
 	{
-	  hr = InitializeShaderResources(RenderBuffers, *Entity[i].texture_shader);
+	  hr = InitializeShaderResources(RenderBuffers, *Entity->texture_shader);
 	  if (FAILED(hr))
 	    return false; 
 
 	}
       
-      else if (Entity[i].color_shader)
+      else if (Entity->color_shader)
 	{
-	  hr = InitializeShaderResources(RenderBuffers, *Entity[i].color_shader);
+	  hr = InitializeShaderResources(RenderBuffers, *Entity->color_shader);
 	  if (FAILED(hr))
 	    return false; 
 
 	}
-    } 
+      //} 
   
   return true; 
 }
