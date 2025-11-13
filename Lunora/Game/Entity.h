@@ -12,7 +12,7 @@ struct Entity
   TextureShader* texture_shader;   
 };
 
-bool InitializeEntity(Entity* Entity, RendererContext& RenderBuffers);
+bool InitializeEntity(Entity* Entity, size_t entity_num, RendererContext& RenderBuffers);
 bool RenderEntity(Entity* Entity);
 void ReleaseEntity(Entity* Entity);
 

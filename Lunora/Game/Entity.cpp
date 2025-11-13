@@ -1,8 +1,7 @@
 #include "Entity.h"
 
-bool InitializeEntity(Entity* Entity, RendererContext& RenderBuffers)
+bool InitializeEntity(Entity* Entity, size_t entity_num, RendererContext& RenderBuffers)
 {
-  // size_t entity_num = sizeof(Entity) / sizeof(Entity[0]);
   bool running;
   HRESULT hr;
 
@@ -12,15 +11,15 @@ bool InitializeEntity(Entity* Entity, RendererContext& RenderBuffers)
   Entity->color_shader = new ColorShader; 
   Entity->texture_shader = nullptr; 
   
-  // for (size_t i = 0; i < entity_num; i++)
-  // {
+  for (size_t i = 0; i < entity_num; i++)
+    {
       InitializeModel(RenderBuffers.Device, Entity->mesh);
       if (Entity->texture_shader)
 	{
 	  hr = InitializeShaderResources(RenderBuffers, *Entity->texture_shader);
 	  if (FAILED(hr))
 	    return false; 
-
+	  
 	}
       
       else if (Entity->color_shader)
@@ -28,9 +27,9 @@ bool InitializeEntity(Entity* Entity, RendererContext& RenderBuffers)
 	  hr = InitializeShaderResources(RenderBuffers, *Entity->color_shader);
 	  if (FAILED(hr))
 	    return false; 
-
+	  
 	}
-      //} 
+    } 
   
   return true; 
 }
