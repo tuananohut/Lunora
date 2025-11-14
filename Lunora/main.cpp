@@ -145,7 +145,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 		      
 		      if (triangle)
 			{
-			  ReleaseEntity(triangle); 
+			  ReleaseEntity(triangle, entity_num); 
 			  delete triangle;
 			  triangle = nullptr; 
 			}

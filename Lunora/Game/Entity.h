@@ -14,6 +14,6 @@ struct Entity
 
 bool InitializeEntity(Entity* Entity, size_t entity_num, RendererContext& RenderBuffers);
 bool RenderEntity(Entity* Entity);
-void ReleaseEntity(Entity* Entity);
+void ReleaseEntity(Entity* Entity, size_t entity_num);
 
 #endif
