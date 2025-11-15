@@ -10,9 +10,6 @@ bool InitializeEntity(Entity* Entity, size_t entity_num, RendererContext& Render
       Entity[i].mesh = new Mesh; 
       Entity[i].mesh->filename = "../Assets/Models/triangle.txt";
 
-      Entity[i].mesh = new Mesh; 
-      Entity[i].mesh->filename = "../Assets/Models/cube.txt";
-      
       Entity[i].color_shader = new ColorShader; 
       Entity[i].texture_shader = nullptr; 
       
@@ -39,6 +36,47 @@ bool InitializeEntity(Entity* Entity, size_t entity_num, RendererContext& Render
 
 bool RenderEntity(Entity* Entity)
 {
+  XMMATRIX world = XMMatrixIdentity();
+  XMMATRIX view;	      
+  mCamera->GetViewMatrix(view);
+  
+  float fieldOfView = 3.141592654f / 4.0f;
+  float screenAspect = 1.f; 
+  if (Window->Height > 0)
+    {
+       screenAspect = (float)Window->Width / (float)Window->Height;
+    }
+  else
+    {
+      screenAspect = 1.0f; 
+    }
+  
+  XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
+
+  for (size_t i = 0; i < entity_num; i++)
+    {      
+      InitializeModel(RenderBuffers.Device, Entity[i].mesh);
+      if (Entity[i].texture_shader)
+	{
+	  RenderModel(*Renderer, *Entity[i].mesh);	      
+	  result = Render(*Renderer, *Entity[i].texture_shader, Entity[i].mesh->indexCount, world, view, proj);
+	  if (FAILED(result))
+	    {
+	      return false; 
+	    }	  
+	}
+      
+      else if (Entity[i].color_shader)
+	{
+	  RenderModel(*Renderer, *Entity[i].mesh);	      
+	  result = Render(*Renderer, *Entity[i].color_shader, Entity[i].mesh->indexCount, world, view, proj);
+	  if (FAILED(result))
+	    {
+	      return false; 
+	    }	  	  
+	}
+    } 
+
   return true;
 }
 
