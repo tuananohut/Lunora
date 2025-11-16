@@ -91,24 +91,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
 	      Running = false;
 	      return 0; 
-	    }
-	  
-	  Camera *mCamera = new Camera;
-	  mCamera->SetPosition(0.0f, 0.0f, -15.0f);
-	  
-	  Entity* entities[1] = {0};
-	  Entity* triangle = new Entity;
-	  entities[0] = triangle;
-	  
-	  size_t entity_num = 1;  
-	  
-	  Running = InitializeEntity(*entities, entity_num, *Renderer);
-	  if (!Running)
-	    {
-	      MessageBoxA(Window->hwnd, "Does not worked!", "Entity", MB_OK);
-	      Running = false;
-	      return 0; 
-	    }
+	    }  
+
 	  /*
 	  Texture* texture = new Texture;
 	  const char* texture_file = "../Assets/Textures/palestine.tga";  
@@ -122,6 +106,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      return 0; 
 	    }
 	  */
+
 	  LARGE_INTEGER frequency;
 	  LARGE_INTEGER startTime;
 	  QueryPerformanceFrequency(&frequency); 
@@ -155,9 +140,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 			  ShutdownRenderer(*Renderer);
 			  delete Renderer;
 			  Renderer = nullptr; 
-			}
-		      
-		      
+			}		      
 		      
 		      Running = false;
 		    }
