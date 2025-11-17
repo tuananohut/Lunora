@@ -34,7 +34,7 @@ bool InitializeEntity(Entity* Entity, size_t entity_num, RendererContext& Render
   return true; 
 }
 
-bool RenderEntity(Entity* Entity)
+bool RenderEntity(RendererContext& Renderer, Entity* Entity)
 {
   XMMATRIX world = XMMatrixIdentity();
   XMMATRIX view;	      

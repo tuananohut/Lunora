@@ -8,8 +8,11 @@ bool InitializeScene(ID3D11Device* device)
   Entity* entities[1] = {0};
   Entity* triangle = new Entity;
   entities[0] = triangle;
-  
-  size_t entity_num = 1;  
+
+  Entity* cube = new Entity;
+  entities[1] = cube;
+
+  size_t entity_num = 2;  
 	  
   Running = InitializeEntity(*entities, entity_num, *Renderer);
   if (!Running)
