@@ -34,42 +34,27 @@ bool InitializeEntity(Entity* Entity, size_t entity_num, RendererContext& Render
   return true; 
 }
 
-bool RenderEntity(RendererContext& Renderer, Entity* Entity)
+bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity, size_t entity_num, const MatrixBufferType& matrix)
 {
-  XMMATRIX world = XMMatrixIdentity();
-  XMMATRIX view;	      
-  mCamera->GetViewMatrix(view);
+  bool result = true;
   
-  float fieldOfView = 3.141592654f / 4.0f;
-  float screenAspect = 1.f; 
-  if (Window->Height > 0)
-    {
-       screenAspect = (float)Window->Width / (float)Window->Height;
-    }
-  else
-    {
-      screenAspect = 1.0f; 
-    }
-  
-  XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
-
   for (size_t i = 0; i < entity_num; i++)
     {      
       InitializeModel(RenderBuffers.Device, Entity[i].mesh);
       if (Entity[i].texture_shader)
-	{
-	  RenderModel(*Renderer, *Entity[i].mesh);	      
-	  result = Render(*Renderer, *Entity[i].texture_shader, Entity[i].mesh->indexCount, world, view, proj);
+	{/*
+	  RenderModel(RenderBuffers, Entity[i].mesh);	      
+	  result = Render(RenderBuffers, *Entity[i].texture_shader, Entity[i].mesh->indexCount, matrix.world, matrix.view, matrix.proj);
 	  if (FAILED(result))
 	    {
 	      return false; 
-	    }	  
+	      }*/	  
 	}
       
       else if (Entity[i].color_shader)
 	{
-	  RenderModel(*Renderer, *Entity[i].mesh);	      
-	  result = Render(*Renderer, *Entity[i].color_shader, Entity[i].mesh->indexCount, world, view, proj);
+	  RenderModel(RenderBuffers, Entity[i].mesh);	      
+	  result = Render(RenderBuffers, *Entity[i].color_shader, Entity[i].mesh->indexCount, matrix.world, matrix.view, matrix.proj);
 	  if (FAILED(result))
 	    {
 	      return false; 
@@ -77,28 +62,29 @@ bool RenderEntity(RendererContext& Renderer, Entity* Entity)
 	}
     } 
 
-  return true;
+  return result;
 }
 
 void ReleaseEntity(Entity* Entity, size_t entity_num)
 {
-  for (size_t i = 0; i < entity_num; entity_num++)
+  if (Entity->mesh)
     {
-      if (Entity->mesh)
-	{
-	  ReleaseModel(Entity->mesh);
-	  delete Entity->mesh;
-	  Entity->mesh = nullptr; 
-	}
+      ReleaseModel(Entity->mesh);
+      delete Entity->mesh;
+      Entity->mesh = nullptr; 
+    }
 
-      if (Entity->color_shader)
-	{
-	  ReleaseShaderResources(*Entity->color_shader);
-	}
+  if (Entity->color_shader)
+    {
+      ReleaseShaderResources(*Entity->color_shader);
+      delete Entity->color_shader;
+      Entity->color_shader = nullptr; 
+    }
   
-      if (Entity->texture_shader)
-	{
-	  ReleaseShaderResources(*Entity->texture_shader);
-	}
+  if (Entity->texture_shader)
+    {
+      ReleaseShaderResources(*Entity->texture_shader);
+      delete Entity->texture_shader;
+      Entity->texture_shader = nullptr; 
     }
 }

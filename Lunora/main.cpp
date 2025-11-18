@@ -93,6 +93,46 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      return 0; 
 	    }  
 
+	  Camera *mCamera = new Camera;
+	  mCamera->SetPosition(0.0f, 0.0f, -15.0f);
+	  
+	  Entity* entities[2] = { nullptr };
+	  Entity* triangle = new Entity;
+	  entities[0] = triangle;
+
+	  Entity* cube = new Entity;
+	  entities[1] = cube;
+
+	  size_t entity_num = 2;  
+	  
+	  Running = InitializeEntity(*entities, entity_num, *Renderer);
+	  if (!Running)
+	    {
+	      MessageBoxA(Window->hwnd, "Does not worked!", "Entity", MB_OK);
+	      Running = false;
+	      return 0; 
+	    }
+
+	  MatrixBufferType matrix; 
+	  
+	  matrix.world = XMMatrixIdentity();
+	  matrix.view;	      
+	  mCamera->GetViewMatrix(matrix.view);
+  
+	  float fieldOfView = 3.141592654f / 4.0f;
+	  float screenAspect = 1.f; 
+	  if (Window->Height > 0)
+	    {
+	      screenAspect = (float)Window->Width / (float)Window->Height;
+	    }
+	  else
+	    {
+	      screenAspect = 1.0f; 
+	    }
+  
+	  matrix.proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
+
+	  
 	  /*
 	  Texture* texture = new Texture;
 	  const char* texture_file = "../Assets/Textures/palestine.tga";  
@@ -128,19 +168,25 @@ int WINAPI WinMain(HINSTANCE Instance,
 			  mCamera = nullptr; 
 			}
 		      
-		      if (triangle)
-			{
-			  ReleaseEntity(triangle, entity_num); 
-			  delete triangle;
-			  triangle = nullptr; 
-			}
-		      
 		      if (Renderer)
 			{
 			  ShutdownRenderer(*Renderer);
 			  delete Renderer;
 			  Renderer = nullptr; 
 			}		      
+		      
+		      if (entities)
+			{
+			  for (size_t i = 0; i < entity_num; ++i)
+			    {
+			      if (entities[i])
+				{
+				  ReleaseEntity(entities[i], entity_num); 
+				  delete entities[i];
+				  entities[i] = nullptr; 
+				}
+			    }
+			}
 		      
 		      Running = false;
 		    }
@@ -158,36 +204,14 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	      float elapsedTime = (float)(currentTime.QuadPart - startTime.QuadPart) / (float)frequency.QuadPart;
 	      
-	      XMMATRIX world = XMMatrixRotationX(elapsedTime * 0.7f) * XMMatrixRotationY(elapsedTime);
-
-	      // XMMATRIX world = XMMatrixIdentity();
-	      XMMATRIX view;	      
-	      mCamera->GetViewMatrix(view);
-  
-	      float fieldOfView = 3.141592654f / 4.0f;
-	      float screenAspect = 1.f; 
-	      if (Window->Height > 0)
+	      Running = RenderEntity(*Renderer, *entities, entity_num, matrix);
+	      if (!Running)
 		{
-		  screenAspect = (float)Window->Width / (float)Window->Height;
+		  MessageBoxA(Window->hwnd, "Does not worked!", "Entity", MB_OK);
+		  Running = false;
+		  return 0; 
 		}
-	      else
-		{
-		  screenAspect = 1.0f; 
-		}
-	      
-	      XMMATRIX proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
-	      
-	      world = XMMatrixIdentity();
-	      world *= XMMatrixTranslation(-8.f, 0.f, 0.f);
-	      world *= XMMatrixRotationY(elapsedTime * 0.7f) * XMMatrixRotationX(elapsedTime);
-	      
-	      RenderModel(*Renderer, triangle->mesh);	      
-	      result = Render(*Renderer, *triangle->color_shader, triangle->mesh->indexCount, world, view, proj);
-	      if (FAILED(result))
-		{
-	       Running = false; 
-		}
-	      
+   
 	      RendererEndScene(*Renderer);
 	    }  
 	} 
