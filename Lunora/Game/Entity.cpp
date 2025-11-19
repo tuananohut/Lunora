@@ -8,25 +8,30 @@ bool InitializeEntity(Entity** Entity, size_t entity_num, RendererContext& Rende
   for (size_t i = 0; i < entity_num; i++)
     {
       Entity[i]->mesh = new Mesh();
-      Entity[i]->mesh->filename = "../Assets/Models/triangle.txt";
-
+      Entity[i]->mesh->filename = "../Assets/Models/cube.txt";
+      
       Entity[i]->color_shader = new ColorShader();
       Entity[i]->texture_shader = nullptr; 
       
-      InitializeModel(RenderBuffers.Device, Entity[i]->mesh);
+      bool result = InitializeModel(RenderBuffers.Device, Entity[i]->mesh);
+      if(!result)
+	{
+          MessageBoxA(nullptr, "Model could not load!", "Error", MB_OK);
+          return false;
+	}
+      
       if (Entity[i]->texture_shader)
 	{
-	  hr = InitializeShaderResources(RenderBuffers, Entity[i]->texture_shader);
-	  if (FAILED(hr))
+          hr = InitializeShaderResources(RenderBuffers, Entity[i]->texture_shader);
+          if (FAILED(hr))
 	    return false; 	  
 	}
       
       else if (Entity[i]->color_shader)
 	{
-	  hr = InitializeShaderResources(RenderBuffers, Entity[i]->color_shader);
-	  if (FAILED(hr))
+          hr = InitializeShaderResources(RenderBuffers, Entity[i]->color_shader);
+          if (FAILED(hr))
 	    return false; 
-	  
 	}
     } 
   
@@ -38,8 +43,10 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity** Entity, size_t entity
   bool result = true;
   
   for (size_t i = 0; i < entity_num; i++)
-    {      
-      InitializeModel(RenderBuffers.Device, Entity[i]->mesh);
+    {
+      matrix.world = XMMatrixIdentity();
+      matrix.world = XMMatrixTranslation((float)i * 3.0f, 0.0f, -1.0f);
+  
       if (Entity[i]->texture_shader)
 	{/*
 	  RenderModel(RenderBuffers, Entity[i].mesh);	      

@@ -25,11 +25,13 @@ LRESULT CALLBACK WindowProc(HWND Window,
     case WM_CLOSE: 
       {
         Running = false;
+	DestroyWindow(Window);
       } break;
 
     case WM_DESTROY:
       {			
-	Running = false;		
+	Running = false;
+	PostQuitMessage(0);
       } break;
 
     default:
@@ -48,8 +50,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 {
   Win32WindowProperties* Window = new Win32WindowProperties;
   Window->Width = 800;
-  Window->Height = 600;
-	  
+  Window->Height = 600;	  
   
   WNDCLASSEXA wc = {};
   
@@ -203,7 +204,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      QueryPerformanceCounter(&currentTime);
 
 	      float elapsedTime = (float)(currentTime.QuadPart - startTime.QuadPart) / (float)frequency.QuadPart;
-	      
+
 	      Running = RenderEntity(*Renderer, (Entity**)entities, entity_num, matrix);
 	      if (!Running)
 		{
@@ -211,7 +212,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 		  Running = false;
 		  return 0; 
 		}
-   
+	      
 	      RendererEndScene(*Renderer);
 	    }  
 	} 
