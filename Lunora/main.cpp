@@ -104,8 +104,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  entities[1] = cube;
 
 	  size_t entity_num = 2;  
-	  
-	  Running = InitializeEntity(*entities, entity_num, *Renderer);
+
+	  Running = InitializeEntity((Entity**)entities, entity_num, *Renderer);
 	  if (!Running)
 	    {
 	      MessageBoxA(Window->hwnd, "Does not worked!", "Entity", MB_OK);
@@ -181,7 +181,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 			    {
 			      if (entities[i])
 				{
-				  ReleaseEntity(entities[i], entity_num); 
+				  ReleaseEntity(entities[i]); 
 				  delete entities[i];
 				  entities[i] = nullptr; 
 				}
@@ -204,7 +204,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	      float elapsedTime = (float)(currentTime.QuadPart - startTime.QuadPart) / (float)frequency.QuadPart;
 	      
-	      Running = RenderEntity(*Renderer, *entities, entity_num, matrix);
+	      Running = RenderEntity(*Renderer, (Entity**)entities, entity_num, matrix);
 	      if (!Running)
 		{
 		  MessageBoxA(Window->hwnd, "Does not worked!", "Entity", MB_OK);

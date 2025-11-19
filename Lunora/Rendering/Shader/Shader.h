@@ -44,17 +44,17 @@ HRESULT CompileShaderFromFile(WCHAR* filename,
 
 HRESULT CreateMatrixBuffer(ID3D11Device* device, ID3D11Buffer** matrixBuffer);
 
-HRESULT InitializeShaderResources(RendererContext& RenderBuffers, ColorShader& shader);
-HRESULT InitializeShaderResources(RendererContext& RenderBuffers, TextureShader& shader);
+HRESULT InitializeShaderResources(RendererContext& RenderBuffers, ColorShader* shader);
+HRESULT InitializeShaderResources(RendererContext& RenderBuffers, TextureShader* shader);
 
-bool Render(RendererContext& RenderBuffers, ColorShader& shader, UINT indexCount,
+bool Render(RendererContext& RenderBuffers, ColorShader* shader, UINT indexCount,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj);
-bool Render(RendererContext& RenderBuffers, TextureShader& shader, UINT indexCount,
+bool Render(RendererContext& RenderBuffers, TextureShader* shader, UINT indexCount,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj,
 	    ID3D11ShaderResourceView* texture);
 
-void ReleaseShaderResources(ColorShader& shader);
-void ReleaseShaderResources(TextureShader& shader);
+void ReleaseShaderResources(ColorShader* shader);
+void ReleaseShaderResources(TextureShader* shader);
 
 #endif
  
