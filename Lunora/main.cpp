@@ -96,17 +96,15 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	  Camera *mCamera = new Camera;
 	  mCamera->SetPosition(0.0f, 0.0f, -15.0f);
+
+	  const size_t entity_num = 2;  
 	  
-	  Entity* entities[2] = { nullptr };
-	  Entity* triangle = new Entity;
-	  entities[0] = triangle;
+	  Entity** entities = new Entity*[entity_num];
 
-	  Entity* cube = new Entity;
-	  entities[1] = cube;
-
-	  size_t entity_num = 2;  
-
-	  Running = InitializeEntity((Entity**)entities, entity_num, *Renderer);
+	  entities[0] = new Entity();
+	  entities[1] = new Entity();
+	  
+	  Running = InitializeEntity(entities, entity_num, *Renderer);
 	  if (!Running)
 	    {
 	      MessageBoxA(Window->hwnd, "Does not worked!", "Entity", MB_OK);
@@ -187,6 +185,9 @@ int WINAPI WinMain(HINSTANCE Instance,
 				  entities[i] = nullptr; 
 				}
 			    }
+
+			  delete[] entities;
+			  entities = nullptr; 
 			}
 		      
 		      Running = false;
@@ -205,7 +206,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	      float elapsedTime = (float)(currentTime.QuadPart - startTime.QuadPart) / (float)frequency.QuadPart;
 
-	      Running = RenderEntity(*Renderer, (Entity**)entities, entity_num, matrix);
+	      Running = RenderEntity(*Renderer, entities, entity_num, matrix);
 	      if (!Running)
 		{
 		  MessageBoxA(Window->hwnd, "Does not worked!", "Entity", MB_OK);

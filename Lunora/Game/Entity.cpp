@@ -45,7 +45,7 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity** Entity, size_t entity
   for (size_t i = 0; i < entity_num; i++)
     {
       matrix.world = XMMatrixIdentity();
-      matrix.world = XMMatrixTranslation((float)i * 3.0f, 0.0f, -1.0f);
+      // matrix.world = XMMatrixTranslation((float)i * 3.0f, 0.0f, -1.0f);
   
       if (Entity[i]->texture_shader)
 	{/*
