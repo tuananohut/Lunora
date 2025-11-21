@@ -99,7 +99,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	  const size_t entity_num = 2;  
 	  
-	  Entity** entities = new Entity*[entity_num];
+	  Entity* entities[entity_num];
 
 	  entities[0] = new Entity();
 	  entities[1] = new Entity();
@@ -114,8 +114,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	  MatrixBufferType matrix; 
 	  
-	  matrix.world = XMMatrixIdentity();
-	  matrix.view;	      
+	  matrix.world = XMMatrixIdentity();      
 	  mCamera->GetViewMatrix(matrix.view);
   
 	  float fieldOfView = 3.141592654f / 4.0f;
@@ -150,8 +149,6 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  LARGE_INTEGER startTime;
 	  QueryPerformanceFrequency(&frequency); 
 	  QueryPerformanceCounter(&startTime);
-
-	  float rotationSpeed = 2.0f;
 	  
 	  while(Running)
 	    {
@@ -176,18 +173,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 		      
 		      if (entities)
 			{
-			  for (size_t i = 0; i < entity_num; ++i)
-			    {
-			      if (entities[i])
-				{
-				  ReleaseEntity(entities[i]); 
-				  delete entities[i];
-				  entities[i] = nullptr; 
-				}
-			    }
-
-			  delete[] entities;
-			  entities = nullptr; 
+			  ReleaseEntity(entities, entity_num);
 			}
 		      
 		      Running = false;
@@ -196,17 +182,33 @@ int WINAPI WinMain(HINSTANCE Instance,
 		  TranslateMessage(&Message);
 		  DispatchMessageA(&Message);
 		}
-	           
-	      RendererBeginScene(*Renderer, 0.f, 0.f, 0.f, 1.f);
 
-	      mCamera->Render();
+	      RendererBeginScene(*Renderer, 0.f, 0.f, 0.f, 1.f);
 
 	      LARGE_INTEGER currentTime;
 	      QueryPerformanceCounter(&currentTime);
 
-	      float elapsedTime = (float)(currentTime.QuadPart - startTime.QuadPart) / (float)frequency.QuadPart;
-
-	      Running = RenderEntity(*Renderer, entities, entity_num, matrix);
+	      float total_time = (float)(currentTime.QuadPart - startTime.QuadPart) / (float)frequency.QuadPart;
+	      
+	      mCamera->Render();
+	      
+	      matrix.world = XMMatrixIdentity();	      
+	      mCamera->GetViewMatrix(matrix.view);
+  
+	      float fieldOfView = 3.141592654f / 4.0f;
+	      float screenAspect = 1.f; 
+	      if (Window->Height > 0)
+		{
+		  screenAspect = (float)Window->Width / (float)Window->Height;
+		}
+	      else
+		{
+		  screenAspect = 1.0f; 
+		}
+  
+	      matrix.proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
+	      
+	      Running = RenderEntity(*Renderer, entities, entity_num, matrix, total_time);
 	      if (!Running)
 		{
 		  MessageBoxA(Window->hwnd, "Does not worked!", "Entity", MB_OK);

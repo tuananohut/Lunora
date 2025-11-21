@@ -1,96 +1,73 @@
 #include "Entity.h"
 
-bool InitializeEntity(Entity** Entity, size_t entity_num, RendererContext& RenderBuffers)
+bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& RenderBuffers)
 {
   bool running;
   HRESULT hr;
     
   for (size_t i = 0; i < entity_num; i++)
     {
-      Entity[i]->mesh = new Mesh();
-      Entity[i]->mesh->filename = "../Assets/Models/cube.txt";
-      
-      Entity[i]->color_shader = new ColorShader();
-      Entity[i]->texture_shader = nullptr; 
-      
-      bool result = InitializeModel(RenderBuffers.Device, Entity[i]->mesh);
+      Entity[i]->mesh.filename = "../Assets/Models/triangle.txt";
+            
+      bool result = InitializeModel(RenderBuffers.Device, &Entity[i]->mesh);
       if(!result)
 	{
           MessageBoxA(nullptr, "Model could not load!", "Error", MB_OK);
           return false;
 	}
       
-      if (Entity[i]->texture_shader)
-	{
-          hr = InitializeShaderResources(RenderBuffers, Entity[i]->texture_shader);
-          if (FAILED(hr))
-	    return false; 	  
-	}
+      hr = InitializeShaderResources(RenderBuffers, &Entity[i]->texture_shader);
+      if (FAILED(hr))
+	return false; 	  
       
-      else if (Entity[i]->color_shader)
-	{
-          hr = InitializeShaderResources(RenderBuffers, Entity[i]->color_shader);
-          if (FAILED(hr))
-	    return false; 
-	}
+      hr = InitializeShaderResources(RenderBuffers, &Entity[i]->color_shader);
+      if (FAILED(hr))
+	return false; 
     } 
   
   return true; 
 }
 
-bool RenderEntity(RendererContext& RenderBuffers, Entity** Entity, size_t entity_num, MatrixBufferType& matrix)
+bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entity_num, MatrixBufferType& matrix, float total_time)
 {
   bool result = true;
+
+  float rotationSpeed = 1.0f;
   
   for (size_t i = 0; i < entity_num; i++)
     {
-      matrix.world = XMMatrixIdentity();
-      // matrix.world = XMMatrixTranslation((float)i * 3.0f, 0.0f, -1.0f);
-  
-      if (Entity[i]->texture_shader)
-	{/*
+      XMMATRIX rotationMatrix = XMMatrixRotationX(total_time * rotationSpeed) * XMMatrixRotationY(total_time * rotationSpeed);
+      
+      XMMATRIX translationMatrix = XMMatrixTranslation((float)i * 5.f - 2.f, 0.0f, 0.0f);
+      
+      matrix.world = rotationMatrix * translationMatrix;
+      
+      /*
 	  RenderModel(RenderBuffers, Entity[i].mesh);	      
 	  result = Render(RenderBuffers, Entity[i].texture_shader, Entity[i].mesh->indexCount, matrix.world, matrix.view, matrix.proj);
 	  if (FAILED(result))
 	    {
 	      return false; 
 	      }*/	  
-	}
-      
-      else if (Entity[i]->color_shader)
+            
+      RenderModel(RenderBuffers, &Entity[i]->mesh);	      
+      result = Render(RenderBuffers, &Entity[i]->color_shader, Entity[i]->mesh.indexCount, matrix.world, matrix.view, matrix.proj);
+      if (FAILED(result))
 	{
-	  RenderModel(RenderBuffers, Entity[i]->mesh);	      
-	  result = Render(RenderBuffers, Entity[i]->color_shader, Entity[i]->mesh->indexCount, matrix.world, matrix.view, matrix.proj);
-	  if (FAILED(result))
-	    {
-	      return false; 
-	    }	  	  
-	}
+	  return false; 
+	}	  	  
     } 
 
   return result;
 }
 
-void ReleaseEntity(Entity* Entity)
+void ReleaseEntity(Entity* entities[], size_t entity_num)
 {
-  if (Entity->mesh)
+  for (size_t i = 0; i < entity_num; ++i)
     {
-      ReleaseModel(Entity->mesh);
-      delete Entity->mesh;
-      Entity->mesh = nullptr; 
-    }
-
-  if (Entity->color_shader)
-    {
-      ReleaseShaderResources(Entity->color_shader);
-      delete Entity->color_shader;
-      Entity->color_shader = nullptr; 
-    }
-  
-  if (Entity->texture_shader)
-    {
-      ReleaseShaderResources(Entity->texture_shader);
-      delete Entity->texture_shader;
-      Entity->texture_shader = nullptr; 
-    }
+      ReleaseModel(&entities[i]->mesh);
+      ReleaseShaderResources(&entities[i]->color_shader);
+      // ReleaseShaderResources(Entity->texture_shader);
+    } 
 }
+ 

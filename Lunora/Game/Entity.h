@@ -9,19 +9,13 @@
 
 struct Entity
 {
-  Mesh* mesh;
-  ColorShader* color_shader;
-  TextureShader* texture_shader;
-
-Entity()
-  : mesh(nullptr),
-    color_shader(nullptr),
-    texture_shader(nullptr)
-  {}
+  Mesh mesh;
+  ColorShader color_shader;
+  TextureShader texture_shader;
 };
 
-bool InitializeEntity(Entity** Entity, size_t entity_num, RendererContext& RenderBuffers);
-bool RenderEntity(RendererContext& Renderer, Entity** Entity, size_t entity_num, MatrixBufferType& matrix);
-void ReleaseEntity(Entity* Entity);
+bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& RenderBuffers);
+bool RenderEntity(RendererContext& Renderer, Entity* Entity[], size_t entity_num, MatrixBufferType& matrix, float total_time);
+void ReleaseEntity(Entity* entities[], size_t entity_num);
 
 #endif
