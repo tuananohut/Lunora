@@ -36,11 +36,10 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
   
   for (size_t i = 0; i < entity_num; i++)
     {
-      XMMATRIX rotationMatrix = XMMatrixRotationX(total_time * rotationSpeed) * XMMatrixRotationY(total_time * rotationSpeed);
       
-      XMMATRIX translationMatrix = XMMatrixTranslation((float)i * 5.f - 2.f, 0.0f, 0.0f);
-      
-      matrix.world = rotationMatrix * translationMatrix;
+   
+      Entity[i].worldMatrix = ComputeWorldMatrix(Entity[i].transform);
+  
       
       /*
 	  RenderModel(RenderBuffers, Entity[i].mesh);	      
@@ -51,7 +50,7 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
 	      }*/	  
             
       RenderModel(RenderBuffers, &Entity[i]->mesh);	      
-      result = Render(RenderBuffers, &Entity[i]->color_shader, Entity[i]->mesh.indexCount, matrix.world, matrix.view, matrix.proj);
+      result = Render(RenderBuffers, &Entity[i]->color_shader, Entity[i]->mesh.indexCount, Entity[i].worldMatrix, matrix.view, matrix.proj);
       if (FAILED(result))
 	{
 	  return false; 
@@ -60,6 +59,18 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
 
   return result;
 }
+
+XMMATRIX ComputeWorldMatrix(const Transform& t)
+{
+    XMMATRIX S = XMMatrixScaling(t.scale.x, t.scale.y, t.scale.z);
+    XMMATRIX RX = XMMatrixRotationX(t.rotation.x);
+    XMMATRIX RY = XMMatrixRotationY(t.rotation.y);
+    XMMATRIX RZ = XMMatrixRotationZ(t.rotation.z);
+    XMMATRIX T = XMMatrixTranslation(t.position.x, t.position.y, t.position.z);
+
+    return S * RX * RY * RZ * T;
+}
+
 
 void ReleaseEntity(Entity* entities[], size_t entity_num)
 {

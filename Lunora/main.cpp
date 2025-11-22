@@ -34,6 +34,11 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	PostQuitMessage(0);
       } break;
 
+    case WM_RESIZE:
+      {
+	
+      } break; 
+      
     default:
       {
 	Result = DefWindowProc(Window, Message, WParam, LParam);
