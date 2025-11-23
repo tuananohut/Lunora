@@ -8,10 +8,25 @@
 #include "../Lunora/Rendering/Shader/Shader.h"
 #include "../Lunora/Rendering/Texture.h"
 
+#include <d2d1.h>
+
 const float SCREEN_DEPTH = 1000.f;
 const float SCREEN_NEAR = 0.3f;
 
 static bool Running; 
+
+void Resize(Win32WindowProperties& Window)
+{
+  ID2D1HwndRenderTarget* pRT_;
+
+  if (pRT_)
+    {
+        D2D1_SIZE_U size;
+        Window.Width = width;
+        Window.Height = height;
+        pRT_->Resize(size);
+    }
+}
 
 LRESULT CALLBACK WindowProc(HWND Window, 
                             UINT Message, 
@@ -19,6 +34,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
                             LPARAM LParam)
 {
   LRESULT Result = 0;
+  auto what_is_this = GetWindowLongPtr(hwnd, GWLP_USERDATA);
  
   switch (Message)
     {  
@@ -34,10 +50,13 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	PostQuitMessage(0);
       } break;
 
-    case WM_RESIZE:
+    case WM_SIZE:
       {
+	UINT width = LOWORD(LParam);
+	UINT height = HIWORD(PParam);
 	
-      } break; 
+	Resize(width, height);
+      } break;
       
     default:
       {
