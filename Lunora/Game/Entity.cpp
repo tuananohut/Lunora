@@ -37,20 +37,20 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
   for (size_t i = 0; i < entity_num; i++)
     {
       
-   
-      Entity[i].worldMatrix = ComputeWorldMatrix(Entity[i].transform);
+      
+      Entity[i]->worldMatrix = ComputeWorldMatrix(Entity[i]->transform);
   
       
       /*
-	  RenderModel(RenderBuffers, Entity[i].mesh);	      
-	  result = Render(RenderBuffers, Entity[i].texture_shader, Entity[i].mesh->indexCount, matrix.world, matrix.view, matrix.proj);
-	  if (FAILED(result))
-	    {
-	      return false; 
-	      }*/	  
-            
+      RenderModel(RenderBuffers, Entity[i].mesh);	      
+      result = Render(RenderBuffers, Entity[i].texture_shader, Entity[i].mesh->indexCount, matrix.world, matrix.view, matrix.proj);
+      if (FAILED(result))
+	{
+	  return false; 
+	}	  
+      */
       RenderModel(RenderBuffers, &Entity[i]->mesh);	      
-      result = Render(RenderBuffers, &Entity[i]->color_shader, Entity[i]->mesh.indexCount, Entity[i].worldMatrix, matrix.view, matrix.proj);
+      result = Render(RenderBuffers, &Entity[i]->color_shader, Entity[i]->mesh.indexCount, Entity[i]->worldMatrix, matrix.view, matrix.proj);
       if (FAILED(result))
 	{
 	  return false; 

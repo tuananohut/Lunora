@@ -8,25 +8,12 @@
 #include "../Lunora/Rendering/Shader/Shader.h"
 #include "../Lunora/Rendering/Texture.h"
 
-#include <d2d1.h>
-
 const float SCREEN_DEPTH = 1000.f;
 const float SCREEN_NEAR = 0.3f;
+int SCREEN_WIDTH  = 800;
+int SCREEN_HEIGHT = 600; 
 
-static bool Running; 
-
-void Resize(Win32WindowProperties& Window)
-{
-  ID2D1HwndRenderTarget* pRT_;
-
-  if (pRT_)
-    {
-        D2D1_SIZE_U size;
-        Window.Width = width;
-        Window.Height = height;
-        pRT_->Resize(size);
-    }
-}
+static bool Running;
 
 LRESULT CALLBACK WindowProc(HWND Window, 
                             UINT Message, 
@@ -34,7 +21,6 @@ LRESULT CALLBACK WindowProc(HWND Window,
                             LPARAM LParam)
 {
   LRESULT Result = 0;
-  auto what_is_this = GetWindowLongPtr(hwnd, GWLP_USERDATA);
  
   switch (Message)
     {  
@@ -52,10 +38,15 @@ LRESULT CALLBACK WindowProc(HWND Window,
 
     case WM_SIZE:
       {
-	UINT width = LOWORD(LParam);
-	UINT height = HIWORD(PParam);
-	
-	Resize(width, height);
+	RECT rect;
+	GetClientRect(Window, &rect);
+
+	int clientWidth  = rect.right - rect.left;
+	int clientHeight = rect.bottom - rect.top;
+
+	SCREEN_WIDTH = clientWidth;  
+	SCREEN_HEIGHT = clientHeight; 
+	  
       } break;
       
     default:
@@ -73,8 +64,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 		   int ShowCode)
 {
   Win32WindowProperties* Window = new Win32WindowProperties;
-  Window->Width = 800;
-  Window->Height = 600;	  
+  Window->Width = SCREEN_WIDTH;
+  Window->Height = SCREEN_HEIGHT;	  
   
   WNDCLASSEXA wc = {};
   
