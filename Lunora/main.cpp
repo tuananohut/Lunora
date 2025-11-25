@@ -10,8 +10,6 @@
 
 const float SCREEN_DEPTH = 1000.f;
 const float SCREEN_NEAR = 0.3f;
-int SCREEN_WIDTH  = 800;
-int SCREEN_HEIGHT = 600; 
 
 static bool Running;
 
@@ -62,11 +60,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 		   HINSTANCE PrevInstance,
 		   LPSTR CommandLine,
 		   int ShowCode)
-{
-  Win32WindowProperties* Window = new Win32WindowProperties;
-  Window->Width = SCREEN_WIDTH;
-  Window->Height = SCREEN_HEIGHT;	  
-  
+{  
   WNDCLASSEXA wc = {};
   
   wc.cbSize = sizeof(WNDCLASSEXA);
@@ -81,30 +75,29 @@ int WINAPI WinMain(HINSTANCE Instance,
   
   if (RegisterClassExA(&wc))
     {
-      int x = Window->Width;
-      int y = Window->Height;
+      int x = SCREEN_WIDTH;
+      int y = SCREEN_HEIGHT; 
  
-      Window->hwnd = CreateWindowExA(0,                   
-				     wc.lpszClassName,          
-				     "Lunora",  
-				     WS_OVERLAPPEDWINDOW | WS_VISIBLE,        
-				     CW_USEDEFAULT, CW_USEDEFAULT, x, y, 
-				     NULL,       
-				     NULL,       
-				     Instance,  
-				     NULL);
+      HWND hwnd = CreateWindowExA(0,                   
+				  wc.lpszClassName,          
+				  "Lunora",  
+				  WS_OVERLAPPEDWINDOW | WS_VISIBLE,        
+				  CW_USEDEFAULT, CW_USEDEFAULT, x, y, 
+				  NULL,       
+				  NULL,       
+				  Instance,  
+				  NULL);
       
-      
-  
-      if (Window->hwnd)
+     
+      if (hwnd)
 	{	  
 	  Running = true;
 	  
 	  RendererContext *Renderer = new RendererContext;
-	  Running = InitializeRenderer(*Renderer, Window->hwnd, Window->Width, Window->Height);
+	  Running = InitializeRenderer(*Renderer, hwnd, SCREEN_WIDTH, SCREEN_HEIGHT);
 	  if (!Running)
 	    {
-	      MessageBoxA(Window->hwnd, "Worked!", "Good", MB_OK);
+	      MessageBoxA(hwnd, "Worked!", "Good", MB_OK);
 	      Running = false;
 	      return 0; 
 	    }  
@@ -122,7 +115,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  Running = InitializeEntity(entities, entity_num, *Renderer);
 	  if (!Running)
 	    {
-	      MessageBoxA(Window->hwnd, "Does not worked!", "Entity", MB_OK);
+	      MessageBoxA(hwnd, "Does not worked!", "Entity", MB_OK);
 	      Running = false;
 	      return 0; 
 	    }
@@ -134,9 +127,9 @@ int WINAPI WinMain(HINSTANCE Instance,
   
 	  float fieldOfView = 3.141592654f / 4.0f;
 	  float screenAspect = 1.f; 
-	  if (Window->Height > 0)
+	  if (SCREEN_HEIGHT > 0)
 	    {
-	      screenAspect = (float)Window->Width / (float)Window->Height;
+	      screenAspect = (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT;
 	    }
 	  else
 	    {
@@ -154,7 +147,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 				     texture, texture_file);
 	  if (FAILED(result))
 	    {
-	      MessageBoxA(Window->hwnd, "Something is wrong about textures!", "Bad", MB_OK | MB_ICONERROR);
+	      MessageBoxA(hwnd, "Something is wrong about textures!", "Bad", MB_OK | MB_ICONERROR);
 	      Running = false;
 	      return 0; 
 	    }
@@ -171,8 +164,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      while(PeekMessageA(&Message, 0, 0, 0, PM_REMOVE))
 		{		  
 		  if (Message.message == WM_QUIT)
-		    {
-		      delete Window; 
+		    { 
 		      if (mCamera)
 			{
 			  delete mCamera;
@@ -212,9 +204,9 @@ int WINAPI WinMain(HINSTANCE Instance,
   
 	      float fieldOfView = 3.141592654f / 4.0f;
 	      float screenAspect = 1.f; 
-	      if (Window->Height > 0)
+	      if (SCREEN_HEIGHT > 0)
 		{
-		  screenAspect = (float)Window->Width / (float)Window->Height;
+		  screenAspect = (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT;
 		}
 	      else
 		{
@@ -226,7 +218,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      Running = RenderEntity(*Renderer, entities, entity_num, matrix, total_time);
 	      if (!Running)
 		{
-		  MessageBoxA(Window->hwnd, "Does not worked!", "Entity", MB_OK);
+		  MessageBoxA(hwnd, "Does not worked!", "Entity", MB_OK);
 		  Running = false;
 		  return 0; 
 		}

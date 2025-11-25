@@ -7,12 +7,8 @@
 
 using namespace DirectX;
 
-struct Win32WindowProperties
-{
-  HWND hwnd;
-  int32_t Width;
-  int32_t Height;
-};
+static int SCREEN_WIDTH  = 800;
+static int SCREEN_HEIGHT = 600; 
 
 struct RendererContext
 {

@@ -36,10 +36,9 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
   
   for (size_t i = 0; i < entity_num; i++)
     {
-      
-      
+      Entity[i]->transform.position = {0.f, 0.f, 0.f};
       Entity[i]->worldMatrix = ComputeWorldMatrix(Entity[i]->transform);
-  
+      
       
       /*
       RenderModel(RenderBuffers, Entity[i].mesh);	      
