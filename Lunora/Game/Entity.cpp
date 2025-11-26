@@ -7,6 +7,9 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
     
   for (size_t i = 0; i < entity_num; i++)
     {
+      Entity[i]->transform.position = {0.f + (i * 5.f), 0.f, -5.f};
+      Entity[i]->transform.rotation = {0.f, 0.f, 0.f};
+      Entity[i]->transform.scale = {0.f, 0.f, 0.f};
       Entity[i]->mesh.filename = "../Assets/Models/triangle.txt";
             
       bool result = InitializeModel(RenderBuffers.Device, &Entity[i]->mesh);
@@ -36,7 +39,6 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
   
   for (size_t i = 0; i < entity_num; i++)
     {
-      Entity[i]->transform.position = {0.f, 0.f, 0.f};
       Entity[i]->worldMatrix = ComputeWorldMatrix(Entity[i]->transform);
       
       
@@ -67,7 +69,7 @@ XMMATRIX ComputeWorldMatrix(const Transform& t)
     XMMATRIX RZ = XMMatrixRotationZ(t.rotation.z);
     XMMATRIX T = XMMatrixTranslation(t.position.x, t.position.y, t.position.z);
 
-    return S * RX * RY * RZ * T;
+    return T; 
 }
 
 

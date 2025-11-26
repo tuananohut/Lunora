@@ -122,23 +122,6 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	  MatrixBufferType matrix; 
 	  
-	  matrix.world = XMMatrixIdentity();      
-	  mCamera->GetViewMatrix(matrix.view);
-  
-	  float fieldOfView = 3.141592654f / 4.0f;
-	  float screenAspect = 1.f; 
-	  if (SCREEN_HEIGHT > 0)
-	    {
-	      screenAspect = (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT;
-	    }
-	  else
-	    {
-	      screenAspect = 1.0f; 
-	    }
-  
-	  matrix.proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
-
-	  
 	  /*
 	  Texture* texture = new Texture;
 	  const char* texture_file = "../Assets/Textures/palestine.tga";  
@@ -176,13 +159,19 @@ int WINAPI WinMain(HINSTANCE Instance,
 			  ShutdownRenderer(*Renderer);
 			  delete Renderer;
 			  Renderer = nullptr; 
-			}		      
+			}		     
 		      
-		      if (entities)
+		      /*if (entities)
 			{
 			  ReleaseEntity(entities, entity_num);
-			}
+			  }*/
 		      
+		      for (int i = 0; i < entity_num; i++)
+			{
+			  delete entities[i];
+			  entities[i] = nullptr;
+			}
+
 		      Running = false;
 		    }
 		  

@@ -253,9 +253,10 @@ bool InitializeRenderer(RendererContext& context,
     }
 
   context.DeviceContext->OMSetRenderTargets(1, &context.RenderTargetView, context.DepthStencilView);
- 
+
+  /*
   rasterDesc.AntialiasedLineEnable = false;
-  rasterDesc.CullMode = D3D11_CULL_BACK;
+  rasterDesc.CullMode = D3D11_CULL_NONE;
   rasterDesc.DepthBias = 0;
   rasterDesc.DepthBiasClamp = 0.f;
   rasterDesc.DepthClipEnable = true;
@@ -264,6 +265,19 @@ bool InitializeRenderer(RendererContext& context,
   rasterDesc.MultisampleEnable = false;
   rasterDesc.ScissorEnable = false;
   rasterDesc.SlopeScaledDepthBias = 0;
+  */
+  
+  rasterDesc.AntialiasedLineEnable = true;
+  rasterDesc.CullMode = D3D11_CULL_NONE;
+  rasterDesc.DepthBias = D3D11_DEFAULT_DEPTH_BIAS;
+  rasterDesc.DepthBiasClamp = D3D11_DEFAULT_DEPTH_BIAS_CLAMP;
+  rasterDesc.DepthClipEnable = true;
+  rasterDesc.FillMode = D3D11_FILL_SOLID;
+  rasterDesc.FrontCounterClockwise = false;
+  rasterDesc.MultisampleEnable = false;
+  rasterDesc.ScissorEnable = false;
+  rasterDesc.SlopeScaledDepthBias = D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+
   
   context.Device->CreateRasterizerState(&rasterDesc, &RasterState);
   if (FAILED(result))
