@@ -8,6 +8,8 @@
 #include "../Lunora/Rendering/Shader/Shader.h"
 #include "../Lunora/Rendering/Texture.h"
 
+using namespace LunoraEngine; 
+
 const float SCREEN_DEPTH = 1000.f;
 const float SCREEN_NEAR = 0.3f;
 
@@ -43,7 +45,14 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	int clientHeight = rect.bottom - rect.top;
 
 	SCREEN_WIDTH = clientWidth;  
-	SCREEN_HEIGHT = clientHeight; 
+	SCREEN_HEIGHT = clientHeight;
+
+	/*
+	LunoraEngine::RendererContext::Viewport.Width = SCREEN_WIDTH;
+	LunoraEngine::RendererContext::Viewport.Height = SCREEN_HEIGHT; 
+
+	LunoraEngine::RendererContext::DeviceContext->RSSetViewports(1, &LunoraEngine::RendererContext::Viewport);
+	*/
 	  
       } break;
       

@@ -7,7 +7,8 @@
 
 #include "../Engine/Renderer.h"
 
-using namespace DirectX; 
+using namespace DirectX;
+using namespace LunoraEngine; 
 
 struct Vertex
 {

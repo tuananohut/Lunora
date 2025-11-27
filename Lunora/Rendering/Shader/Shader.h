@@ -5,9 +5,10 @@
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
 
-using namespace DirectX; 
-
 #include "../../Engine/Renderer.h"
+
+using namespace DirectX; 
+using namespace LunoraEngine; 
 
 struct BaseShader
 {
