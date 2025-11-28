@@ -310,6 +310,91 @@ namespace LunoraEngine {
     context.DeviceContext->ClearDepthStencilView(context.DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
   }
 
+  HRESULT ResizeRenderer(RendererContext& context, int width, int height)
+  {
+    HRESULT result; 
+    ID3D11Texture2D *BackBuffer;
+
+    assert(context.DeviceContext);
+    assert(context.Device);
+    assert(context.SwapChain);
+
+    context.RenderTargetView->Release();
+    context.RenderTargetView = nullptr;
+
+    context.DepthStencilView->Release();
+    context.DepthStencilView = nullptr;
+
+    context.DepthStencilBuffer->Release();
+    context.DepthStencilBuffer = nullptr;
+
+    result = context.SwapChain->ResizeBuffers(1, SCREEN_WIDTH, SCREEN_HEIGHT,
+					      DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+    if (FAILED(result))
+      {
+	return false; 
+      }
+
+    result = context.SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&BackBuffer);
+    if (FAILED(result))
+      {
+	return false; 
+      }
+    
+    result = context.Device->CreateRenderTargetView(BackBuffer, 0, &context.RenderTargetView); 
+    if (FAILED(result))
+      {
+	return false; 
+      }
+    
+    BackBuffer->Release();
+    BackBuffer = nullptr; 
+
+    D3D11_TEXTURE2D_DESC DepthBufferDesc;
+    
+    ZeroMemory(&DepthBufferDesc, sizeof(DepthBufferDesc));
+  
+    DepthBufferDesc.Width = width;
+    DepthBufferDesc.Height = height;
+    DepthBufferDesc.MipLevels = 1;
+    DepthBufferDesc.ArraySize = 1;
+    DepthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    DepthBufferDesc.SampleDesc.Count = 1;
+    DepthBufferDesc.SampleDesc.Quality = 0;
+    DepthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    DepthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    DepthBufferDesc.CPUAccessFlags = 0;
+    DepthBufferDesc.MiscFlags = 0;
+
+    result = context.Device->CreateTexture2D(&DepthBufferDesc, 0,
+					     &context.DepthStencilBuffer);
+    if (FAILED(result))
+      {
+	return false; 
+      }
+    
+    result = context.Device->CreateDepthStencilView(context.DepthStencilBuffer, 0,
+						    &context.DepthStencilView); 
+    if (FAILED(result))
+      {
+	return false; 
+      }
+    
+    context.DeviceContext->OMSetRenderTargets(1, &context.RenderTargetView,
+					      context.DepthStencilView);
+
+    context.Viewport.Width = static_cast<float>(SCREEN_WIDTH);
+    context.Viewport.Height = static_cast<float>(SCREEN_HEIGHT);
+    context.Viewport.MinDepth = 0.f;
+    context.Viewport.MaxDepth = 1.f;
+    context.Viewport.TopLeftX = 0.f;
+    context.Viewport.TopLeftY = 0.f;
+    
+    context.DeviceContext->RSSetViewports(1, &context.Viewport);
+
+    return true; 
+  }
+  
   void RendererEndScene(RendererContext& context)
   {
     context.SwapChain->Present(0, 0);
@@ -328,6 +413,29 @@ namespace LunoraEngine {
 	context.DeviceContext->Release();
 	context.DeviceContext = nullptr; 
       }
+
+    if (context.RenderTargetView)
+      {
+	context.RenderTargetView->Release();
+	context.RenderTargetView = nullptr; 
+      }
+
+    if (context.DepthStencilBuffer)
+      {
+	context.DepthStencilBuffer->Release();
+	context.DepthStencilBuffer = nullptr; 
+      }
+
+    if (context.DepthStencilView)
+      {
+	context.DepthStencilView->Release();
+	context.DepthStencilView = nullptr; 
+      }
+
+    if (context.SwapChain)
+      {
+	context.SwapChain->Release();
+	context.SwapChain = nullptr; 
+      }
   }
- 
 };

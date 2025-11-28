@@ -29,6 +29,8 @@ namespace LunoraEngine {
   
   void ShutdownRenderer(RendererContext& context);
 
+  HRESULT ResizeRenderer(RendererContext& context, int width, int height);
+
   void RendererBeginScene(RendererContext& context, float r, float g, float b, float a); 
   void RendererEndScene(RendererContext& context); 
 };

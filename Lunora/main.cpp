@@ -15,13 +15,16 @@ const float SCREEN_NEAR = 0.3f;
 
 static bool Running;
 
+static RendererContext *Renderer = new RendererContext();
+
 LRESULT CALLBACK WindowProc(HWND Window, 
                             UINT Message, 
                             WPARAM WParam, 
                             LPARAM LParam)
 {
   LRESULT Result = 0;
- 
+  ID3D11Texture2D *BackBuffer;
+  
   switch (Message)
     {  
     case WM_CLOSE: 
@@ -38,6 +41,8 @@ LRESULT CALLBACK WindowProc(HWND Window,
 
     case WM_SIZE:
       {
+	if (WParam == SIZE_MINIMIZED) break;
+	
 	RECT rect;
 	GetClientRect(Window, &rect);
 
@@ -47,13 +52,11 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	SCREEN_WIDTH = clientWidth;  
 	SCREEN_HEIGHT = clientHeight;
 
-	/*
-	LunoraEngine::RendererContext::Viewport.Width = SCREEN_WIDTH;
-	LunoraEngine::RendererContext::Viewport.Height = SCREEN_HEIGHT; 
-
-	LunoraEngine::RendererContext::DeviceContext->RSSetViewports(1, &LunoraEngine::RendererContext::Viewport);
-	*/
-	  
+	if (Renderer && Renderer->Device && Renderer->DeviceContext && Renderer->SwapChain)
+	  {
+	    ResizeRenderer(*Renderer, SCREEN_WIDTH, SCREEN_HEIGHT); 
+	  }
+	
       } break;
       
     default:
@@ -102,13 +105,12 @@ int WINAPI WinMain(HINSTANCE Instance,
 	{	  
 	  Running = true;
 	  
-	  RendererContext *Renderer = new RendererContext;
 	  Running = InitializeRenderer(*Renderer, hwnd, SCREEN_WIDTH, SCREEN_HEIGHT);
 	  if (!Running)
 	    {
 	      MessageBoxA(hwnd, "Worked!", "Good", MB_OK);
 	      Running = false;
-	      return 0; 
+	      return false; 
 	    }  
 
 	  Camera *mCamera = new Camera;
