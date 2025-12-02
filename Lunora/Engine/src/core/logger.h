@@ -25,7 +25,7 @@ enum log_level {
 b8 initialize_logging();
 void shutdown_logging(); 
 
-LAPI void log_output(log_level, const char* message, ...); 
+LAPI void log_output(log_level level, const char* message, ...); 
 
 #define LFATAL(message, ...) log_output(LOG_LEVEL_FATAL, message, __VA_ARGS__); 
 

@@ -1,10 +1,8 @@
-#include <test.h>
-
-LAPI void print_int(i32 i);
+#include <core/logger.h>
 
 int main(void)
 {
-  print_int(58);
+  LFATAL("A test message: %f", 3.14f); 
+  
   return 0; 
 }
-

@@ -12,8 +12,8 @@ del /Q Engine.dll >nul 2>&1
 del /Q Engine.lib >nul 2>&1
 del /Q Engine.exp >nul 2>&1
 
-set cppFiles
-for %%f in ("%SRC%\*.cpp") do (
+set "cppFiles="
+for /R "%SRC%" %%f in (*.cpp) do (
     set "cppFiles=!cppFiles! "%%f""
 )
 

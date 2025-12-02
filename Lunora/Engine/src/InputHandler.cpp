@@ -1,3 +1,4 @@
+/*
 InputHandler::InputHandler()
 {
   KeyW = false;
@@ -29,3 +30,4 @@ void InputHandler::UpdateInput()
         ChangeColor(XMFLOAT4{0.15f, 0.15f, 0.15f, 1.f});
     }
 }
+*/
