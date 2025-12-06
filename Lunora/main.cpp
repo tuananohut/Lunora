@@ -1,7 +1,7 @@
 #include <windows.h>
 
 #include "resource.h"
-#include "../Lunora/Engine/Renderer.h"
+#include "../Lunora/Engine/src/Renderer.h"
 #include "../Lunora/Game/Camera/Camera.h"
 #include "../Lunora/Game/Entity.h"
 #include "../Lunora/Rendering/Mesh.h"
@@ -24,6 +24,42 @@ LRESULT CALLBACK WindowProc(HWND Window,
 {
   LRESULT Result = 0;
   ID3D11Texture2D *BackBuffer;
+
+  const size_t entity_num = 2;  
+	  
+  Entity* entities[entity_num];
+
+  entities[0] = new Entity();
+  entities[1] = new Entity();
+	  
+  Running = InitializeEntity(entities, entity_num, *Renderer);
+  if (!Running)
+    {
+      MessageBoxA(Window, "Does not worked!", "Entity", MB_OK);
+      Running = false;
+      return 0; 
+    }
+
+  MatrixBufferType matrix;
+
+  Camera *mCamera = new Camera;
+  mCamera->SetPosition(0.0f, 0.0f, -15.0f);
+  
+  matrix.world = XMMatrixIdentity();	      
+  mCamera->GetViewMatrix(matrix.view);
+  
+  float fieldOfView = 3.141592654f / 4.0f;
+  float screenAspect = 1.f; 
+  if (SCREEN_HEIGHT > 0)
+    {
+      screenAspect = (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT;
+    }
+  else
+    {
+      screenAspect = 1.0f; 
+    }
+  
+  matrix.proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
   
   switch (Message)
     {  
@@ -38,7 +74,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	Running = false;
 	PostQuitMessage(0);
       } break;
-
+      
     case WM_SIZE:
       {
 	if (WParam == SIZE_MINIMIZED) break;
@@ -54,7 +90,8 @@ LRESULT CALLBACK WindowProc(HWND Window,
 
 	if (Renderer && Renderer->Device && Renderer->DeviceContext && Renderer->SwapChain)
 	  {
-	    ResizeRenderer(*Renderer, SCREEN_WIDTH, SCREEN_HEIGHT); 
+	    ResizeRenderer(*Renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+	    RenderEntity(*Renderer, entities, entity_num, matrix, 5);
 	  }
 	
       } break;

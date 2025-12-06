@@ -5,13 +5,13 @@
 
 #include "../Rendering/Mesh.h"
 #include "../Rendering/Shader/Shader.h"
-#include "../Engine/Renderer.h"
+#include "../Engine/src/Renderer.h"
 
 struct Transform
 {
-    XMFLOAT3 position;
-    XMFLOAT3 rotation;
-    XMFLOAT3 scale;
+  XMFLOAT3 position;
+  XMFLOAT3 rotation;
+  XMFLOAT3 scale;
 };
 
 struct Entity
