@@ -17,6 +17,12 @@ static bool Running;
 
 static RendererContext *Renderer = new RendererContext();
 
+const size_t entity_num = 2;  
+static Entity* entities[entity_num];
+
+static Camera *mCamera = new Camera;
+
+
 LRESULT CALLBACK WindowProc(HWND Window, 
                             UINT Message, 
                             WPARAM WParam, 
@@ -25,42 +31,6 @@ LRESULT CALLBACK WindowProc(HWND Window,
   LRESULT Result = 0;
   ID3D11Texture2D *BackBuffer;
 
-  const size_t entity_num = 2;  
-	  
-  Entity* entities[entity_num];
-
-  entities[0] = new Entity();
-  entities[1] = new Entity();
-	  
-  Running = InitializeEntity(entities, entity_num, *Renderer);
-  if (!Running)
-    {
-      MessageBoxA(Window, "Does not worked!", "Entity", MB_OK);
-      Running = false;
-      return 0; 
-    }
-
-  MatrixBufferType matrix;
-
-  Camera *mCamera = new Camera;
-  mCamera->SetPosition(0.0f, 0.0f, -15.0f);
-  
-  matrix.world = XMMatrixIdentity();	      
-  mCamera->GetViewMatrix(matrix.view);
-  
-  float fieldOfView = 3.141592654f / 4.0f;
-  float screenAspect = 1.f; 
-  if (SCREEN_HEIGHT > 0)
-    {
-      screenAspect = (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT;
-    }
-  else
-    {
-      screenAspect = 1.0f; 
-    }
-  
-  matrix.proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
-  
   switch (Message)
     {  
     case WM_CLOSE: 
@@ -81,7 +51,7 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	
 	RECT rect;
 	GetClientRect(Window, &rect);
-
+	
 	int clientWidth  = rect.right - rect.left;
 	int clientHeight = rect.bottom - rect.top;
 
@@ -91,7 +61,6 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	if (Renderer && Renderer->Device && Renderer->DeviceContext && Renderer->SwapChain)
 	  {
 	    ResizeRenderer(*Renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
-	    RenderEntity(*Renderer, entities, entity_num, matrix, 5);
 	  }
 	
       } break;
@@ -150,12 +119,10 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      return false; 
 	    }  
 
-	  Camera *mCamera = new Camera;
+	  // Camera *mCamera = new Camera;
 	  mCamera->SetPosition(0.0f, 0.0f, -15.0f);
-
-	  const size_t entity_num = 2;  
-	  
-	  Entity* entities[entity_num];
+  
+	  // Entity* entities[entity_num];
 
 	  entities[0] = new Entity();
 	  entities[1] = new Entity();
