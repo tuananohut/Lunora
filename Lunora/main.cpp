@@ -29,7 +29,6 @@ LRESULT CALLBACK WindowProc(HWND Window,
                             LPARAM LParam)
 {
   LRESULT Result = 0;
-  ID3D11Texture2D *BackBuffer;
 
   switch (Message)
     {  
@@ -55,12 +54,15 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	int clientWidth  = rect.right - rect.left;
 	int clientHeight = rect.bottom - rect.top;
 
-	SCREEN_WIDTH = clientWidth;  
-	SCREEN_HEIGHT = clientHeight;
+	SCREEN_WIDTH = (int)clientWidth;  
+	SCREEN_HEIGHT = (int)clientHeight;
 
 	if (Renderer && Renderer->Device && Renderer->DeviceContext && Renderer->SwapChain)
 	  {
-	    ResizeRenderer(*Renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+	    if (ResizeRenderer(*Renderer, SCREEN_WIDTH, SCREEN_HEIGHT))
+	      {}
+	    else
+	      Result = false; 
 	  }
 	
       } break;

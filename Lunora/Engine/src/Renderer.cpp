@@ -16,7 +16,6 @@ namespace LunoraEngine {
     int error; 
     DXGI_SWAP_CHAIN_DESC SwapChainDesc;
     D3D_FEATURE_LEVEL featureLevel;
-    ID3D11Texture2D *BackBuffer;
     D3D11_TEXTURE2D_DESC DepthBufferDesc;
     D3D11_DEPTH_STENCIL_DESC DepthStencilDesc; 
     D3D11_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc;
@@ -136,9 +135,6 @@ namespace LunoraEngine {
     SwapChainDesc.SampleDesc.Count = 1;
     SwapChainDesc.SampleDesc.Quality = 0;
 
-    // if (fullscreen)
-    // SwapChainDesc.Windowed = false;
-    // else
     SwapChainDesc.Windowed = true;
   
     SwapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
@@ -168,14 +164,14 @@ namespace LunoraEngine {
 	return false; 
       }
   
-    result = context.SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&BackBuffer);
+    result = context.SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&context.BackBuffer);
     if (FAILED(result))
       {
 	MessageBoxA(hwnd, "Get Buffer", "Error", MB_OK | MB_ICONERROR);
 	return false;
       }
   
-    result = context.Device->CreateRenderTargetView(BackBuffer,
+    result = context.Device->CreateRenderTargetView(context.BackBuffer,
 						    NULL,
 						    &context.RenderTargetView);
     if (FAILED(result))
@@ -184,8 +180,8 @@ namespace LunoraEngine {
 	return false;
       }
 
-    BackBuffer->Release();
-    BackBuffer = nullptr; 
+    context.BackBuffer->Release();
+    context.BackBuffer = nullptr; 
 
     ZeroMemory(&DepthBufferDesc, sizeof(DepthBufferDesc));
   
@@ -254,19 +250,6 @@ namespace LunoraEngine {
       }
 
     context.DeviceContext->OMSetRenderTargets(1, &context.RenderTargetView, context.DepthStencilView);
-
-    /*
-      rasterDesc.AntialiasedLineEnable = false;
-      rasterDesc.CullMode = D3D11_CULL_NONE;
-      rasterDesc.DepthBias = 0;
-      rasterDesc.DepthBiasClamp = 0.f;
-      rasterDesc.DepthClipEnable = true;
-      rasterDesc.FillMode = D3D11_FILL_SOLID;
-      rasterDesc.FrontCounterClockwise = false;
-      rasterDesc.MultisampleEnable = false;
-      rasterDesc.ScissorEnable = false;
-      rasterDesc.SlopeScaledDepthBias = 0;
-    */
   
     rasterDesc.AntialiasedLineEnable = true;
     rasterDesc.CullMode = D3D11_CULL_NONE;
@@ -310,10 +293,9 @@ namespace LunoraEngine {
     context.DeviceContext->ClearDepthStencilView(context.DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
   }
 
-  HRESULT ResizeRenderer(RendererContext& context, int width, int height)
+  bool ResizeRenderer(RendererContext& context, int& width, int& height)
   {
-    HRESULT result; 
-    ID3D11Texture2D *BackBuffer;
+    HRESULT result; 	
 
     assert(context.DeviceContext);
     assert(context.Device);
@@ -328,34 +310,34 @@ namespace LunoraEngine {
     context.DepthStencilBuffer->Release();
     context.DepthStencilBuffer = nullptr;
 
-    result = context.SwapChain->ResizeBuffers(1, SCREEN_WIDTH, SCREEN_HEIGHT,
+    result = context.SwapChain->ResizeBuffers(1, width, height,
 					      DXGI_FORMAT_R8G8B8A8_UNORM, 0);
     if (FAILED(result))
       {
 	return false; 
       }
 
-    result = context.SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&BackBuffer);
+    result = context.SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&context.BackBuffer);
     if (FAILED(result))
       {
 	return false; 
       }
     
-    result = context.Device->CreateRenderTargetView(BackBuffer, 0, &context.RenderTargetView); 
+    result = context.Device->CreateRenderTargetView(context.BackBuffer, 0, &context.RenderTargetView); 
     if (FAILED(result))
       {
 	return false; 
       }
     
-    BackBuffer->Release();
-    BackBuffer = nullptr; 
+    context.BackBuffer->Release();
+    context.BackBuffer = nullptr; 
 
     D3D11_TEXTURE2D_DESC DepthBufferDesc;
     
     ZeroMemory(&DepthBufferDesc, sizeof(DepthBufferDesc));
-  
-    DepthBufferDesc.Width = width;
-    DepthBufferDesc.Height = height;
+    
+    DepthBufferDesc.Width = (float)width;
+    DepthBufferDesc.Height = (float)height;
     DepthBufferDesc.MipLevels = 1;
     DepthBufferDesc.ArraySize = 1;
     DepthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -372,9 +354,10 @@ namespace LunoraEngine {
       {
 	return false; 
       }
-    
-    result = context.Device->CreateDepthStencilView(context.DepthStencilBuffer, 0,
-						    &context.DepthStencilView); 
+
+    result = context.Device->CreateDepthStencilView(context.DepthStencilBuffer,
+						    0,
+						    &context.DepthStencilView);
     if (FAILED(result))
       {
 	return false; 
@@ -383,8 +366,8 @@ namespace LunoraEngine {
     context.DeviceContext->OMSetRenderTargets(1, &context.RenderTargetView,
 					      context.DepthStencilView);
 
-    context.Viewport.Width = static_cast<float>(SCREEN_WIDTH);
-    context.Viewport.Height = static_cast<float>(SCREEN_HEIGHT);
+    context.Viewport.Width = (float)width;
+    context.Viewport.Height = (float)height;
     context.Viewport.MinDepth = 0.f;
     context.Viewport.MaxDepth = 1.f;
     context.Viewport.TopLeftX = 0.f;

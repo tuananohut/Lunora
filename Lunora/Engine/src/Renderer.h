@@ -19,6 +19,7 @@ namespace LunoraEngine {
     ID3D11Texture2D *DepthStencilBuffer;
     ID3D11DepthStencilView *DepthStencilView;
     IDXGISwapChain *SwapChain;
+    ID3D11Texture2D *BackBuffer;
     D3D11_VIEWPORT Viewport;
   };
 
@@ -29,7 +30,7 @@ namespace LunoraEngine {
   
   void ShutdownRenderer(RendererContext& context);
 
-  HRESULT ResizeRenderer(RendererContext& context, int width, int height);
+  bool ResizeRenderer(RendererContext& context, int& width, int& height);
 
   void RendererBeginScene(RendererContext& context, float r, float g, float b, float a); 
   void RendererEndScene(RendererContext& context); 
