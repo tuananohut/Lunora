@@ -35,13 +35,13 @@ LRESULT CALLBACK WindowProc(HWND Window,
     case WM_CLOSE: 
       {
         Running = false;
-	DestroyWindow(Window);
+	// DestroyWindow(Window);
       } break;
 
     case WM_DESTROY:
       {			
 	Running = false;
-	PostQuitMessage(0);
+	// PostQuitMessage(0);
       } break;
       
     case WM_SIZE:
