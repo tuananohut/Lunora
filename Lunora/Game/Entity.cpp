@@ -36,6 +36,8 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
   bool result = true;
 
   float rotationSpeed = 1.0f;
+
+  matrix.world *= total_time * rotationSpeed; 
   
   for (size_t i = 0; i < entity_num; i++)
     {

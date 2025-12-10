@@ -17,12 +17,6 @@ static bool Running;
 
 static RendererContext *Renderer = new RendererContext();
 
-const size_t entity_num = 2;  
-static Entity* entities[entity_num];
-
-static Camera *mCamera = new Camera;
-
-
 LRESULT CALLBACK WindowProc(HWND Window, 
                             UINT Message, 
                             WPARAM WParam, 
@@ -62,7 +56,8 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	    if (ResizeRenderer(*Renderer, SCREEN_WIDTH, SCREEN_HEIGHT))
 	      {}
 	    else
-	      Result = false; 
+	      Running = false;
+	    
 	  }
 	
       } break;
@@ -121,10 +116,13 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      return false; 
 	    }  
 
-	  // Camera *mCamera = new Camera;
+	  Camera *mCamera = new Camera;
 	  mCamera->SetPosition(0.0f, 0.0f, -15.0f);
   
 	  // Entity* entities[entity_num];
+
+	  const size_t entity_num = 2;  
+	  Entity* entities[entity_num];
 
 	  entities[0] = new Entity();
 	  entities[1] = new Entity();
