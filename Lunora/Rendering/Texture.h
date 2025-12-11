@@ -3,6 +3,8 @@
 
 #include <d3d11.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <assert.h>
 
 struct TargaHeader
 {
@@ -25,5 +27,6 @@ bool InitializeTexture(ID3D11Device*, ID3D11DeviceContext*, Texture*, const char
 void ReleaseTexture(Texture*);
 
 bool LoadTarga32Bit(Texture*, const char*); 
+bool LoadTarga24Bit(Texture* texture, const char* filename);
 
 #endif

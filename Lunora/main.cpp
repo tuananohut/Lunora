@@ -29,13 +29,13 @@ LRESULT CALLBACK WindowProc(HWND Window,
     case WM_CLOSE: 
       {
         Running = false;
-	// DestroyWindow(Window);
+	DestroyWindow(Window);
       } break;
 
     case WM_DESTROY:
       {			
 	Running = false;
-	// PostQuitMessage(0);
+	PostQuitMessage(0);
       } break;
       
     case WM_SIZE:
@@ -137,9 +137,9 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	  MatrixBufferType matrix; 
 	  
-	  /*
+	  
 	  Texture* texture = new Texture;
-	  const char* texture_file = "../Assets/Textures/palestine.tga";  
+	  const char* texture_file = "c:/dev/Lunora/Assets/Textures/flag..tga";  
 	  result = InitializeTexture(Renderer->Device,
 				     Renderer->DeviceContext,
 				     texture, texture_file);
@@ -149,7 +149,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      Running = false;
 	      return 0; 
 	    }
-	  */
+	  
 
 	  LARGE_INTEGER frequency;
 	  LARGE_INTEGER startTime;

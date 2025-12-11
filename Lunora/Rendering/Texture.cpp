@@ -10,13 +10,22 @@ bool InitializeTexture(ID3D11Device* device,
   HRESULT hr;
   unsigned int rowPitch;
   D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-  
-  result = LoadTarga32Bit(texture, filename);
+
+  result = LoadTarga24Bit(texture, filename);
   if (!result)
+    {
+      result = LoadTarga32Bit(texture, filename);
+      if (!result)
+	{
+	  return false; 
+	}
+      assert(texture == nullptr); 
+    }
+  else
     {
       return false; 
     }
-
+  
   textureDesc.Height = texture->m_height;
   textureDesc.Width = texture->m_width;
   textureDesc.MipLevels = 0;
@@ -28,7 +37,7 @@ bool InitializeTexture(ID3D11Device* device,
   textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
   textureDesc.CPUAccessFlags = 0;
   textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
-
+  
   hr = device->CreateTexture2D(&textureDesc, NULL, &texture->m_texture);
   if (FAILED(hr))
     return false;
@@ -141,6 +150,80 @@ bool LoadTarga32Bit(Texture* texture, const char* filename)
 	}
 
       k -= (texture->m_width * 8);
+    }
+
+  delete[] targaImage;
+  targaImage = nullptr;
+
+  return true;
+} 
+
+bool LoadTarga24Bit(Texture* texture, const char* filename)
+{
+  int error, bpp, imageSize, index = 0, i, j, k;
+  FILE* filePtr;
+  unsigned int count;
+  TargaHeader targaFileHeader;
+  unsigned char* targaImage;
+  
+  error = fopen_s(&filePtr, filename, "rb");
+  if (error != 0)
+    {
+      return false; 
+    }
+  
+  count = (unsigned int)fread(&targaFileHeader, sizeof(TargaHeader), 1, filePtr);
+  if (count != 1)
+    {
+      return false; 
+    }
+  
+  texture->m_height = (int)targaFileHeader.height;
+  texture->m_width = (int)targaFileHeader.width;
+  bpp = (int)targaFileHeader.bpp;
+
+  if (bpp != 24)
+    {
+      return false; 
+    }
+
+  imageSize = texture->m_width * texture->m_height * 4;
+
+  targaImage = new unsigned char[imageSize];
+
+  count = (unsigned int)fread(targaImage, 1, imageSize, filePtr);
+  if (count != imageSize)
+    {
+      return false; 
+    }
+
+  error = fclose(filePtr);
+  if (error != 0)
+    {
+      return false; 
+    }
+
+  texture->m_targaData = new unsigned char[imageSize];
+
+  index = 0;
+
+  k = (texture->m_width * texture->m_height * 3) - (texture->m_width * 3);
+
+  
+  for (j = 0; j < texture->m_height; j++)
+    {
+      for (i = 0; i < texture->m_width; i++)
+	{
+	  texture->m_targaData[index + 0] = targaImage[k + 2];
+	  texture->m_targaData[index + 1] = targaImage[k + 1];
+	  texture->m_targaData[index + 2] = targaImage[k + 0];
+	  texture->m_targaData[index + 3] = 255;
+	  
+	  k += 3;
+	  index += 4;
+	}
+
+      k -= (texture->m_width * 6);
     }
 
   delete[] targaImage;
