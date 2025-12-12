@@ -5,6 +5,7 @@
 
 #include "../Rendering/Mesh.h"
 #include "../Rendering/Shader/Shader.h"
+#include "../Rendering/Texture.h"
 #include "../Engine/src/Renderer.h"
 
 struct Transform
@@ -19,8 +20,9 @@ struct Entity
   Mesh mesh;
   ColorShader color_shader;
   TextureShader texture_shader;
+  Texture texture; 
   Transform transform;
-
+  
   XMMATRIX worldMatrix; 
 };
 

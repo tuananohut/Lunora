@@ -2,9 +2,20 @@
 
 bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& RenderBuffers)
 {
-  bool running;
+  bool running, texture_check;
   HRESULT hr;
-    
+  
+  const char* texture_file = "c:/dev/Lunora/Assets/Textures/flag..tga";  
+  hr = InitializeTexture(RenderBuffers.Device,
+			 RenderBuffers.DeviceContext,
+			 &Entity[0]->texture, texture_file);
+  if (FAILED(hr))
+    {
+      return false; 
+    }
+  else
+    texture_check = true;
+ 
   for (size_t i = 0; i < entity_num; i++)
     {
       Entity[i]->transform.position = {0.f + (i * 5.f), 0.f, -5.f};
@@ -18,10 +29,13 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
           MessageBoxA(nullptr, "Model could not load!", "Error", MB_OK);
           return false;
 	}
-      
-      hr = InitializeShaderResources(RenderBuffers, &Entity[i]->texture_shader);
-      if (FAILED(hr))
-	return false; 	  
+
+      if (texture_check)
+	{
+	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->texture_shader);
+	  if (FAILED(hr))
+	    return false;
+	}
       
       hr = InitializeShaderResources(RenderBuffers, &Entity[i]->color_shader);
       if (FAILED(hr))
@@ -33,7 +47,7 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
 
 bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entity_num, MatrixBufferType& matrix, float total_time)
 {
-  bool result = true;
+  HRESULT result = true;
 
   float rotationSpeed = 1.0f;
 
@@ -42,25 +56,29 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
   for (size_t i = 0; i < entity_num; i++)
     {
       Entity[i]->worldMatrix = ComputeWorldMatrix(Entity[i]->transform);
-      
-      
-      /*
-      RenderModel(RenderBuffers, Entity[i].mesh);	      
-      result = Render(RenderBuffers, Entity[i].texture_shader, Entity[i].mesh->indexCount, matrix.world, matrix.view, matrix.proj);
-      if (FAILED(result))
-	{
-	  return false; 
-	}	  
-      */
-      RenderModel(RenderBuffers, &Entity[i]->mesh);	      
-      result = Render(RenderBuffers, &Entity[i]->color_shader, Entity[i]->mesh.indexCount, Entity[i]->worldMatrix, matrix.view, matrix.proj);
-      if (FAILED(result))
-	{
-	  return false; 
-	}	  	  
-    } 
 
-  return result;
+      if (&Entity[i]->texture_shader != nullptr)
+	{
+	  RenderModel(RenderBuffers, &Entity[i]->mesh);	      
+	  result = Render(RenderBuffers, &Entity[i]->texture_shader, Entity[i]->mesh.indexCount, Entity[i]->worldMatrix, matrix.view, matrix.proj, Entity[i]->texture.m_textureView);
+	  if (FAILED(result))
+	    {
+	      return false; 
+	    }	  
+	}
+
+      else if (&Entity[i]->color_shader != nullptr)
+	{
+	  RenderModel(RenderBuffers, &Entity[i]->mesh);	      
+	  result = Render(RenderBuffers, &Entity[i]->color_shader, Entity[i]->mesh.indexCount, Entity[i]->worldMatrix, matrix.view, matrix.proj);
+	  if (FAILED(result))
+	    {
+	      return false; 
+	    }
+	}
+    } 
+  
+  return true;
 }
 
 XMMATRIX ComputeWorldMatrix(const Transform& t)

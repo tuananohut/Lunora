@@ -118,7 +118,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	  Camera *mCamera = new Camera;
 	  mCamera->SetPosition(0.0f, 0.0f, -15.0f);
-  
+	  
 	  // Entity* entities[entity_num];
 
 	  const size_t entity_num = 2;  
@@ -137,20 +137,6 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	  MatrixBufferType matrix; 
 	  
-	  
-	  Texture* texture = new Texture;
-	  const char* texture_file = "c:/dev/Lunora/Assets/Textures/flag..tga";  
-	  result = InitializeTexture(Renderer->Device,
-				     Renderer->DeviceContext,
-				     texture, texture_file);
-	  if (FAILED(result))
-	    {
-	      MessageBoxA(hwnd, "Something is wrong about textures!", "Bad", MB_OK | MB_ICONERROR);
-	      Running = false;
-	      return 0; 
-	    }
-	  
-
 	  LARGE_INTEGER frequency;
 	  LARGE_INTEGER startTime;
 	  QueryPerformanceFrequency(&frequency); 
