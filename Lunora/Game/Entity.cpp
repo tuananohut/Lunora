@@ -5,12 +5,13 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
   bool running, texture_check;
   HRESULT hr;
   
-  const char* texture_file = "c:/dev/Lunora/Assets/Textures/flag..tga";  
+  const char* texture_file = "c:/dev/Lunora/Assets/Textures/flag.tga";  
   hr = InitializeTexture(RenderBuffers.Device,
 			 RenderBuffers.DeviceContext,
 			 &Entity[0]->texture, texture_file);
   if (FAILED(hr))
     {
+      texture_check = false; 
       return false; 
     }
   else
@@ -20,26 +21,34 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
     {
       Entity[i]->transform.position = {0.f + (i * 5.f), 0.f, -5.f};
       Entity[i]->transform.rotation = {0.f, 0.f, 0.f};
-      Entity[i]->transform.scale = {0.f, 0.f, 0.f};
+      Entity[i]->transform.scale = {1.f, 1.f, 1.f};
       Entity[i]->mesh.filename = "../Assets/Models/triangle.txt";
-            
+
+      hr = InitializeTexture(RenderBuffers.Device,
+			     RenderBuffers.DeviceContext,
+			     &Entity[0]->texture, texture_file);
+
+      
       bool result = InitializeModel(RenderBuffers.Device, &Entity[i]->mesh);
       if(!result)
 	{
-          MessageBoxA(nullptr, "Model could not load!", "Error", MB_OK);
           return false;
 	}
 
-      if (texture_check)
+      if (&Entity[i]->texture != nullptr) 
 	{
 	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->texture_shader);
 	  if (FAILED(hr))
 	    return false;
 	}
-      
-      hr = InitializeShaderResources(RenderBuffers, &Entity[i]->color_shader);
-      if (FAILED(hr))
-	return false; 
+
+      else
+	{
+	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->color_shader);
+	  if (FAILED(hr))
+	    return false;
+	}
+
     } 
   
   return true; 
@@ -50,33 +59,30 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
   HRESULT result = true;
 
   float rotationSpeed = 1.0f;
-
-  matrix.world *= total_time * rotationSpeed; 
   
   for (size_t i = 0; i < entity_num; i++)
     {
       Entity[i]->worldMatrix = ComputeWorldMatrix(Entity[i]->transform);
 
-      if (&Entity[i]->texture_shader != nullptr)
-	{
-	  RenderModel(RenderBuffers, &Entity[i]->mesh);	      
+      RenderModel(RenderBuffers, &Entity[i]->mesh);	      
+
+      if (Entity[i]->texture.m_textureView)
+	{      
 	  result = Render(RenderBuffers, &Entity[i]->texture_shader, Entity[i]->mesh.indexCount, Entity[i]->worldMatrix, matrix.view, matrix.proj, Entity[i]->texture.m_textureView);
 	  if (FAILED(result))
 	    {
 	      return false; 
-	    }	  
+	    }
 	}
-
-      else if (&Entity[i]->color_shader != nullptr)
+      else
 	{
-	  RenderModel(RenderBuffers, &Entity[i]->mesh);	      
 	  result = Render(RenderBuffers, &Entity[i]->color_shader, Entity[i]->mesh.indexCount, Entity[i]->worldMatrix, matrix.view, matrix.proj);
 	  if (FAILED(result))
 	    {
 	      return false; 
 	    }
 	}
-    } 
+    }
   
   return true;
 }
@@ -89,7 +95,7 @@ XMMATRIX ComputeWorldMatrix(const Transform& t)
     XMMATRIX RZ = XMMatrixRotationZ(t.rotation.z);
     XMMATRIX T = XMMatrixTranslation(t.position.x, t.position.y, t.position.z);
 
-    return T; 
+    return S * RX * RY * RZ * T;
 }
 
 

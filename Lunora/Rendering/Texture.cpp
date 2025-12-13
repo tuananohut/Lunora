@@ -19,12 +19,9 @@ bool InitializeTexture(ID3D11Device* device,
 	{
 	  return false; 
 	}
-      assert(texture == nullptr); 
     }
-  else
-    {
-      return false; 
-    }
+  
+  assert(texture != nullptr);
   
   textureDesc.Height = texture->m_height;
   textureDesc.Width = texture->m_width;
