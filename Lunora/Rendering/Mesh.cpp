@@ -82,13 +82,6 @@ bool InitializeModel(ID3D11Device *Device, Mesh* ModelBuffer)
       return false; 
     }
 
-  /*
-  delete[] ModelBuffer->vertices;
-  ModelBuffer->vertices = nullptr;
-    
-  delete[] ModelBuffer->indices;
-  ModelBuffer->indices = nullptr;
-  */
   return true;
 }
 

@@ -118,8 +118,6 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	  Camera *mCamera = new Camera;
 	  mCamera->SetPosition(0.0f, 0.0f, -15.0f);
-	  
-	  // Entity* entities[entity_num];
 
 	  const size_t entity_num = 2;  
 	  Entity* entities[entity_num];
@@ -154,7 +152,24 @@ int WINAPI WinMain(HINSTANCE Instance,
 			  delete mCamera;
 			  mCamera = nullptr; 
 			}
-		      
+
+		      for (int i = 0; i < entity_num; i++)
+			{
+			  if (&entities[i]->mesh)
+			    ReleaseModel(&entities[i]->mesh);
+			  
+			  if (&entities[i]->color_shader)
+			    ReleaseShaderResources(&entities[i]->color_shader);
+			  else
+			    ReleaseShaderResources(&entities[i]->texture_shader);
+
+			  if (&entities[i]->texture)
+			    ReleaseTexture(&entities[i]->texture);
+			  
+			  delete entities[i];
+			  entities[i] = nullptr;
+			}
+		      		      
 		      if (Renderer)
 			{
 			  ShutdownRenderer(*Renderer);
@@ -162,17 +177,6 @@ int WINAPI WinMain(HINSTANCE Instance,
 			  Renderer = nullptr; 
 			}		     
 		      
-		      /*if (entities)
-			{
-			  ReleaseEntity(entities, entity_num);
-			  }*/
-		      
-		      for (int i = 0; i < entity_num; i++)
-			{
-			  delete entities[i];
-			  entities[i] = nullptr;
-			}
-
 		      Running = false;
 		    }
 		  

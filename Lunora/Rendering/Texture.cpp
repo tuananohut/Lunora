@@ -204,7 +204,7 @@ bool LoadTarga24Bit(Texture* texture, const char* filename)
 
   index = 0;
 
-  k = (texture->m_width * texture->m_height * 3) - (texture->m_width * 3);
+  k = (texture->m_width * texture->m_height * 4) - (texture->m_width * 4);
 
   
   for (j = 0; j < texture->m_height; j++)
@@ -216,11 +216,11 @@ bool LoadTarga24Bit(Texture* texture, const char* filename)
 	  texture->m_targaData[index + 2] = targaImage[k + 0];
 	  texture->m_targaData[index + 3] = 255;
 	  
-	  k += 3;
+	  k += 4;
 	  index += 4;
 	}
 
-      k -= (texture->m_width * 6);
+      k -= (texture->m_width * 8);
     }
 
   delete[] targaImage;

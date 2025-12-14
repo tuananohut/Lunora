@@ -28,8 +28,7 @@ struct Entity
 
 bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& RenderBuffers);
 bool RenderEntity(RendererContext& Renderer, Entity* Entity[], size_t entity_num, MatrixBufferType& matrix, float total_time);
-void ReleaseEntity(Entity* entities[], size_t entity_num);
-XMMATRIX ComputeWorldMatrix(const Transform& t);
 
+XMMATRIX ComputeWorldMatrix(const Transform& t);
 
 #endif

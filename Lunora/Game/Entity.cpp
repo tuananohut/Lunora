@@ -2,20 +2,21 @@
 
 bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& RenderBuffers)
 {
-  bool running, texture_check;
+  bool running, texture_check = false;
   HRESULT hr;
   
-  const char* texture_file = "c:/dev/Lunora/Assets/Textures/flag.tga";  
-  hr = InitializeTexture(RenderBuffers.Device,
-			 RenderBuffers.DeviceContext,
-			 &Entity[0]->texture, texture_file);
-  if (FAILED(hr))
+  const char* texture_file = "c:/dev/Lunora/Assets/Textures/palestine.tga";  
+  running = InitializeTexture(RenderBuffers.Device,
+			      RenderBuffers.DeviceContext,
+			      &Entity[0]->texture, texture_file);
+  if (!running)
     {
-      texture_check = false; 
       return false; 
     }
   else
     texture_check = true;
+
+  assert(Entity[0]->texture.m_textureView != nullptr);
  
   for (size_t i = 0; i < entity_num; i++)
     {
@@ -23,19 +24,14 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
       Entity[i]->transform.rotation = {0.f, 0.f, 0.f};
       Entity[i]->transform.scale = {1.f, 1.f, 1.f};
       Entity[i]->mesh.filename = "../Assets/Models/triangle.txt";
-
-      hr = InitializeTexture(RenderBuffers.Device,
-			     RenderBuffers.DeviceContext,
-			     &Entity[0]->texture, texture_file);
-
       
-      bool result = InitializeModel(RenderBuffers.Device, &Entity[i]->mesh);
-      if(!result)
+      running = InitializeModel(RenderBuffers.Device, &Entity[i]->mesh);
+      if(!running)
 	{
           return false;
 	}
 
-      if (&Entity[i]->texture != nullptr) 
+      if (Entity[i]->texture.m_textureView != nullptr && texture_check) 
 	{
 	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->texture_shader);
 	  if (FAILED(hr))
@@ -98,14 +94,3 @@ XMMATRIX ComputeWorldMatrix(const Transform& t)
     return S * RX * RY * RZ * T;
 }
 
-
-void ReleaseEntity(Entity* entities[], size_t entity_num)
-{
-  for (size_t i = 0; i < entity_num; ++i)
-    {
-      ReleaseModel(&entities[i]->mesh);
-      ReleaseShaderResources(&entities[i]->color_shader);
-      // ReleaseShaderResources(Entity->texture_shader);
-    } 
-}
- 

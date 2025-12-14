@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #include "../Engine/src/Renderer.h"
+#include "../Rendering/Texture.h"
 
 using namespace DirectX;
 using namespace LunoraEngine; 
@@ -13,7 +14,7 @@ using namespace LunoraEngine;
 struct Vertex
 {
   XMFLOAT3 position;
-  XMFLOAT4 color; 
+  XMFLOAT4 color;
 };
 
 struct Mesh 
