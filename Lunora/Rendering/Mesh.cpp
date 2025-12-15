@@ -155,6 +155,11 @@ bool LoadModelFromFile(Mesh* Buffer)
       (Buffer->vertices)[i].color = colors[i];
     }
 
+  Buffer->vertices[0].texture = XMFLOAT2(0.f, 0.f);
+  Buffer->vertices[1].texture = XMFLOAT2(1.f, 0.f);
+  Buffer->vertices[2].texture = XMFLOAT2(1.f, 1.f);
+  Buffer->vertices[3].texture = XMFLOAT2(0.f, 1.f);
+  
   Buffer->indices = new unsigned long[idxCount];
   if (!Buffer->indices)
     return false;
@@ -163,6 +168,6 @@ bool LoadModelFromFile(Mesh* Buffer)
     (Buffer->indices)[i] = indicesTemp[i];
     
   Buffer->indexCount = idxCount;
- 
+  
   return true;
 }
