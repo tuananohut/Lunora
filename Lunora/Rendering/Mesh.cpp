@@ -109,42 +109,46 @@ bool LoadModelFromFile(Mesh* Buffer)
 
   XMFLOAT3 positions[1024];
   XMFLOAT4 colors[1024];
+  XMFLOAT2 texCoords[1024]; 
   unsigned long indicesTemp[2048];
-  int posCount = 0, colCount = 0;
+  int posCount = 0, colCount = 0, texCount = 0; 
   UINT idxCount = 0;
 
-  char type[2];
-  while (fscanf(file, "%1s", type) == 1)
+  char line[256];
+  while (fgets(line, sizeof(line), file))
     {
-      if (strcmp(type, "v") == 0)
-        {
+      if (line[0] == 'v' && line[1] == ' ')
+	{
 	  float x, y, z;
-	  if (fscanf(file, "%f %f %f", &x, &y, &z) == 3)
-	    positions[posCount++] = XMFLOAT3(x, y, z);
-        }
-      else if (strcmp(type, "c") == 0)
-        {
+	  sscanf(line, "v %f %f %f", &x, &y, &z);
+	  positions[posCount++] = XMFLOAT3(x, y, z);
+	}
+      else if (line[0] == 'c' && line[1] == ' ')
+	{
 	  float r, g, b, a;
-	  if (fscanf(file, "%f %f %f %f", &r, &g, &b, &a) == 4)
-	    colors[colCount++] = XMFLOAT4(r, g, b, a);
-        }
-      else if (strcmp(type, "i") == 0)
-        {
+	  sscanf(line, "c %f %f %f %f", &r, &g, &b, &a);
+	  colors[colCount++] = XMFLOAT4(r, g, b, a);
+	}
+      else if (line[0] == 'v' && line[1] == 't')
+	{
+	  float u, v;
+	  sscanf(line, "vt %f %f", &u, &v);
+	  texCoords[texCount++] = XMFLOAT2(u, v);
+	}
+      else if (line[0] == 'i' && line[1] == ' ')
+	{
 	  unsigned long a, b, c;
-	  if (fscanf(file, "%lu %lu %lu", &a, &b, &c) == 3)
-            {
-	      indicesTemp[idxCount++] = a;
-	      indicesTemp[idxCount++] = b;
-	      indicesTemp[idxCount++] = c;
-            }
-        }
+	  sscanf(line, "i %lu %lu %lu", &a, &b, &c);
+	  indicesTemp[idxCount++] = a;
+	  indicesTemp[idxCount++] = b;
+	  indicesTemp[idxCount++] = c;
+	}
     }
-
   fclose(file);
 
   int vertexCount = (posCount < colCount) ? posCount : colCount;
   Buffer->vertexCount = vertexCount;
-
+  
   Buffer->vertices = new Vertex[vertexCount];
   if (!Buffer->vertices)
     return false;
@@ -153,12 +157,8 @@ bool LoadModelFromFile(Mesh* Buffer)
     {
       (Buffer->vertices)[i].position = positions[i];
       (Buffer->vertices)[i].color = colors[i];
+      (Buffer->vertices)[i].texture = texCoords[i];
     }
-
-  Buffer->vertices[0].texture = XMFLOAT2(0.f, 0.f);
-  Buffer->vertices[1].texture = XMFLOAT2(1.f, 0.f);
-  Buffer->vertices[2].texture = XMFLOAT2(1.f, 1.f);
-  Buffer->vertices[3].texture = XMFLOAT2(0.f, 1.f);
   
   Buffer->indices = new unsigned long[idxCount];
   if (!Buffer->indices)

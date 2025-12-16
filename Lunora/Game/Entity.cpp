@@ -23,7 +23,7 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
       Entity[i]->transform.position = {0.f + (i * 5.f), 0.f, -5.f};
       Entity[i]->transform.rotation = {0.f, 10.f, 0.f};
       Entity[i]->transform.scale = {1.f, 1.f, 1.f};
-      Entity[i]->mesh.filename = "../Assets/Models/triangle.txt";
+      Entity[i]->mesh.filename = "../Assets/Models/cube_trial_2.txt";
       
       running = InitializeModel(RenderBuffers.Device, &Entity[i]->mesh);
       if(!running)
