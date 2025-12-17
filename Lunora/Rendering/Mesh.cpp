@@ -63,12 +63,12 @@ void RenderModel(RendererContext& RenderBuffers, Mesh* Buffer)
 bool InitializeModel(ID3D11Device *Device, Mesh* ModelBuffer)
 {
   HRESULT result;
-  
+ 
   bool loaded = LoadModelFromFile(ModelBuffer);
   if (!loaded)
     {
       return false; 
-    }
+    } 
   
   result = CreateVertexBuffer(Device, ModelBuffer); 
   if (FAILED(result))
@@ -109,9 +109,9 @@ bool LoadModelFromFile(Mesh* Buffer)
 
   XMFLOAT3 positions[1024];
   XMFLOAT4 colors[1024];
-  XMFLOAT2 texCoords[1024]; 
+  XMFLOAT2 texCoords[1024];
   unsigned long indicesTemp[2048];
-  int posCount = 0, colCount = 0, texCount = 0; 
+  int posCount = 0, colCount = 0, texCount = 0;
   UINT idxCount = 0;
 
   char line[256];
@@ -135,7 +135,7 @@ bool LoadModelFromFile(Mesh* Buffer)
 	  sscanf(line, "vt %f %f", &u, &v);
 	  texCoords[texCount++] = XMFLOAT2(u, v);
 	}
-      else if (line[0] == 'i' && line[1] == ' ')
+       else if (line[0] == 'i' && line[1] == ' ')
 	{
 	  unsigned long a, b, c;
 	  sscanf(line, "i %lu %lu %lu", &a, &b, &c);
@@ -145,10 +145,11 @@ bool LoadModelFromFile(Mesh* Buffer)
 	}
     }
   fclose(file);
-
-  int vertexCount = (posCount < colCount) ? posCount : colCount;
-  Buffer->vertexCount = vertexCount;
   
+  // int vertexCount = (posCount < colCount) ? posCount : colCount;
+  int vertexCount = posCount; 
+  Buffer->vertexCount = vertexCount;
+
   Buffer->vertices = new Vertex[vertexCount];
   if (!Buffer->vertices)
     return false;
@@ -156,8 +157,15 @@ bool LoadModelFromFile(Mesh* Buffer)
   for (int i = 0; i < vertexCount; ++i)
     {
       (Buffer->vertices)[i].position = positions[i];
-      (Buffer->vertices)[i].color = colors[i];
-      (Buffer->vertices)[i].texture = texCoords[i];
+      if (colCount > 0)
+	(Buffer->vertices)[i].color = colors[i];
+      else
+	(Buffer->vertices)[i].color = XMFLOAT4(1,1,1,1);
+
+      if (texCount > 0)
+	(Buffer->vertices)[i].texture = texCoords[i % texCount];
+      else
+	(Buffer->vertices)[i].texture = XMFLOAT2(0, 0);
     }
   
   Buffer->indices = new unsigned long[idxCount];
