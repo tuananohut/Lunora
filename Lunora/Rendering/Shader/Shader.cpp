@@ -89,13 +89,13 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
 			     &vsBlob);
   if (FAILED(hr))
     {
-      // return false; 
+      return false; 
     }
   
   hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &shader->baseShader.m_vertexShader);
   if (FAILED(hr))
     {
-      // return false; 
+      return false; 
     }
 
   hr = CompileShaderFromFile(L"../../Lunora/Shaders/gpu.hlsl",
@@ -104,13 +104,13 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
 			     &psBlob);
   if (FAILED(hr))
     {
-      // return false; 
+      return false; 
     }
 
   hr = RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &shader->baseShader.m_pixelShader);
   if (FAILED(hr))
     {
-      // return false; 
+      return false; 
     }
 
   D3D11_INPUT_ELEMENT_DESC input_layout[] =
@@ -130,7 +130,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
 					       &shader->baseShader.m_layout);
   if (FAILED(hr))
     {
-      // return false; 
+      return false; 
     }
   
   vsBlob->Release();
@@ -142,7 +142,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
   hr = CreateMatrixBuffer(RenderBuffers.Device, &shader->baseShader.m_matrixBuffer);
   if (FAILED(hr))
     {
-      // return false; 
+      return false; 
     }
   
   return true; 
@@ -318,8 +318,6 @@ void ReleaseShaderResources(ColorShader* shader)
   if (shader)
     {
       shader->baseShader.Release();
-      delete shader;
-      shader = nullptr; 
     }
 }
 
@@ -334,8 +332,5 @@ void ReleaseShaderResources(TextureShader* shader)
 	  shader->m_sampleState->Release();
 	  shader->m_sampleState = nullptr; 
 	}
-
-      delete shader;
-      shader = nullptr; 
     }
 }

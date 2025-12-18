@@ -15,8 +15,6 @@ const float SCREEN_NEAR = 0.3f;
 
 static bool Running;
 
-static RendererContext *Renderer = new RendererContext();
-
 LRESULT CALLBACK WindowProc(HWND Window, 
                             UINT Message, 
                             WPARAM WParam, 
@@ -24,20 +22,30 @@ LRESULT CALLBACK WindowProc(HWND Window,
 {
   LRESULT Result = 0;
 
+  RendererContext* Renderer =
+    (RendererContext*)GetWindowLongPtr(Window, GWLP_USERDATA);
+
   switch (Message)
     {  
     case WM_CLOSE: 
       {
         Running = false;
-	DestroyWindow(Window);
       } break;
 
     case WM_DESTROY:
-      {			
+      {	
 	Running = false;
-	PostQuitMessage(0);
       } break;
       
+    case WM_CREATE:
+      {
+	CREATESTRUCTA* create = (CREATESTRUCTA*)LParam;
+	RendererContext* renderer =
+	  (RendererContext*)create->lpCreateParams;
+
+	SetWindowLongPtr(Window, GWLP_USERDATA, (LONG_PTR)renderer);
+      } break;
+
     case WM_SIZE:
       {
 	if (WParam == SIZE_MINIMIZED) break;
@@ -92,7 +100,9 @@ int WINAPI WinMain(HINSTANCE Instance,
     {
       int x = SCREEN_WIDTH;
       int y = SCREEN_HEIGHT; 
- 
+
+      RendererContext *Renderer = new RendererContext();
+      
       HWND hwnd = CreateWindowExA(0,                   
 				  wc.lpszClassName,          
 				  "Lunora",  
@@ -101,7 +111,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 				  NULL,       
 				  NULL,       
 				  Instance,  
-				  NULL);
+				  Renderer);
       
      
       if (hwnd)
@@ -155,16 +165,17 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 		      for (int i = 0; i < entity_num; i++)
 			{
-			  if (&entities[i]->mesh)
+			  if (entities[i]->mesh.vertexBuffer)
 			    ReleaseModel(&entities[i]->mesh);
 			  
-			  if (&entities[i]->color_shader)
+			  if (entities[i]->color_shader.baseShader.m_vertexShader)
 			    ReleaseShaderResources(&entities[i]->color_shader);
-			  else
+			  else if (entities[i]->texture_shader.baseShader.m_vertexShader)
 			    ReleaseShaderResources(&entities[i]->texture_shader);
 
-			  if (&entities[i]->texture)
+			  if (entities[i]->texture.m_textureView)
 			    ReleaseTexture(&entities[i]->texture);
+
 			  
 			  delete entities[i];
 			  entities[i] = nullptr;
@@ -184,6 +195,9 @@ int WINAPI WinMain(HINSTANCE Instance,
 		  DispatchMessageA(&Message);
 		}
 
+	      if (!Running)
+		break; 
+	      
 	      RendererBeginScene(*Renderer, 0.f, 0.f, 0.f, 1.f);
 
 	      LARGE_INTEGER currentTime;

@@ -2,7 +2,7 @@
 
 bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& RenderBuffers)
 {
-  bool running, texture_check = false;
+  bool running;
   HRESULT hr;
   
   const char* texture_file = "c:/dev/Lunora/Assets/Textures/palestine.tga";  
@@ -13,8 +13,6 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
     {
       return false; 
     }
-  else
-    texture_check = true;
 
   assert(Entity[1]->texture.m_textureView != nullptr);
  
@@ -25,7 +23,16 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
       Entity[i]->transform.scale = {1.f, 1.f, 1.f};
       Entity[i]->mesh.filename = "../Assets/Models/cube_trial.txt";
 
-      if (Entity[i]->texture.m_textureView != nullptr && texture_check) 
+      running = InitializeTexture(RenderBuffers.Device,
+				  RenderBuffers.DeviceContext,
+				  &Entity[i]->texture, texture_file);
+      if (!running)
+	{
+	  return false; 
+	}
+
+
+      if (Entity[i]->texture.m_textureView != nullptr) 
 	Entity[i]->mesh.filename = "../Assets/Models/cube_trial_2.txt";
       
       running = InitializeModel(RenderBuffers.Device, &Entity[i]->mesh);
@@ -34,7 +41,7 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
           return false;
 	}
 
-      if (Entity[i]->texture.m_textureView != nullptr && texture_check) 
+      if (Entity[i]->texture.m_textureView != nullptr) 
 	{
 	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->texture_shader);
 	  if (FAILED(hr))
@@ -43,7 +50,7 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
 
       else
 	{
-	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->color_shader);
+	  // hr = InitializeShaderResources(RenderBuffers, &Entity[i]->color_shader);
 	  if (FAILED(hr))
 	    return false;
 	}
@@ -59,14 +66,16 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
   
   for (size_t i = 0; i < entity_num; i++)
     {
-      Entity[i]->transform.rotation = {1.f * total_time, 1.f * total_time, 0.f};
+      Entity[i]->transform.rotation = {2.f * total_time, 1.f * total_time, 61.f};
       Entity[i]->worldMatrix = ComputeWorldMatrix(Entity[i]->transform);
 
       RenderModel(RenderBuffers, &Entity[i]->mesh);	      
 
       if (Entity[i]->texture.m_textureView)
 	{      
-	  result = Render(RenderBuffers, &Entity[i]->texture_shader, Entity[i]->mesh.indexCount, Entity[i]->worldMatrix, matrix.view, matrix.proj, Entity[i]->texture.m_textureView);
+	  result = Render(RenderBuffers, &Entity[i]->texture_shader,
+			  Entity[i]->mesh.indexCount, Entity[i]->worldMatrix,
+			  matrix.view, matrix.proj, Entity[i]->texture.m_textureView);
 	  if (FAILED(result))
 	    {
 	      return false; 
@@ -74,7 +83,7 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
 	}
       else
 	{
-	  result = Render(RenderBuffers, &Entity[i]->color_shader, Entity[i]->mesh.indexCount, Entity[i]->worldMatrix, matrix.view, matrix.proj);
+	  // result = Render(RenderBuffers, &Entity[i]->color_shader, Entity[i]->mesh.indexCount, Entity[i]->worldMatrix, matrix.view, matrix.proj);
 	  if (FAILED(result))
 	    {
 	      return false; 

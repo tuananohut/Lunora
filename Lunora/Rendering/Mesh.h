@@ -14,10 +14,16 @@ using namespace LunoraEngine;
 struct Vertex
 {
   XMFLOAT3 position;
-  XMFLOAT4 color;
   XMFLOAT2 texture; 
 };
 
+/*
+struct VertexColor
+{
+  XMFLOAT3 position;
+  XMFLOAT4 color;
+};
+*/
 struct Mesh 
 {  
   ID3D11Buffer *vertexBuffer = nullptr;

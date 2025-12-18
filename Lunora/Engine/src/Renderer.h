@@ -35,4 +35,5 @@ namespace LunoraEngine {
   void RendererBeginScene(RendererContext& context, float r, float g, float b, float a); 
   void RendererEndScene(RendererContext& context); 
 };
+
 #endif

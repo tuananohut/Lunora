@@ -11,10 +11,10 @@ bool InitializeTexture(ID3D11Device* device,
   unsigned int rowPitch;
   D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 
-  result = LoadTarga24Bit(texture, filename);
+  result = LoadTarga32Bit(texture, filename);
   if (!result)
     {
-      result = LoadTarga32Bit(texture, filename);
+      result = LoadTarga24Bit(texture, filename);
       if (!result)
 	{
 	  return false; 
@@ -184,8 +184,7 @@ bool LoadTarga24Bit(Texture* texture, const char* filename)
       return false; 
     }
 
-  imageSize = texture->m_width * texture->m_height * 4;
-
+  imageSize = texture->m_width * texture->m_height * 3;
   targaImage = new unsigned char[imageSize];
 
   count = (unsigned int)fread(targaImage, 1, imageSize, filePtr);
@@ -204,8 +203,7 @@ bool LoadTarga24Bit(Texture* texture, const char* filename)
 
   index = 0;
 
-  k = (texture->m_width * texture->m_height * 4) - (texture->m_width * 4);
-
+  k = (texture->m_width * texture->m_height * 3) - (texture->m_width * 3);
   
   for (j = 0; j < texture->m_height; j++)
     {
