@@ -166,12 +166,12 @@ bool LoadModelFromFile(Mesh* Buffer)
   for (int i = 0; i < vertexCount; ++i)
     {
       (Buffer->vertices)[i].position = positions[i];
-      /*
+      
       if (colCount > 0)
 	(Buffer->vertices)[i].color = colors[i];
       else
 	(Buffer->vertices)[i].color = XMFLOAT4(1,1,1,1);
-      */
+      
       if (texCount > 0)
 	(Buffer->vertices)[i].texture = texCoords[i % texCount];
       else

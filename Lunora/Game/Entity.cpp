@@ -5,7 +5,18 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
   bool running;
   HRESULT hr;
   
-  const char* texture_file = "c:/dev/Lunora/Assets/Textures/palestine.tga";  
+  const char* texture_file = "c:/dev/Lunora/Assets/Textures/palestine.tga";
+  running = InitializeTexture(RenderBuffers.Device,
+			      RenderBuffers.DeviceContext,
+			      &Entity[0]->texture, texture_file);
+  if (!running)
+    {
+      return false; 
+    }
+
+  assert(Entity[0]->texture.m_textureView != nullptr);
+  
+  texture_file = "c:/dev/Lunora/Assets/Textures/flag.tga";  
   running = InitializeTexture(RenderBuffers.Device,
 			      RenderBuffers.DeviceContext,
 			      &Entity[1]->texture, texture_file);
@@ -22,15 +33,6 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
       Entity[i]->transform.rotation = {0.f, 10.f, 0.f};
       Entity[i]->transform.scale = {1.f, 1.f, 1.f};
       Entity[i]->mesh.filename = "../Assets/Models/cube_trial.txt";
-
-      running = InitializeTexture(RenderBuffers.Device,
-				  RenderBuffers.DeviceContext,
-				  &Entity[i]->texture, texture_file);
-      if (!running)
-	{
-	  return false; 
-	}
-
 
       if (Entity[i]->texture.m_textureView != nullptr) 
 	Entity[i]->mesh.filename = "../Assets/Models/cube_trial_2.txt";
@@ -50,7 +52,7 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
 
       else
 	{
-	  // hr = InitializeShaderResources(RenderBuffers, &Entity[i]->color_shader);
+	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->color_shader);
 	  if (FAILED(hr))
 	    return false;
 	}
@@ -83,7 +85,7 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
 	}
       else
 	{
-	  // result = Render(RenderBuffers, &Entity[i]->color_shader, Entity[i]->mesh.indexCount, Entity[i]->worldMatrix, matrix.view, matrix.proj);
+	  result = Render(RenderBuffers, &Entity[i]->color_shader, Entity[i]->mesh.indexCount, Entity[i]->worldMatrix, matrix.view, matrix.proj);
 	  if (FAILED(result))
 	    {
 	      return false; 

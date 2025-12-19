@@ -127,13 +127,15 @@ int WINAPI WinMain(HINSTANCE Instance,
 	    }  
 
 	  Camera *mCamera = new Camera;
-	  mCamera->SetPosition(0.0f, 0.0f, -15.0f);
-
-	  const size_t entity_num = 2;  
+	  mCamera->SetPosition(5.0f, 0.0f, -15.0f);
+	  
+	  const size_t entity_num = 3;  
 	  Entity* entities[entity_num];
 
-	  entities[0] = new Entity();
-	  entities[1] = new Entity();
+	  for (size_t i = 0; i < entity_num; ++i)
+	    {
+	      entities[i] = new Entity();
+	    }
 	  
 	  Running = InitializeEntity(entities, entity_num, *Renderer);
 	  if (!Running)

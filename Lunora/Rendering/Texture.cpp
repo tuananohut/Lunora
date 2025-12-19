@@ -43,6 +43,7 @@ bool InitializeTexture(ID3D11Device* device,
 
   deviceContext->UpdateSubresource(texture->m_texture, 0, NULL, texture->m_targaData, rowPitch, 0);
 
+  ZeroMemory(&srvDesc, sizeof(srvDesc));
   srvDesc.Format = textureDesc.Format;
   srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
   srvDesc.Texture2D.MostDetailedMip = 0;
@@ -170,6 +171,14 @@ bool LoadTarga24Bit(Texture* texture, const char* filename)
     }
   
   count = (unsigned int)fread(&targaFileHeader, sizeof(TargaHeader), 1, filePtr);
+  if (targaFileHeader.imageType != 2)
+    return false;
+  
+  if (targaFileHeader.idLength > 0)
+    {
+      fseek(filePtr, targaFileHeader.idLength, SEEK_CUR);
+    }
+
   if (count != 1)
     {
       return false; 
@@ -199,7 +208,8 @@ bool LoadTarga24Bit(Texture* texture, const char* filename)
       return false; 
     }
 
-  texture->m_targaData = new unsigned char[imageSize];
+  // texture->m_targaData = new unsigned char[imageSize];
+  texture->m_targaData = new unsigned char[texture->m_width * texture->m_height * 4];
 
   index = 0;
 
@@ -214,11 +224,11 @@ bool LoadTarga24Bit(Texture* texture, const char* filename)
 	  texture->m_targaData[index + 2] = targaImage[k + 0];
 	  texture->m_targaData[index + 3] = 255;
 	  
-	  k += 4;
+	  k += 3;
 	  index += 4;
 	}
 
-      k -= (texture->m_width * 8);
+      k -= (texture->m_width * 6);
     }
 
   delete[] targaImage;

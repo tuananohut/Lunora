@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <assert.h>
 
+/*
 struct TargaHeader
 {
   unsigned char data1[12];
@@ -14,6 +15,27 @@ struct TargaHeader
   unsigned char bpp;
   unsigned char data2; 
 };
+*/
+
+#pragma pack(push, 1)
+struct TargaHeader
+{
+    unsigned char  idLength;        // 0
+    unsigned char  colorMapType;    // 1
+    unsigned char  imageType;       // 2
+
+    unsigned short colorMapFirst;   // 3-4
+    unsigned short colorMapLength;  // 5-6
+    unsigned char  colorMapEntry;   // 7
+
+    unsigned short xOrigin;         // 8-9
+    unsigned short yOrigin;         // 10-11
+    unsigned short width;           // 12-13
+    unsigned short height;          // 14-15
+    unsigned char  bpp;             // 16
+    unsigned char  imageDescriptor; // 17
+};
+#pragma pack(pop)
 
 struct Texture
 {
