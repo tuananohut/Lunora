@@ -24,3 +24,38 @@ bool InitializeScene(ID3D11Device* device)
   
   return true;
 }
+
+void CleanScene()
+{
+  if (mCamera)
+    {
+      delete mCamera;
+      mCamera = nullptr; 
+    }
+
+  for (int i = 0; i < entity_num; i++)
+    {
+      if (entities[i]->mesh.vertexBuffer)
+	ReleaseModel(&entities[i]->mesh);
+			  
+      if (entities[i]->color_shader.baseShader.m_vertexShader)
+	ReleaseShaderResources(&entities[i]->color_shader);
+      else if (entities[i]->texture_shader.baseShader.m_vertexShader)
+	ReleaseShaderResources(&entities[i]->texture_shader);
+
+      if (entities[i]->texture.m_textureView)
+	ReleaseTexture(&entities[i]->texture);
+
+			  
+      delete entities[i];
+      entities[i] = nullptr;
+    }
+		      		      
+  if (Renderer)
+    {
+      ShutdownRenderer(*Renderer);
+      delete Renderer;
+      Renderer = nullptr; 
+    }		     
+
+}

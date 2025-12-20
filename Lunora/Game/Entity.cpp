@@ -16,7 +16,7 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
 
   assert(Entity[0]->texture.m_textureView != nullptr);
   
-  texture_file = "c:/dev/Lunora/Assets/Textures/flag.tga";  
+  texture_file = "c:/dev/Lunora/Assets/Textures/lemons.tga";  
   running = InitializeTexture(RenderBuffers.Device,
 			      RenderBuffers.DeviceContext,
 			      &Entity[1]->texture, texture_file);
@@ -68,7 +68,10 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
   
   for (size_t i = 0; i < entity_num; i++)
     {
-      Entity[i]->transform.rotation = {2.f * total_time, 1.f * total_time, 61.f};
+      Entity[0]->transform.rotation = {2.f * total_time, -1.f * total_time, 61.f};
+      Entity[1]->transform.rotation = {2.f * total_time, 1.f * total_time, 61.f};
+      Entity[2]->transform.rotation = {2.f * total_time, -1.f * total_time, 61.f};
+
       Entity[i]->worldMatrix = ComputeWorldMatrix(Entity[i]->transform);
 
       RenderModel(RenderBuffers, &Entity[i]->mesh);	      

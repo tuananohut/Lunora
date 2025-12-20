@@ -1,16 +1,20 @@
 # Lunora
 
-Lunora is a lightweight rendering module developed for my graphics research experiments. Its purpose is to provide a clean, minimal core for testing rendering techniques without the complexity of a full engine.
+Lunora is a lightweight graphics engine developed for my graphics research experiments. Its purpose is to provide a clean, minimal core for testing rendering techniques without the complexity of a full engine.
 
 ### Current Features
 
-- Mesh loading and rendering
+- 3D mesh loading and rendering
 
 - Basic color and lighting shaders
 
 - Window resizing and viewport updates
 
-- Logging 
+- Logging
+
+- 24-bit and 32-bit TGA file support
+
+- Texture rendering 
 
 This module intentionally includes only essential functionality. Techniques such as shadow mapping, PBR, post-processing, or GPU-driven pipelines will be implemented as separate, dedicated research tasks and added modularly.
 
