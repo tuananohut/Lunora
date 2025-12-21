@@ -1,19 +1,8 @@
 #include <windows.h>
 
 #include "resource.h"
-#include "../Lunora/Engine/src/Renderer.h"
-#include "../Lunora/Game/Camera/Camera.h"
-#include "../Lunora/Game/Entity.h"
-#include "../Lunora/Rendering/Mesh.h"
-#include "../Lunora/Rendering/Shader/Shader.h"
-#include "../Lunora/Rendering/Texture.h"
 
-using namespace LunoraEngine; 
-
-const float SCREEN_DEPTH = 1000.f;
-const float SCREEN_NEAR = 0.3f;
-
-static bool Running;
+#include "../Lunora/Game/Scene.h"
 
 LRESULT CALLBACK WindowProc(HWND Window, 
                             UINT Message, 
@@ -101,7 +90,8 @@ int WINAPI WinMain(HINSTANCE Instance,
       int x = SCREEN_WIDTH;
       int y = SCREEN_HEIGHT; 
 
-      RendererContext *Renderer = new RendererContext();
+      RendererContext* Renderer = new RendererContext();
+      Scene *scene = new Scene();
       
       HWND hwnd = CreateWindowExA(0,                   
 				  wc.lpszClassName,          
@@ -112,45 +102,23 @@ int WINAPI WinMain(HINSTANCE Instance,
 				  NULL,       
 				  Instance,  
 				  Renderer);
+
       
+      Running = InitializeScene(scene, hwnd); 
+      if (!Running)
+	return 1;
+
+      Running = InitializeRenderer(*Renderer, hwnd, SCREEN_WIDTH, SCREEN_HEIGHT);
+      if (!Running)
+	{
+	  return false; 
+	}  
+   
+      scene->Renderer = Renderer;
      
       if (hwnd)
 	{	  
 	  Running = true;
-	  
-	  Running = InitializeRenderer(*Renderer, hwnd, SCREEN_WIDTH, SCREEN_HEIGHT);
-	  if (!Running)
-	    {
-	      MessageBoxA(hwnd, "Worked!", "Good", MB_OK);
-	      Running = false;
-	      return false; 
-	    }  
-
-	  Camera *mCamera = new Camera;
-	  mCamera->SetPosition(5.0f, 0.0f, -15.0f);
-	  
-	  const size_t entity_num = 3;  
-	  Entity* entities[entity_num];
-
-	  for (size_t i = 0; i < entity_num; ++i)
-	    {
-	      entities[i] = new Entity();
-	    }
-	  
-	  Running = InitializeEntity(entities, entity_num, *Renderer);
-	  if (!Running)
-	    {
-	      MessageBoxA(hwnd, "Does not worked!", "Entity", MB_OK);
-	      Running = false;
-	      return 0; 
-	    }
-
-	  MatrixBufferType matrix; 
-	  
-	  LARGE_INTEGER frequency;
-	  LARGE_INTEGER startTime;
-	  QueryPerformanceFrequency(&frequency); 
-	  QueryPerformanceCounter(&startTime);
 	  
 	  while(Running)
 	    {
@@ -159,36 +127,10 @@ int WINAPI WinMain(HINSTANCE Instance,
 		{		  
 		  if (Message.message == WM_QUIT)
 		    { 
-		      if (mCamera)
-			{
-			  delete mCamera;
-			  mCamera = nullptr; 
-			}
+		      CleanScene(scene);
 
-		      for (int i = 0; i < entity_num; i++)
-			{
-			  if (entities[i]->mesh.vertexBuffer)
-			    ReleaseModel(&entities[i]->mesh);
-			  
-			  if (entities[i]->color_shader.baseShader.m_vertexShader)
-			    ReleaseShaderResources(&entities[i]->color_shader);
-			  else if (entities[i]->texture_shader.baseShader.m_vertexShader)
-			    ReleaseShaderResources(&entities[i]->texture_shader);
-
-			  if (entities[i]->texture.m_textureView)
-			    ReleaseTexture(&entities[i]->texture);
-
-			  
-			  delete entities[i];
-			  entities[i] = nullptr;
-			}
-		      		      
-		      if (Renderer)
-			{
-			  ShutdownRenderer(*Renderer);
-			  delete Renderer;
-			  Renderer = nullptr; 
-			}		     
+		      delete scene;
+		      scene = nullptr; 
 		      
 		      Running = false;
 		    }
@@ -198,42 +140,14 @@ int WINAPI WinMain(HINSTANCE Instance,
 		}
 
 	      if (!Running)
-		break; 
-	      
-	      RendererBeginScene(*Renderer, 0.f, 0.f, 0.f, 1.f);
+		break;
 
-	      LARGE_INTEGER currentTime;
-	      QueryPerformanceCounter(&currentTime);
-
-	      float total_time = (float)(currentTime.QuadPart - startTime.QuadPart) / (float)frequency.QuadPart;
-	      
-	      mCamera->Render();
-	      
-	      matrix.world = XMMatrixIdentity();	      
-	      mCamera->GetViewMatrix(matrix.view);
-  
-	      float fieldOfView = 3.141592654f / 4.0f;
-	      float screenAspect = 1.f; 
-	      if (SCREEN_HEIGHT > 0)
-		{
-		  screenAspect = (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT;
-		}
-	      else
-		{
-		  screenAspect = 1.0f; 
-		}
-  
-	      matrix.proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
-	      
-	      Running = RenderEntity(*Renderer, entities, entity_num, matrix, total_time);
+	      Running = RenderScene(scene);
 	      if (!Running)
 		{
-		  MessageBoxA(hwnd, "Does not worked!", "Entity", MB_OK);
 		  Running = false;
 		  return 0; 
 		}
-	      
-	      RendererEndScene(*Renderer);
 	    }  
 	} 
     }

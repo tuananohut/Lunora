@@ -1,61 +1,103 @@
 #include "Scene.h"
 
-bool InitializeScene(ID3D11Device* device)
+bool InitializeScene(Scene *scene, HWND hwnd)
 {
-  Camera *mCamera = new Camera;
-  mCamera->SetPosition(0.0f, 0.0f, -15.0f);
-	  
-  Entity* entities[1] = {0};
-  Entity* triangle = new Entity;
-  entities[0] = triangle;
+  
+  scene->mCamera = new Camera;
+  scene->mCamera->SetPosition(5.0f, 0.0f, -15.0f);
 
-  Entity* cube = new Entity;
-  entities[1] = cube;
-
-  size_t entity_num = 2;  
+  scene->entity_num = 3; 
+  
+  for (size_t i = 0; i < scene->entity_num; ++i)
+    {
+      scene->entities[i] = new Entity();
+    }
 	  
-  Running = InitializeEntity(*entities, entity_num, *Renderer);
+  Running = InitializeEntity(scene->entities, scene->entity_num, *scene->Renderer);
   if (!Running)
     {
-      MessageBoxA(Window->hwnd, "Does not worked!", "Entity", MB_OK);
       Running = false;
       return 0; 
     }
-  
+
+  QueryPerformanceFrequency(&scene->frequency); 
+  QueryPerformanceCounter(&scene->startTime);
+
   return true;
 }
 
-void CleanScene()
+bool RenderScene(Scene *Scene)
 {
-  if (mCamera)
+  bool Running; 
+  MatrixBufferType matrix; 
+	  
+  RendererBeginScene(*Scene->Renderer, 0.f, 0.f, 0.f, 1.f);
+
+  LARGE_INTEGER currentTime;
+  QueryPerformanceCounter(&currentTime);
+
+  float total_time = (float)(currentTime.QuadPart - Scene->startTime.QuadPart) / (float)Scene->frequency.QuadPart;
+	      
+  Scene->mCamera->Render();
+	      
+  matrix.world = XMMatrixIdentity();	      
+  Scene->mCamera->GetViewMatrix(matrix.view);
+  
+  float fieldOfView = 3.141592654f / 4.0f;
+  float screenAspect = 1.f; 
+  if (SCREEN_HEIGHT > 0)
     {
-      delete mCamera;
-      mCamera = nullptr; 
+      screenAspect = (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT;
+    }
+  else
+    {
+      screenAspect = 1.0f; 
+    }
+  
+  matrix.proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
+	      
+  Running = RenderEntity(*Scene->Renderer, Scene->entities, Scene->entity_num, matrix, total_time);
+  if (!Running)
+    {
+      Running = false;
+      return 0; 
+    }
+	      
+  RendererEndScene(*Scene->Renderer);
+  return true; 
+}
+
+void CleanScene(Scene *scene)
+{
+  if (scene->mCamera)
+    {
+      delete scene->mCamera;
+      scene->mCamera = nullptr; 
     }
 
-  for (int i = 0; i < entity_num; i++)
+  for (int i = 0; i < scene->entity_num; i++)
     {
-      if (entities[i]->mesh.vertexBuffer)
-	ReleaseModel(&entities[i]->mesh);
+      if (scene->entities[i]->mesh.vertexBuffer)
+	ReleaseModel(&scene->entities[i]->mesh);
 			  
-      if (entities[i]->color_shader.baseShader.m_vertexShader)
-	ReleaseShaderResources(&entities[i]->color_shader);
-      else if (entities[i]->texture_shader.baseShader.m_vertexShader)
-	ReleaseShaderResources(&entities[i]->texture_shader);
+      if (scene->entities[i]->color_shader.baseShader.m_vertexShader)
+	ReleaseShaderResources(&scene->entities[i]->color_shader);
+      else if (scene->entities[i]->texture_shader.baseShader.m_vertexShader)
+	ReleaseShaderResources(&scene->entities[i]->texture_shader);
 
-      if (entities[i]->texture.m_textureView)
-	ReleaseTexture(&entities[i]->texture);
+      if (scene->entities[i]->texture.m_textureView)
+	ReleaseTexture(&scene->entities[i]->texture);
 
 			  
-      delete entities[i];
-      entities[i] = nullptr;
+      delete scene->entities[i];
+      scene->entities[i] = nullptr;
     }
 		      		      
-  if (Renderer)
+  if (scene->Renderer)
     {
-      ShutdownRenderer(*Renderer);
-      delete Renderer;
-      Renderer = nullptr; 
+      ShutdownRenderer(*scene->Renderer);
+      delete scene->Renderer;
+      scene->Renderer = nullptr; 
     }		     
 
 }
