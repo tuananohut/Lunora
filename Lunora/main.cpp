@@ -11,8 +11,8 @@ LRESULT CALLBACK WindowProc(HWND Window,
 {
   LRESULT Result = 0;
 
-  RendererContext* Renderer =
-    (RendererContext*)GetWindowLongPtr(Window, GWLP_USERDATA);
+  Scene* scene =
+    (Scene*)GetWindowLongPtr(Window, GWLP_USERDATA);
 
   switch (Message)
     {  
@@ -29,10 +29,9 @@ LRESULT CALLBACK WindowProc(HWND Window,
     case WM_CREATE:
       {
 	CREATESTRUCTA* create = (CREATESTRUCTA*)LParam;
-	RendererContext* renderer =
-	  (RendererContext*)create->lpCreateParams;
+	Scene* scene = (Scene*)create->lpCreateParams;
 
-	SetWindowLongPtr(Window, GWLP_USERDATA, (LONG_PTR)renderer);
+	SetWindowLongPtr(Window, GWLP_USERDATA, (LONG_PTR)scene);
       } break;
 
     case WM_SIZE:
@@ -48,9 +47,17 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	SCREEN_WIDTH = (int)clientWidth;  
 	SCREEN_HEIGHT = (int)clientHeight;
 
+	Scene* scene =
+	  (Scene*)GetWindowLongPtr(Window, GWLP_USERDATA);
+
+	RendererContext* Renderer = scene ? scene->Renderer : nullptr;
+
+	if (!scene || !scene->Renderer)
+	  break;
+	
 	if (Renderer && Renderer->Device && Renderer->DeviceContext && Renderer->SwapChain)
 	  {
-	    if (ResizeRenderer(*Renderer, SCREEN_WIDTH, SCREEN_HEIGHT))
+	    if (ResizeRenderer(*scene->Renderer, SCREEN_WIDTH, SCREEN_HEIGHT))
 	      {}
 	    else
 	      Running = false;
@@ -90,8 +97,7 @@ int WINAPI WinMain(HINSTANCE Instance,
       int x = SCREEN_WIDTH;
       int y = SCREEN_HEIGHT; 
 
-      RendererContext* Renderer = new RendererContext();
-      Scene *scene = new Scene();
+      Scene *scene = new Scene();   
       
       HWND hwnd = CreateWindowExA(0,                   
 				  wc.lpszClassName,          
@@ -101,24 +107,17 @@ int WINAPI WinMain(HINSTANCE Instance,
 				  NULL,       
 				  NULL,       
 				  Instance,  
-				  Renderer);
+				  scene);
 
-      
-      Running = InitializeScene(scene, hwnd); 
-      if (!Running)
-	return 1;
+ 
 
-      Running = InitializeRenderer(*Renderer, hwnd, SCREEN_WIDTH, SCREEN_HEIGHT);
-      if (!Running)
-	{
-	  return false; 
-	}  
-   
-      scene->Renderer = Renderer;
-     
       if (hwnd)
 	{	  
 	  Running = true;
+
+	  Running = InitializeScene(scene, hwnd); 
+	  if (!Running)
+	    return 1;
 	  
 	  while(Running)
 	    {

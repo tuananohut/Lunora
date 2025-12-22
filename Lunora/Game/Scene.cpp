@@ -2,6 +2,12 @@
 
 bool InitializeScene(Scene *scene, HWND hwnd)
 {
+  scene->Renderer = new RendererContext; 
+  Running = InitializeRenderer(*scene->Renderer, hwnd, SCREEN_WIDTH, SCREEN_HEIGHT);
+  if (!Running)
+    {
+      return false; 
+    }  
   
   scene->mCamera = new Camera;
   scene->mCamera->SetPosition(5.0f, 0.0f, -15.0f);
