@@ -300,16 +300,25 @@ namespace LunoraEngine {
     assert(context.DeviceContext);
     assert(context.Device);
     assert(context.SwapChain);
+    
+    if (context.RenderTargetView)
+      {
+	context.RenderTargetView->Release();
+	context.RenderTargetView = nullptr;
+      }
+    
+    if (context.DepthStencilView)
+      {
+	context.DepthStencilView->Release();
+	context.DepthStencilView = nullptr;
+      }
 
-    context.RenderTargetView->Release();
-    context.RenderTargetView = nullptr;
-
-    context.DepthStencilView->Release();
-    context.DepthStencilView = nullptr;
-
-    context.DepthStencilBuffer->Release();
-    context.DepthStencilBuffer = nullptr;
-
+    if (context.DepthStencilBuffer)
+      {
+	context.DepthStencilBuffer->Release();
+	context.DepthStencilBuffer = nullptr;
+      }
+    
     result = context.SwapChain->ResizeBuffers(1, width, height,
 					      DXGI_FORMAT_R8G8B8A8_UNORM, 0);
     if (FAILED(result))

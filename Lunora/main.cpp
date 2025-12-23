@@ -11,8 +11,8 @@ LRESULT CALLBACK WindowProc(HWND Window,
 {
   LRESULT Result = 0;
 
-  Scene* scene =
-    (Scene*)GetWindowLongPtr(Window, GWLP_USERDATA);
+  RendererContext *Renderer = 
+    (RendererContext*)GetWindowLongPtr(Window, GWLP_USERDATA);
 
   switch (Message)
     {  
@@ -29,9 +29,9 @@ LRESULT CALLBACK WindowProc(HWND Window,
     case WM_CREATE:
       {
 	CREATESTRUCTA* create = (CREATESTRUCTA*)LParam;
-	Scene* scene = (Scene*)create->lpCreateParams;
+	RendererContext* renderer = (RendererContext*)create->lpCreateParams;
 
-	SetWindowLongPtr(Window, GWLP_USERDATA, (LONG_PTR)scene);
+	SetWindowLongPtr(Window, GWLP_USERDATA, (LONG_PTR)renderer);
       } break;
 
     case WM_SIZE:
@@ -47,17 +47,9 @@ LRESULT CALLBACK WindowProc(HWND Window,
 	SCREEN_WIDTH = (int)clientWidth;  
 	SCREEN_HEIGHT = (int)clientHeight;
 
-	Scene* scene =
-	  (Scene*)GetWindowLongPtr(Window, GWLP_USERDATA);
-
-	RendererContext* Renderer = scene ? scene->Renderer : nullptr;
-
-	if (!scene || !scene->Renderer)
-	  break;
-	
 	if (Renderer && Renderer->Device && Renderer->DeviceContext && Renderer->SwapChain)
 	  {
-	    if (ResizeRenderer(*scene->Renderer, SCREEN_WIDTH, SCREEN_HEIGHT))
+	    if (ResizeRenderer(*Renderer, SCREEN_WIDTH, SCREEN_HEIGHT))
 	      {}
 	    else
 	      Running = false;
@@ -90,15 +82,17 @@ int WINAPI WinMain(HINSTANCE Instance,
   wc.hCursor = LoadCursor(NULL, IDC_ARROW);
   wc.lpszClassName = "Lunora";
 
-  HRESULT result; 
+  HRESULT result;
+
+  RendererContext *Renderer = new RendererContext;
   
   if (RegisterClassExA(&wc))
     {
       int x = SCREEN_WIDTH;
       int y = SCREEN_HEIGHT; 
 
-      Scene *scene = new Scene();   
-      
+      Scene *scene = new Scene();
+
       HWND hwnd = CreateWindowExA(0,                   
 				  wc.lpszClassName,          
 				  "Lunora",  
@@ -107,17 +101,25 @@ int WINAPI WinMain(HINSTANCE Instance,
 				  NULL,       
 				  NULL,       
 				  Instance,  
-				  scene);
-
- 
-
+				  Renderer);
+      
       if (hwnd)
 	{	  
 	  Running = true;
 
-	  Running = InitializeScene(scene, hwnd); 
+	  Running = InitializeRenderer(*Renderer, hwnd, SCREEN_WIDTH, SCREEN_HEIGHT);
 	  if (!Running)
-	    return 1;
+	    {
+	      Running = false; 
+	      return -1; 
+	    }  
+	    
+	  Running = InitializeScene(*scene, *Renderer, hwnd); 
+	  if (!Running)
+	    {
+	      Running = false; 
+	      return -1; 
+	    }
 	  
 	  while(Running)
 	    {
@@ -129,7 +131,14 @@ int WINAPI WinMain(HINSTANCE Instance,
 		      CleanScene(scene);
 
 		      delete scene;
-		      scene = nullptr; 
+		      scene = nullptr;
+
+		      if (Renderer)
+			{
+			  ShutdownRenderer(*Renderer);
+			  delete Renderer;
+			  Renderer = nullptr; 
+			}
 		      
 		      Running = false;
 		    }
@@ -141,7 +150,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      if (!Running)
 		break;
 
-	      Running = RenderScene(scene);
+	      Running = RenderScene(*scene, *Renderer);
 	      if (!Running)
 		{
 		  Running = false;

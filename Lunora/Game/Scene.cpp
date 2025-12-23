@@ -1,53 +1,46 @@
 #include "Scene.h"
 
-bool InitializeScene(Scene *scene, HWND hwnd)
-{
-  scene->Renderer = new RendererContext; 
-  Running = InitializeRenderer(*scene->Renderer, hwnd, SCREEN_WIDTH, SCREEN_HEIGHT);
-  if (!Running)
-    {
-      return false; 
-    }  
-  
-  scene->mCamera = new Camera;
-  scene->mCamera->SetPosition(5.0f, 0.0f, -15.0f);
+bool InitializeScene(Scene &scene, RendererContext &Renderer, HWND hwnd)
+{  
+  scene.mCamera = new Camera;
+  scene.mCamera->SetPosition(5.0f, 0.0f, -15.0f);
 
-  scene->entity_num = 3; 
+  scene.entity_num = 3; 
   
-  for (size_t i = 0; i < scene->entity_num; ++i)
+  for (size_t i = 0; i < scene.entity_num; ++i)
     {
-      scene->entities[i] = new Entity();
+      scene.entities[i] = new Entity();
     }
 	  
-  Running = InitializeEntity(scene->entities, scene->entity_num, *scene->Renderer);
+  Running = InitializeEntity(scene.entities, scene.entity_num, Renderer);
   if (!Running)
     {
       Running = false;
       return 0; 
     }
 
-  QueryPerformanceFrequency(&scene->frequency); 
-  QueryPerformanceCounter(&scene->startTime);
+  QueryPerformanceFrequency(&scene.frequency); 
+  QueryPerformanceCounter(&scene.startTime);
 
   return true;
 }
 
-bool RenderScene(Scene *Scene)
+bool RenderScene(Scene &scene, RendererContext &Renderer)
 {
   bool Running; 
   MatrixBufferType matrix; 
 	  
-  RendererBeginScene(*Scene->Renderer, 0.f, 0.f, 0.f, 1.f);
+  RendererBeginScene(Renderer, 0.f, 0.f, 0.f, 1.f);
 
   LARGE_INTEGER currentTime;
   QueryPerformanceCounter(&currentTime);
 
-  float total_time = (float)(currentTime.QuadPart - Scene->startTime.QuadPart) / (float)Scene->frequency.QuadPart;
+  float total_time = (float)(currentTime.QuadPart - scene.startTime.QuadPart) / (float)scene.frequency.QuadPart;
 	      
-  Scene->mCamera->Render();
+  scene.mCamera->Render();
 	      
   matrix.world = XMMatrixIdentity();	      
-  Scene->mCamera->GetViewMatrix(matrix.view);
+  scene.mCamera->GetViewMatrix(matrix.view);
   
   float fieldOfView = 3.141592654f / 4.0f;
   float screenAspect = 1.f; 
@@ -62,14 +55,14 @@ bool RenderScene(Scene *Scene)
   
   matrix.proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
 	      
-  Running = RenderEntity(*Scene->Renderer, Scene->entities, Scene->entity_num, matrix, total_time);
+  Running = RenderEntity(Renderer, scene.entities, scene.entity_num, matrix, total_time);
   if (!Running)
     {
       Running = false;
       return 0; 
     }
 	      
-  RendererEndScene(*Scene->Renderer);
+  RendererEndScene(Renderer);
   return true; 
 }
 
@@ -98,12 +91,4 @@ void CleanScene(Scene *scene)
       delete scene->entities[i];
       scene->entities[i] = nullptr;
     }
-		      		      
-  if (scene->Renderer)
-    {
-      ShutdownRenderer(*scene->Renderer);
-      delete scene->Renderer;
-      scene->Renderer = nullptr; 
-    }		     
-
 }

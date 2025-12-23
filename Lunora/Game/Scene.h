@@ -20,14 +20,13 @@ struct Scene
   Camera *mCamera;
   size_t entity_num; 
   Entity *entities[3];
-  RendererContext *Renderer;
   
   LARGE_INTEGER frequency;
   LARGE_INTEGER startTime;
 };
 
-bool InitializeScene(Scene *scene, HWND hwnd);
-bool RenderScene(Scene *scene);
+bool InitializeScene(Scene &scene, RendererContext &Renderer, HWND hwnd);
+bool RenderScene(Scene &scene, RendererContext &Renderer);
 void CleanScene(Scene *scene);
 
 #endif
