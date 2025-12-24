@@ -27,9 +27,9 @@ bool InitializeScene(Scene &scene, RendererContext &Renderer, HWND hwnd)
 
 bool RenderScene(Scene &scene, RendererContext &Renderer)
 {
-  bool Running; 
-  MatrixBufferType matrix; 
-	  
+  bool Running;
+  MatrixBufferType matrix;
+ 	  
   RendererBeginScene(Renderer, 0.f, 0.f, 0.f, 1.f);
 
   LARGE_INTEGER currentTime;

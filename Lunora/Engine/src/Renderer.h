@@ -30,7 +30,7 @@ namespace LunoraEngine {
   
   void ShutdownRenderer(RendererContext& context);
 
-  bool ResizeRenderer(RendererContext& context, int& width, int& height);
+  bool ResizeRenderer(RendererContext& context, int width, int height);
 
   void RendererBeginScene(RendererContext& context, float r, float g, float b, float a); 
   void RendererEndScene(RendererContext& context); 

@@ -293,7 +293,7 @@ namespace LunoraEngine {
     context.DeviceContext->ClearDepthStencilView(context.DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
   }
 
-  bool ResizeRenderer(RendererContext& context, int& width, int& height)
+  bool ResizeRenderer(RendererContext& context, int width, int height)
   {
     HRESULT result; 	
 
