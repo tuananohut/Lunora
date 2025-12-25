@@ -295,7 +295,7 @@ namespace LunoraEngine {
 
   bool ResizeRenderer(RendererContext& context, int width, int height)
   {
-    HRESULT result; 	
+    HRESULT result;
 
     assert(context.DeviceContext);
     assert(context.Device);
@@ -345,8 +345,8 @@ namespace LunoraEngine {
     
     ZeroMemory(&DepthBufferDesc, sizeof(DepthBufferDesc));
     
-    DepthBufferDesc.Width = (float)width;
-    DepthBufferDesc.Height = (float)height;
+    DepthBufferDesc.Width = width;
+    DepthBufferDesc.Height = height;
     DepthBufferDesc.MipLevels = 1;
     DepthBufferDesc.ArraySize = 1;
     DepthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;

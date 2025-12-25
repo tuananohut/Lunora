@@ -1,17 +1,14 @@
 #include "Scene.h"
 
-bool InitializeScene(Scene &scene, RendererContext &Renderer, HWND hwnd)
-{  
-  scene.mCamera = new Camera;
-  scene.mCamera->SetPosition(5.0f, 0.0f, -15.0f);
-
+bool InitializeScene(Scene &scene, Camera &mCamera, RendererContext &Renderer, HWND hwnd)
+{
+  mCamera.SetPosition(5.0f, 0.0f, -15.0f);
+	 
   scene.entity_num = 3; 
-  
+
   for (size_t i = 0; i < scene.entity_num; ++i)
-    {
-      scene.entities[i] = new Entity();
-    }
-	  
+    scene.entities[i] = new Entity();
+  
   Running = InitializeEntity(scene.entities, scene.entity_num, Renderer);
   if (!Running)
     {
@@ -25,10 +22,9 @@ bool InitializeScene(Scene &scene, RendererContext &Renderer, HWND hwnd)
   return true;
 }
 
-bool RenderScene(Scene &scene, RendererContext &Renderer)
+bool RenderScene(Scene &scene, Camera &mCamera, RendererContext &Renderer, MatrixBufferType& matrix)
 {
   bool Running;
-  MatrixBufferType matrix;
  	  
   RendererBeginScene(Renderer, 0.f, 0.f, 0.f, 1.f);
 
@@ -37,10 +33,10 @@ bool RenderScene(Scene &scene, RendererContext &Renderer)
 
   float total_time = (float)(currentTime.QuadPart - scene.startTime.QuadPart) / (float)scene.frequency.QuadPart;
 	      
-  scene.mCamera->Render();
+  mCamera.Render();
 	      
   matrix.world = XMMatrixIdentity();	      
-  scene.mCamera->GetViewMatrix(matrix.view);
+  mCamera.GetViewMatrix(matrix.view);
   
   float fieldOfView = 3.141592654f / 4.0f;
   float screenAspect = 1.f; 
@@ -68,12 +64,13 @@ bool RenderScene(Scene &scene, RendererContext &Renderer)
 
 void CleanScene(Scene *scene)
 {
+  /*
   if (scene->mCamera)
     {
       delete scene->mCamera;
       scene->mCamera = nullptr; 
     }
-
+  */
   for (int i = 0; i < scene->entity_num; i++)
     {
       if (scene->entities[i]->mesh.vertexBuffer)

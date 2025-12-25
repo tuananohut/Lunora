@@ -17,7 +17,6 @@ static bool Running;
 
 struct Scene
 {
-  Camera *mCamera;
   size_t entity_num; 
   Entity *entities[3];
   
@@ -25,8 +24,8 @@ struct Scene
   LARGE_INTEGER startTime;
 };
 
-bool InitializeScene(Scene &scene, RendererContext &Renderer, HWND hwnd);
-bool RenderScene(Scene &scene, RendererContext &Renderer);
+bool InitializeScene(Scene &scene, Camera& mCamera, RendererContext &Renderer, HWND hwnd);
+bool RenderScene(Scene &scene, Camera& mCamera, RendererContext &Renderer, MatrixBufferType& matrix);
 void CleanScene(Scene *scene);
 
 #endif

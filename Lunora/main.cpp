@@ -29,7 +29,8 @@ LRESULT CALLBACK WindowProc(HWND Window,
     case WM_CREATE:
       {
 	CREATESTRUCTA* create = (CREATESTRUCTA*)LParam;
-	RendererContext* renderer = (RendererContext*)create->lpCreateParams;
+	RendererContext* renderer =
+	  (RendererContext*)create->lpCreateParams;
 
 	SetWindowLongPtr(Window, GWLP_USERDATA, (LONG_PTR)renderer);
       } break;
@@ -83,14 +84,13 @@ int WINAPI WinMain(HINSTANCE Instance,
   wc.lpszClassName = "Lunora";
 
   HRESULT result;
-
-  RendererContext *Renderer = new RendererContext;
   
   if (RegisterClassExA(&wc))
     {
       int x = SCREEN_WIDTH;
       int y = SCREEN_HEIGHT; 
 
+      RendererContext *Renderer = new RendererContext();
       Scene *scene = new Scene();
 
       HWND hwnd = CreateWindowExA(0,                   
@@ -112,14 +112,18 @@ int WINAPI WinMain(HINSTANCE Instance,
 	    {
 	      Running = false; 
 	      return -1; 
-	    }  
-	    
-	  Running = InitializeScene(*scene, *Renderer, hwnd); 
+	    }
+
+	  Camera *mCamera = new Camera; 
+	  
+	  Running = InitializeScene(*scene, *mCamera, *Renderer, hwnd); 
 	  if (!Running)
 	    {
 	      Running = false; 
 	      return -1; 
 	    }
+
+	  MatrixBufferType matrix;
 	  
 	  while(Running)
 	    {
@@ -150,7 +154,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      if (!Running)
 		break;
 
-	      Running = RenderScene(*scene, *Renderer);
+	      Running = RenderScene(*scene, *mCamera, *Renderer, matrix);
 	      if (!Running)
 		{
 		  Running = false;

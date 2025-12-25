@@ -13,13 +13,13 @@ namespace LunoraEngine {
 
   struct RendererContext
   {
-    ID3D11Device *Device;
-    ID3D11DeviceContext *DeviceContext;
-    ID3D11RenderTargetView *RenderTargetView;
-    ID3D11Texture2D *DepthStencilBuffer;
-    ID3D11DepthStencilView *DepthStencilView;
-    IDXGISwapChain *SwapChain;
-    ID3D11Texture2D *BackBuffer;
+    ID3D11Device *Device = nullptr;
+    ID3D11DeviceContext *DeviceContext = nullptr;
+    ID3D11RenderTargetView *RenderTargetView = nullptr;
+    ID3D11Texture2D *DepthStencilBuffer = nullptr;
+    ID3D11DepthStencilView *DepthStencilView = nullptr;
+    IDXGISwapChain *SwapChain = nullptr;
+    ID3D11Texture2D *BackBuffer = nullptr;
     D3D11_VIEWPORT Viewport;
   };
 
