@@ -24,8 +24,6 @@ bool InitializeScene(Scene &scene, Camera &mCamera, RendererContext &Renderer, H
 
 bool RenderScene(Scene &scene, Camera &mCamera, RendererContext &Renderer, MatrixBufferType& matrix)
 {
-  bool Running;
- 	  
   RendererBeginScene(Renderer, 0.f, 0.f, 0.f, 1.f);
 
   LARGE_INTEGER currentTime;
@@ -65,7 +63,7 @@ bool RenderScene(Scene &scene, Camera &mCamera, RendererContext &Renderer, Matri
 void CleanScene(Scene *scene)
 {
   /*
-  if (scene->mCamera)
+    if (scene->mCamera)
     {
       delete scene->mCamera;
       scene->mCamera = nullptr; 
