@@ -91,7 +91,6 @@ int WINAPI WinMain(HINSTANCE Instance,
       int y = SCREEN_HEIGHT; 
 
       RendererContext *Renderer = new RendererContext();
-      Scene *scene = new Scene();
 
       HWND hwnd = CreateWindowExA(0,                   
 				  wc.lpszClassName,          
@@ -111,19 +110,29 @@ int WINAPI WinMain(HINSTANCE Instance,
 	  if (!Running)
 	    {
 	      Running = false; 
-	      return -1; 
 	    }
 
-	  Camera *mCamera = new Camera; 
-	  
-	  Running = InitializeScene(*scene, *mCamera, *Renderer, hwnd); 
+	  Camera *mCamera = new Camera;
+	  mCamera->SetPosition(5.0f, 0.0f, -15.0f);
+
+	  const size_t entity_num = 3; 
+	  Entity *entities[entity_num];	   
+
+	  for (size_t i = 0; i < entity_num; ++i)
+	    entities[i] = new Entity();
+  
+	  Running = InitializeEntity(entities, entity_num, *Renderer);
 	  if (!Running)
 	    {
-	      Running = false; 
-	      return -1; 
+	      Running = false;
 	    }
-
+	  
 	  MatrixBufferType matrix;
+
+	  LARGE_INTEGER frequency;
+	  LARGE_INTEGER startTime;
+	  QueryPerformanceFrequency(&frequency); 
+	  QueryPerformanceCounter(&startTime);
 	  
 	  while(Running)
 	    {
@@ -132,10 +141,30 @@ int WINAPI WinMain(HINSTANCE Instance,
 		{		  
 		  if (Message.message == WM_QUIT)
 		    { 
-		      CleanScene(scene);
+		      if (mCamera)
+			{
+			  delete mCamera;
+			  mCamera = nullptr; 
+			}
+		      
+			for (int i = 0; i < entity_num; i++)
+			  {
+			    if (entities[i]->mesh.vertexBuffer)
+			      ReleaseModel(&entities[i]->mesh);
+			  
+			    if (entities[i]->color_shader.baseShader.m_vertexShader)
+			      ReleaseShaderResources(&entities[i]->color_shader);
+			    else if (entities[i]->texture_shader.baseShader.m_vertexShader)
+			      ReleaseShaderResources(&entities[i]->texture_shader);
 
-		      delete scene;
-		      scene = nullptr;
+			    if (entities[i]->texture.m_textureView)
+			      ReleaseTexture(&entities[i]->texture);
+
+			  
+			    delete entities[i];
+			    entities[i] = nullptr;
+			  }
+
 
 		      if (Renderer)
 			{
@@ -153,13 +182,40 @@ int WINAPI WinMain(HINSTANCE Instance,
 
 	      if (!Running)
 		break;
+	      
+	      RendererBeginScene(*Renderer, 0.f, 0.f, 0.f, 1.f);
 
-	      Running = RenderScene(*scene, *mCamera, *Renderer, matrix);
+	      LARGE_INTEGER currentTime;
+	      QueryPerformanceCounter(&currentTime);
+
+	      float total_time = (float)(currentTime.QuadPart - startTime.QuadPart) / (float)frequency.QuadPart;
+	      
+	      mCamera->Render();
+	      
+	      matrix.world = XMMatrixIdentity();	      
+	      mCamera->GetViewMatrix(matrix.view);
+	      
+	      float fieldOfView = 3.141592654f / 4.0f;
+	      float screenAspect = 1.f; 
+	      if (SCREEN_HEIGHT > 0)
+		{
+		  screenAspect = (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT;
+		}
+	      else
+		{
+		  screenAspect = 1.0f; 
+		}
+  
+	      matrix.proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
+	      
+	      Running = RenderEntity(*Renderer, entities, entity_num, matrix, total_time);
 	      if (!Running)
 		{
 		  Running = false;
 		  return 0; 
 		}
+	      
+	      RendererEndScene(*Renderer);
 	    }  
 	} 
     }
