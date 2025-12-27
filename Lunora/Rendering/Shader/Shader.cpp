@@ -83,7 +83,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
   ID3DBlob *psBlob = nullptr;
   ID3DBlob *errorMessage = nullptr;
 
-  hr = CompileShaderFromFile(L"../../Lunora/Shaders/gpu.hlsl",
+  hr = CompileShaderFromFile(L"../../Lunora/Shaders/color.hlsl",
 			     "ColorVertexShader",
 			     "vs_5_0",
 			     &vsBlob);
@@ -98,7 +98,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
       return false; 
     }
 
-  hr = CompileShaderFromFile(L"../../Lunora/Shaders/gpu.hlsl",
+  hr = CompileShaderFromFile(L"../../Lunora/Shaders/color.hlsl",
 			     "ColorPixelShader",
 			     "ps_5_0",
 			     &psBlob);
