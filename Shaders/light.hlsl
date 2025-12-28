@@ -5,30 +5,28 @@ cbuffer MatrixBuffer
 {
 	matrix worldMatrix;
 	matrix viewMatrix;
-	atrix projectionMatrix; 
-};
-
-cbuffer LightBuffer
-{
-	float4 ambientColor; 
-	float4 diffuseColor;
-	float3 lightDirection;
-	float padding; 
+	matrix projectionMatrix; 
 };
 
 struct VertexInputType
 {
 	float4 position: POSITION;
-	float2 tex: TEXCOORD0;
 	float3 normal: NORMAL; 
+	float2 tex: TEXCOORD0;
 };
 
 struct PixelInputType
 {
 	float4 position: SV_POSITION;
 	float2 tex: TEXCOORD0;
-	float3 normal: NORMAL; 
+	float3 normal: TEXCOORD1; 
 };
+
+cbuffer HemiConstants : register( b0 )
+{
+	float3 AmbientDown : packoffset( c0 );
+ 	float3 AmbientRange : packoffset( c1 );
+}
 
 PixelInputType LightVertexShader(VertexInputType input)
 {
@@ -48,29 +46,19 @@ PixelInputType LightVertexShader(VertexInputType input)
 	return output; 
 }
 
+float3 CalcAmbient(float3 normal, float3 color)
+{
+	float up = normal.y * 0.5 + 0.5;
+
+	float3 Ambient = AmbientDown + up * AmbientUp;
+
+	return Ambient * color;
+}
+
 float4 LightPixelShader(PixelInputType input): SV_TARGET
 {
-	float4 textureColor;
-	float3 lightDir;
-	float lightIntensity;
-	float4 color;
-
-	textureColor = shaderTexture.Sample(SampleType, input.tex);
-
-	color = ambientColor; 
 	
-	lightDir = -lightDirection;
+	float3 normal = normalize(input.normal);
 
-	lightIntensity = saturate(dot(input.normal, lightDir));
-
-	if (lightIntensity > 0.f)
-	{
-		color += (diffuseColor * lightIntensity); 
-	}
-
-	color = saturate(color);
-
-	color = color * textureColor;
-
-	return color; 
+	
 }

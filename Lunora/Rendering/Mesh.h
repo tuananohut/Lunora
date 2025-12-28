@@ -18,13 +18,13 @@ struct Vertex
   XMFLOAT2 texture; 
 };
 
-/*
-struct VertexColor
+struct HemisphericVertex
 {
-  XMFLOAT3 position;
-  XMFLOAT4 color;
+  XMFLOAT4 position;
+  XMFLOAT2 texture;
+  XMFLOAT3 normal; 
 };
-*/
+
 struct Mesh 
 {  
   ID3D11Buffer *vertexBuffer = nullptr;
