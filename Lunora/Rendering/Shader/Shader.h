@@ -33,7 +33,7 @@ struct TextureShader
 
 struct LightShader
 {
-  TextureShader textureShader;
+  TextureShader baseShader;
   ID3D11SamplerState *m_sampleState = nullptr;
   ID3D11Buffer *m_lightBuffer = nullptr; 
 };

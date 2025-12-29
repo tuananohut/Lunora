@@ -428,3 +428,24 @@ void ReleaseShaderResources(TextureShader* shader)
 	}
     }
 }
+
+void ReleaseShaderResources(LightShader* shader)
+{
+  if (shader)
+    {
+      shader->baseShader.Release();
+  
+      if (shader->m_sampleState)
+	{
+	  shader->m_sampleState->Release();
+	  shader->m_sampleState = nullptr; 
+	}
+
+      if (shader->m_lightBuffer)
+	{
+	  shader->m_lightBuffer->Release();
+	  shader->m_lightBuffer = nullptr; 
+	}
+
+    }
+}
