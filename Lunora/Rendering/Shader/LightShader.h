@@ -1,0 +1,28 @@
+#ifndef LIGHTSHADER_H
+#define LIGHTSHADER_H
+
+#include "Shader.h"
+
+struct LightShader
+{
+  BaseShader baseShader;
+  ID3D11SamplerState *m_sampleState = nullptr;
+  ID3D11Buffer *m_lightBuffer = nullptr; 
+};
+
+
+struct LightBufferType
+{
+  XMFLOAT3 AmbientDowwn;
+  XMFLOAT3 AmbientRange;
+};
+
+HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* shader);
+
+bool Render(RendererContext& RenderBuffers, LightShader* shader, UINT indexCount,
+	    XMMATRIX world, XMMATRIX view, XMMATRIX proj,
+	    ID3D11ShaderResourceView* texture);
+
+void ReleaseShaderResources(LightShader* shader);
+
+#endif 
