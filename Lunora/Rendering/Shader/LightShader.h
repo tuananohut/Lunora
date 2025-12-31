@@ -10,10 +10,9 @@ struct LightShader
   ID3D11Buffer *m_lightBuffer = nullptr; 
 };
 
-
 struct LightBufferType
 {
-  XMFLOAT3 AmbientDowwn;
+  XMFLOAT3 AmbientDown;
   XMFLOAT3 AmbientRange;
 };
 

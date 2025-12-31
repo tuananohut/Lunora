@@ -93,6 +93,68 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* s
   return true;
 }
 
+bool Render(RendererContext& RenderBuffers, LightShader* shader,
+	    UINT indexCount,
+	    XMMATRIX world, XMMATRIX view, XMMATRIX proj,
+	    ID3D11ShaderResourceView* texture,
+	    XMFLOAT3 AmbientDown,
+	    XMFLOAT3 AmbientRange)
+{
+  HRESULT hr; 
+  D3D11_MAPPED_SUBRESOURCE mappedResource;
+  MatrixBufferType* dataPtr;
+  LightBufferType* dataPtr2; 
+  unsigned int bufferNumber;
+  
+  world = XMMatrixTranspose(world);
+  view = XMMatrixTranspose(view);
+  proj = XMMatrixTranspose(proj);
+  
+  hr = RenderBuffers.DeviceContext->Map(shader->baseShader.m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+  if (FAILED(hr))
+    {
+      return false;
+    }
+  
+  dataPtr = (MatrixBufferType*)mappedResource.pData;
+  
+  dataPtr->world = world;
+  dataPtr->view = view;
+  dataPtr->proj = proj;
+
+  RenderBuffers.DeviceContext->Unmap(shader->baseShader.m_matrixBuffer, 0);
+  
+  bufferNumber = 0;
+
+  RenderBuffers.DeviceContext->VSSetConstantBuffers(bufferNumber, 1, &shader->baseShader.m_matrixBuffer); 
+
+  RenderBuffers.DeviceContext->PSSetShaderResources(0, 1, &texture);
+
+  hr = RenderBuffers.DeviceContext->Map(shader->m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+  if (FAILED(hr))
+    return false;
+  
+  dataPtr2->AmbientDown = AmbientDown; 
+  dataPtr2->AmbientRange = AmbientRange;
+
+  RenderBuffers.DeviceContext->Unmap(shader->m_lightBuffer, 0);
+
+  bufferNumber = 0;
+
+  RenderBuffers.DeviceContext->PSSetConstantBuffers(bufferNumber, 1, &shader->m_lightBuffer); 
+  
+  RenderBuffers.DeviceContext->IASetInputLayout(shader->baseShader.m_layout);
+  		
+  RenderBuffers.DeviceContext->VSSetShader(shader->baseShader.m_vertexShader, NULL, 0);
+  RenderBuffers.DeviceContext->PSSetShader(shader->baseShader.m_pixelShader, NULL, 0);
+  	
+  RenderBuffers.DeviceContext->PSSetSamplers(0, 1, &shader->m_sampleState);
+  	
+  RenderBuffers.DeviceContext->DrawIndexed(indexCount, 0, 0);
+    
+  return true;
+}
+
 void ReleaseShaderResources(LightShader* shader)
 {
   if (shader)

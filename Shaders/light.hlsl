@@ -22,11 +22,11 @@ struct PixelInputType
 	float3 normal: TEXCOORD1; 
 };
 
-cbuffer HemiConstants : register( b0 )
+cbuffer HemiConstants
 {
-	float3 AmbientDown : packoffset( c0 );
- 	float3 AmbientRange : packoffset( c1 );
-}
+	float3 AmbientDown; 
+ 	float3 AmbientRange; 
+};
 
 PixelInputType LightVertexShader(VertexInputType input)
 {
