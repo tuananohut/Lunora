@@ -20,7 +20,7 @@ struct Vertex
 
 struct HemisphericVertex
 {
-  XMFLOAT4 position;
+  XMFLOAT3 position;
   XMFLOAT2 texture;
   XMFLOAT3 normal; 
 };

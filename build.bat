@@ -10,6 +10,6 @@ FOR /R %%f in (*.cpp) do (
 
 SET assembly=engine
 
-cl -EHsc -FC -Zi /FeLunora.exe c:\dev\Lunora\Lunora\main.cpp c:\dev\Lunora\Lunora\Rendering\Texture.cpp c:\dev\Lunora\Lunora\Rendering\Shader\Shader.cpp c:\dev\Lunora\Lunora\Engine\src\Renderer.cpp c:\dev\Lunora\Lunora\Rendering\Mesh.cpp c:\dev\Lunora\Lunora\Game\Camera\Camera.cpp c:\dev\Lunora\Lunora\Game\Entity.cpp c:\dev\Lunora\Lunora\Game\Scene.cpp user32.lib Gdi32.lib d3d11.lib d3dcompiler.lib dxgi.lib c:\dev\Lunora\data\resource.res
+cl -EHsc -FC -Zi /FeLunora.exe c:\dev\Lunora\Lunora\main.cpp c:\dev\Lunora\Lunora\Rendering\Texture.cpp c:\dev\Lunora\Lunora\Rendering\Shader\Shader.cpp c:\dev\Lunora\Lunora\Rendering\Shader\LightShader.cpp c:\dev\Lunora\Lunora\Rendering\Shader\Light.cpp c:\dev\Lunora\Lunora\Engine\src\Renderer.cpp c:\dev\Lunora\Lunora\Rendering\Mesh.cpp c:\dev\Lunora\Lunora\Game\Camera\Camera.cpp c:\dev\Lunora\Lunora\Game\Entity.cpp c:\dev\Lunora\Lunora\Game\Scene.cpp user32.lib Gdi32.lib d3d11.lib d3dcompiler.lib dxgi.lib c:\dev\Lunora\data\resource.res
 
 popd

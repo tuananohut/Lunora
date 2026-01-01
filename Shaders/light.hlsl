@@ -46,19 +46,26 @@ PixelInputType LightVertexShader(VertexInputType input)
 	return output; 
 }
 
-float3 CalcAmbient(float3 normal, float3 color)
+float4 CalcAmbient(float3 normal, float3 color)
 {
 	float up = normal.y * 0.5 + 0.5;
 
 	float3 Ambient = AmbientDown + up * AmbientUp;
 
-	return Ambient * color;
+	return float4(Ambient * color, 1.f);
 }
 
 float4 LightPixelShader(PixelInputType input): SV_TARGET
 {
-	
-	float3 normal = normalize(input.normal);
+	float4 textureColor; 
+	float3 color; 
+	float4 ambientColor;
 
-	
+	textureColor = shaderTexture.Sample(SampleType, input.tex); 
+
+	color = float3(1.f, 1.f, 1.f);
+
+	ambientColor = float4(CalcAmbient(input.normal, color));
+
+	return ambientColor; 
 }
