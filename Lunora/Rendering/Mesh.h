@@ -17,25 +17,18 @@ struct Vertex
   XMFLOAT4 color;
   XMFLOAT2 texture; 
 };
-
-struct HemisphericVertex
-{
-  XMFLOAT3 position;
-  XMFLOAT2 texture;
-  XMFLOAT3 normal; 
-};
-
+ 
 struct Mesh 
 {  
   ID3D11Buffer *vertexBuffer = nullptr;
   ID3D11Buffer *indexBuffer = nullptr;
-  UINT vertexCount = 0;
-  UINT indexCount = 0;
-  UINT stride = sizeof(Vertex);
-  UINT offset = 0;
-  Vertex* vertices;
-  unsigned long* indices;
-  char *filename;
+  uint32_t vertexCount = 0;
+  uint32_t indexCount = 0;
+  uint32_t stride = sizeof(Vertex);
+  uint32_t offset = 0;
+  Vertex* vertices = nullptr;
+  uint32_t* indices = nullptr;
+  const char *filename = nullptr;
 };
 
 bool MeshInitialize(Mesh* Mesh,
