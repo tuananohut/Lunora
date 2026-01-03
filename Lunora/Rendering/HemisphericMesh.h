@@ -34,7 +34,6 @@ struct HemisphericMesh
 bool HemisphericMeshInitialize(ID3D11Device* device, HemisphericMesh* mesh); 
 
 bool HemisphericMeshCreateVertexBuffer(ID3D11Device* device, HemisphericMesh* mesh);
-
 bool HemisphericMeshCreateIndexBuffer(ID3D11Device* device, HemisphericMesh* mesh);
 
 void HemisphericMeshRender(ID3D11Device* device, HemisphericMesh* mesh);

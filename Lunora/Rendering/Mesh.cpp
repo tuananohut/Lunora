@@ -57,7 +57,7 @@ void RenderModel(RendererContext& RenderBuffers, Mesh* Buffer)
 
   RenderBuffers.DeviceContext->RSSetViewports(1, &RenderBuffers.Viewport);
 
-  RenderBuffers.DeviceContext->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+  RenderBuffers.DeviceContext->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST ); 
 }
 
 bool InitializeModel(ID3D11Device *Device, Mesh* ModelBuffer)
