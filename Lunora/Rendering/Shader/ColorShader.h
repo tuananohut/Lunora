@@ -11,7 +11,7 @@ struct ColorShader
 HRESULT InitializeShaderResources(RendererContext& RenderBuffers, ColorShader* shader);
 
 
-bool Render(RendererContext& RenderBuffers, ColorShader* shader, UINT indexCount,
+bool Render(RendererContext& RenderBuffers, ColorShader* shader, uint32_t indexCount,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj);
 
 void ReleaseShaderResources(ColorShader* shader);

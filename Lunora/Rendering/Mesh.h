@@ -28,7 +28,7 @@ struct Mesh
   uint32_t offset = 0;
   Vertex* vertices = nullptr;
   uint32_t* indices = nullptr;
-  const char *filename = nullptr;
+  char *filename = nullptr;
 };
 
 bool MeshInitialize(Mesh* Mesh,

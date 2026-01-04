@@ -1,7 +1,6 @@
 #include "HemisphericMesh.h"
 
-
-bool HemisphericMeshCreateVertexBuffer(ID3D11Device* device, HemisphericMesh* mesh)
+bool HemisphericMeshCreateVertexBuffer(ID3D11Device* Device, HemisphericMesh* Mesh)
 {
   HRESULT result;
   
@@ -19,13 +18,12 @@ bool HemisphericMeshCreateVertexBuffer(ID3D11Device* device, HemisphericMesh* me
   
   result = Device->CreateBuffer( &bufferDesc, &InitData, &Mesh->vertexBuffer );
   if (FAILED(result))
-    reutrn false; 
+    return false; 
   
   return true; 
-
 }
 
-bool HemisphericMeshCreateIndexBuffer(ID3D11Device* device, HemisphericMesh* mesh)
+bool HemisphericMeshCreateIndexBuffer(ID3D11Device* Device, HemisphericMesh* Mesh)
 {
   HRESULT hr;
  
@@ -74,7 +72,7 @@ bool HemisphericMeshInitialize(ID3D11Device *Device, HemisphericMesh* ModelBuffe
   return true;
 }
 
-void HemisphericMeshRender(ID3D11Device* device, HemisphericMesh* mesh)
+void HemisphericMeshRender(RendererContext& RenderBuffers, HemisphericMesh* mesh)
 {
   uint32_t stride = sizeof(HemisphericMesh);
   uint32_t offset = 0;
@@ -117,7 +115,77 @@ void HemisphericMeshRelease(HemisphericMesh* Buffer)
 
 }
 
-bool HemisphericMeshLoadFromFile(HemisphericMesh* mesh)
+bool HemisphericMeshLoadFromFile(HemisphericMesh* Buffer)
 {
+  char* filename = Buffer->filename; 
   
+  FILE* file = fopen(filename, "r");
+  if (!file)
+    return false;
+
+  XMFLOAT3 positions[1024];
+  XMFLOAT2 texCoords[1024];
+  XMFLOAT3 normal[1024];
+  uint32_t indicesTemp[2048];
+  int posCount = 0, normalCount = 0, texCount = 0;
+  UINT idxCount = 0;
+
+  char line[256];
+  while (fgets(line, sizeof(line), file))
+    {
+      if (line[0] == 'v' && line[1] == ' ')
+	{
+	  float x, y, z;
+	  sscanf(line, "v %f %f %f", &x, &y, &z);
+	  positions[posCount++] = XMFLOAT3(x, y, z);
+	}
+      else if (line[0] == 'v' && line[1] == 't')
+	{
+	  float u, v;
+	  sscanf(line, "vt %f %f", &u, &v);
+	  texCoords[texCount++] = XMFLOAT2(u, v);
+	}
+      else if (line[0] == 'v' && line[1] == 't')
+	{
+	  float nx, ny, nz;	  
+	  sscanf(line, "vn %f %f", &nx, &ny, &nz);
+	  normal[normalCount++] = XMFLOAT3(nx, ny, nz);
+	}
+
+      else if (line[0] == 'i' && line[1] == ' ')
+	{
+	  uint32_t a, b, c;
+	  sscanf(line, "i %u %u %u", &a, &b, &c);
+	  indicesTemp[idxCount++] = a;
+	  indicesTemp[idxCount++] = b;
+	  indicesTemp[idxCount++] = c;
+	}
+    }
+  fclose(file);
+  
+  // int vertexCount = (posCount < colCount) ? posCount : colCount;
+  int vertexCount = posCount; 
+  Buffer->vertexCount = vertexCount;
+
+  Buffer->vertices = new HemisphericVertex[vertexCount];
+  if (!Buffer->vertices)
+    return false;
+
+  for (int i = 0; i < vertexCount; ++i)
+    {
+      (Buffer->vertices)[i].position = positions[i];
+      (Buffer->vertices)[i].texture = texCoords[i % texCount];
+      (Buffer->vertices)[i].normal = normal[i]; 
+    }
+  
+  Buffer->indices = new uint32_t[idxCount];
+  if (!Buffer->indices)
+    return false;
+  
+  for (int i = 0; i < idxCount; ++i)
+    (Buffer->indices)[i] = indicesTemp[i];
+    
+  Buffer->indexCount = idxCount;
+  
+  return true;
 }

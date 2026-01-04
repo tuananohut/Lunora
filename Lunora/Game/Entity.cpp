@@ -13,7 +13,6 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
     {
       return false; 
     }
-
   assert(Entity[0]->texture.m_textureView != nullptr);
   
   texture_file = "c:/dev/Lunora/Assets/Textures/lemons.tga";  
@@ -24,9 +23,10 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
     {
       return false; 
     }
-
   assert(Entity[1]->texture.m_textureView != nullptr);
- 
+  
+  texture_file = "c:/dev/Lunora/Assets/Textures/palestine_normalized.tga";
+  
   for (size_t i = 0; i < entity_num; i++)
     {
       Entity[i]->transform.position = {0.f + (i * 5.f), 0.f, -5.f};
@@ -36,22 +36,26 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
 
       if (Entity[i]->texture.m_textureView != nullptr) 
 	Entity[i]->mesh.filename = "../Assets/Models/cube_trial_2.txt";
-      
+
+      /*
       running = InitializeModel(RenderBuffers.Device, &Entity[i]->mesh);
       if(!running)
 	{
           return false;
 	}
+      */
 
       if (Entity[i]->texture.m_textureView != nullptr) 
 	{
-	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->texture_shader);
+	  HemisphericMeshInitialize(RenderBuffers.Device, &Entity[i]->hemisphericMesh);
+	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->light_shader);
 	  if (FAILED(hr))
 	    return false;
 	}
 
       else
 	{
+	  InitializeModel(RenderBuffers.Device, &Entity[i]->mesh);
 	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->color_shader);
 	  if (FAILED(hr))
 	    return false;
@@ -65,6 +69,9 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
 bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entity_num, MatrixBufferType& matrix, float total_time)
 {
   HRESULT result = true;
+
+  XMFLOAT3 AmbientDown = XMFLOAT3(4.f, 4.f, 4.f);
+  XMFLOAT3 AmbientRange = XMFLOAT3(2.f, 2.f, 2.f);
   
   for (size_t i = 0; i < entity_num; i++)
     {
@@ -78,9 +85,10 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
 
       if (Entity[i]->texture.m_textureView)
 	{      
-	  result = Render(RenderBuffers, &Entity[i]->texture_shader,
-			  Entity[i]->mesh.indexCount, Entity[i]->worldMatrix,
-			  matrix.view, matrix.proj, Entity[i]->texture.m_textureView);
+	  result = Render(RenderBuffers, &Entity[i]->light_shader,
+			  Entity[i]->hemisphericMesh.indexCount, Entity[i]->worldMatrix,
+			  matrix.view, matrix.proj, Entity[i]->texture.m_textureView,
+			  AmbientDown, AmbientRange);
 	  if (FAILED(result))
 	    {
 	      return false; 

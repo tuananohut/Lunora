@@ -119,7 +119,7 @@ bool LoadModelFromFile(Mesh* Buffer)
   XMFLOAT3 positions[1024];
   XMFLOAT4 colors[1024];
   XMFLOAT2 texCoords[1024];
-  unsigned long indicesTemp[2048];
+  uint32_t indicesTemp[2048];
   int posCount = 0, colCount = 0, texCount = 0;
   UINT idxCount = 0;
 
@@ -178,7 +178,7 @@ bool LoadModelFromFile(Mesh* Buffer)
 	(Buffer->vertices)[i].texture = XMFLOAT2(0, 0);
     }
   
-  Buffer->indices = new unsigned long[idxCount];
+  Buffer->indices = new uint32_t[idxCount];
   if (!Buffer->indices)
     return false;
 

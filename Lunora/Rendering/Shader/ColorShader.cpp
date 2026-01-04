@@ -75,7 +75,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers,
 
 bool Render(RendererContext& RenderBuffers,
 	    ColorShader* shader,
-	    UINT indexCount,
+	    uint32_t indexCount,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj)
 {
   HRESULT hr; 

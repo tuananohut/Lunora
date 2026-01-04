@@ -1,4 +1,4 @@
-#include "Shader.h"
+#include "LightShader.h"
 
 HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* shader)
 {
@@ -8,14 +8,14 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* s
   ID3DBlob *errorMessage = nullptr;
   
   D3DCompileFromFile(L"../../Lunora/Shaders/light.hlsl", 0, 0, "LightVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
-  hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &shader->textureShader.baseShader.m_vertexShader);
+  hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &shader->baseShader.m_vertexShader);
   if (FAILED(hr))
     {
       return false; 
     }
   
   D3DCompileFromFile(L"../../Lunora/Shaders/light.hlsl", 0, 0, "LightPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
-  hr = RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &shader->textureShader.baseShader.m_pixelShader);
+  hr = RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &shader->baseShader.m_pixelShader);
   if (FAILED(hr))
     {
       return false; 
@@ -37,7 +37,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* s
 					       num_elements,
 					       vsBlob->GetBufferPointer(),
 					       vsBlob->GetBufferSize(),
-					       &shader->textureShader.baseShader.m_layout);
+					       &shader->baseShader.m_layout);
   if (FAILED(hr))
     {
       return false; 
@@ -49,7 +49,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* s
   psBlob->Release();
   psBlob = nullptr;
   
-  hr = CreateMatrixBuffer(RenderBuffers.Device, &shader->textureShader.baseShader.m_matrixBuffer);
+  hr = CreateMatrixBuffer(RenderBuffers.Device, &shader->baseShader.m_matrixBuffer);
   if (FAILED(hr))
     {
       return false; 
@@ -94,7 +94,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* s
 }
 
 bool Render(RendererContext& RenderBuffers, LightShader* shader,
-	    UINT indexCount,
+	    uint32_t indexCount,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj,
 	    ID3D11ShaderResourceView* texture,
 	    XMFLOAT3 AmbientDown,
