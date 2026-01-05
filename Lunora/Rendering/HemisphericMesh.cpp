@@ -55,7 +55,7 @@ bool HemisphericMeshInitialize(ID3D11Device *Device, HemisphericMesh* ModelBuffe
   if (!loaded)
     {
       return false; 
-    } 
+    }
   
   result = HemisphericMeshCreateVertexBuffer(Device, ModelBuffer); 
   if (FAILED(result))
@@ -117,10 +117,12 @@ void HemisphericMeshRelease(HemisphericMesh* Buffer)
 
 bool HemisphericMeshLoadFromFile(HemisphericMesh* Buffer)
 {
-  char* filename = Buffer->filename; 
+  char* filename = Buffer->filename;
+  assert(filename != nullptr);
   
   FILE* file = fopen(filename, "r");
   if (!file)
+    
     return false;
 
   XMFLOAT3 positions[1024];

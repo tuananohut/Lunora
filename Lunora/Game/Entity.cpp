@@ -35,15 +35,13 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
       Entity[i]->mesh.filename = "../Assets/Models/cube_trial.txt";
 
       if (Entity[i]->texture.m_textureView != nullptr) 
-	Entity[i]->mesh.filename = "../Assets/Models/cube_trial_2.txt";
-
-      /*
+	Entity[i]->hemisphericMesh.filename = "c:/dev/Lunora/Assets/Models/cube_with_normal.txt";
+      
       running = InitializeModel(RenderBuffers.Device, &Entity[i]->mesh);
       if(!running)
 	{
           return false;
 	}
-      */
 
       if (Entity[i]->texture.m_textureView != nullptr) 
 	{

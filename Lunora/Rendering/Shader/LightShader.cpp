@@ -7,14 +7,20 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* s
   ID3DBlob *psBlob = nullptr;
   ID3DBlob *errorMessage = nullptr;
   
-  D3DCompileFromFile(L"../../Lunora/Shaders/light.hlsl", 0, 0, "LightVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
+  D3DCompileFromFile(L"c:/dev/Lunora/Shaders/light.hlsl", 0, 0, "LightVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
   hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &shader->baseShader.m_vertexShader);
   if (FAILED(hr))
     {
-      return false; 
+      if (errorMessage)
+	{
+	  OutputDebugStringA((char*)errorMessage->GetBufferPointer());
+	  errorMessage->Release();
+	}
+      assert(false);
+      return false;
     }
   
-  D3DCompileFromFile(L"../../Lunora/Shaders/light.hlsl", 0, 0, "LightPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
+  D3DCompileFromFile(L"c:/dev/Lunora/Shaders/light.hlsl", 0, 0, "LightPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
   hr = RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &shader->baseShader.m_pixelShader);
   if (FAILED(hr))
     {
@@ -133,7 +139,9 @@ bool Render(RendererContext& RenderBuffers, LightShader* shader,
   hr = RenderBuffers.DeviceContext->Map(shader->m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
   if (FAILED(hr))
     return false;
-  
+
+  dataPtr2 = (LightBufferType*)mappedResource.pData;
+
   dataPtr2->AmbientDown = AmbientDown; 
   dataPtr2->AmbientRange = AmbientRange;
 

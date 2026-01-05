@@ -28,7 +28,7 @@ struct HemisphericMesh
   uint32_t offset = 0;
   HemisphericVertex* vertices = nullptr;
   uint32_t* indices = nullptr;
-  char *filename = nullptr;
+  char *filename;
 };
 
 bool HemisphericMeshInitialize(ID3D11Device* device, HemisphericMesh* mesh); 

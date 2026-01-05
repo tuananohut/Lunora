@@ -18,9 +18,9 @@ struct LightBufferType
 
 HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* shader);
 
-bool Render(RendererContext& RenderBuffers, LightShader* shader, UINT indexCount,
+bool Render(RendererContext& RenderBuffers, LightShader* shader, uint32_t indexCount,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj,
-	    ID3D11ShaderResourceView* texture);
+	    ID3D11ShaderResourceView* texture, XMFLOAT3 AmbientDown, XMFLOAT3 AmbientRange);
 
 void ReleaseShaderResources(LightShader* shader);
 
