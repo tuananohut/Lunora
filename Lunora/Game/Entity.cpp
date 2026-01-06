@@ -33,9 +33,7 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
       Entity[i]->transform.rotation = {0.f, 10.f, 0.f};
       Entity[i]->transform.scale = {1.f, 1.f, 1.f};
       Entity[i]->mesh.filename = "../Assets/Models/cube_trial.txt";
-
-      if (Entity[i]->texture.m_textureView != nullptr) 
-	Entity[i]->hemisphericMesh.filename = "c:/dev/Lunora/Assets/Models/cube_with_normal.txt";
+      Entity[i]->hemisphericMesh.filename = "c:/dev/Lunora/Assets/Models/cube_with_normal.txt";
       
       running = InitializeModel(RenderBuffers.Device, &Entity[i]->mesh);
       if(!running)
@@ -43,17 +41,17 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
           return false;
 	}
 
+      HemisphericMeshInitialize(RenderBuffers.Device, &Entity[0]->hemisphericMesh);
+      
       if (Entity[i]->texture.m_textureView != nullptr) 
-	{
-	  HemisphericMeshInitialize(RenderBuffers.Device, &Entity[i]->hemisphericMesh);
-	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->light_shader);
+	{ 
+	  hr = InitializeShaderResources(RenderBuffers, &Entity[0]->light_shader);
 	  if (FAILED(hr))
 	    return false;
 	}
 
       else
 	{
-	  InitializeModel(RenderBuffers.Device, &Entity[i]->mesh);
 	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->color_shader);
 	  if (FAILED(hr))
 	    return false;
@@ -81,11 +79,11 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
 
       RenderModel(RenderBuffers, &Entity[i]->mesh);	      
 
-      if (Entity[i]->texture.m_textureView)
+      if (Entity[0]->texture.m_textureView)
 	{      
-	  result = Render(RenderBuffers, &Entity[i]->light_shader,
-			  Entity[i]->hemisphericMesh.indexCount, Entity[i]->worldMatrix,
-			  matrix.view, matrix.proj, Entity[i]->texture.m_textureView,
+	  result = Render(RenderBuffers, &Entity[0]->light_shader,
+			  Entity[0]->hemisphericMesh.indexCount, Entity[i]->worldMatrix,
+			  matrix.view, matrix.proj, Entity[0]->texture.m_textureView,
 			  AmbientDown, AmbientRange);
 	  if (FAILED(result))
 	    {

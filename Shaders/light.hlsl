@@ -25,7 +25,7 @@ struct PixelInputType
 cbuffer HemiConstants
 {
 	float3 AmbientDown; 
- 	float3 AmbientRange; 
+ 	float3 AmbientUp; 
 };
 
 PixelInputType LightVertexShader(VertexInputType input)

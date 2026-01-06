@@ -14,6 +14,8 @@ struct LightBufferType
 {
   XMFLOAT3 AmbientDown;
   XMFLOAT3 AmbientRange;
+  float padding1;
+  float padding2; 
 };
 
 HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* shader);
