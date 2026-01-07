@@ -67,5 +67,5 @@ float4 LightPixelShader(PixelInputType input): SV_TARGET
 
 	ambientColor = float4(CalcAmbient(input.normal, color));
 
-	return ambientColor; 
+	return ambientColor * textureColor; 
 }
