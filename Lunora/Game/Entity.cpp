@@ -66,8 +66,8 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
 {
   HRESULT result = true;
 
-  XMFLOAT3 AmbientDown = XMFLOAT3(4.f, 4.f, 4.f);
-  XMFLOAT3 AmbientRange = XMFLOAT3(2.f, 2.f, 2.f);
+  XMFLOAT3 AmbientDown = XMFLOAT3(1.f, 2.f, 1.f);
+  XMFLOAT3 AmbientRange = XMFLOAT3(2.f, 4.f, 2.f);
   
   for (size_t i = 0; i < entity_num; i++)
     {
