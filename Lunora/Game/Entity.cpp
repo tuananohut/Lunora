@@ -4,17 +4,7 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
 {
   bool running;
   HRESULT hr;
-  
-  const char* texture_file = "c:/dev/Lunora/Assets/Textures/palestine.tga";
-  running = InitializeTexture(RenderBuffers.Device,
-			      RenderBuffers.DeviceContext,
-			      &Entity[0]->texture, texture_file);
-  if (!running)
-    {
-      return false; 
-    }
-  assert(Entity[0]->texture.m_textureView != nullptr);
-  
+  /*
   texture_file = "c:/dev/Lunora/Assets/Textures/lemons.tga";  
   running = InitializeTexture(RenderBuffers.Device,
 			      RenderBuffers.DeviceContext,
@@ -24,9 +14,7 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
       return false; 
     }
   assert(Entity[1]->texture.m_textureView != nullptr);
-  
-  texture_file = "c:/dev/Lunora/Assets/Textures/palestine_normalized.tga";
-  
+  */
   for (size_t i = 0; i < entity_num; i++)
     {
       Entity[i]->transform.position = {0.f + (i * 5.f), 0.f, -5.f};
@@ -34,18 +22,30 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
       Entity[i]->transform.scale = {1.f, 1.f, 1.f};
       Entity[i]->mesh.filename = "../Assets/Models/cube_trial.txt";
       Entity[i]->hemisphericMesh.filename = "c:/dev/Lunora/Assets/Models/cube_with_normal.txt";
+
+      const char* texture_file = "c:/dev/Lunora/Assets/Textures/palestine.tga";
+      running = InitializeTexture(RenderBuffers.Device,
+				  RenderBuffers.DeviceContext,
+				  &Entity[i]->texture, texture_file);
+      if (!running)
+	{
+	  return false; 
+	}
+      assert(Entity[i]->texture.m_textureView != nullptr);
       
+      /*    
       running = InitializeModel(RenderBuffers.Device, &Entity[i]->mesh);
       if(!running)
 	{
           return false;
 	}
+      */
 
-      HemisphericMeshInitialize(RenderBuffers.Device, &Entity[0]->hemisphericMesh);
+      HemisphericMeshInitialize(RenderBuffers.Device, &Entity[i]->hemisphericMesh);
       
       if (Entity[i]->texture.m_textureView != nullptr) 
 	{ 
-	  hr = InitializeShaderResources(RenderBuffers, &Entity[0]->light_shader);
+	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->light_shader);
 	  if (FAILED(hr))
 	    return false;
 	}
@@ -79,11 +79,11 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
 
       RenderModel(RenderBuffers, &Entity[i]->mesh);	      
 
-      if (Entity[0]->texture.m_textureView)
+      if (Entity[i]->texture.m_textureView)
 	{      
-	  result = Render(RenderBuffers, &Entity[0]->light_shader,
-			  Entity[0]->hemisphericMesh.indexCount, Entity[i]->worldMatrix,
-			  matrix.view, matrix.proj, Entity[0]->texture.m_textureView,
+	  result = Render(RenderBuffers, &Entity[i]->light_shader,
+			  Entity[i]->hemisphericMesh.indexCount, Entity[i]->worldMatrix,
+			  matrix.view, matrix.proj, Entity[i]->texture.m_textureView,
 			  AmbientDown, AmbientRange);
 	  if (FAILED(result))
 	    {

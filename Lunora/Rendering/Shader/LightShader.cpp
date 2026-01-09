@@ -144,7 +144,9 @@ bool Render(RendererContext& RenderBuffers, LightShader* shader,
 
   dataPtr2->AmbientDown = AmbientDown; 
   dataPtr2->AmbientRange = AmbientRange;
-
+  dataPtr2->padding1 = 0.f;
+  dataPtr2->padding2 = 0.f;
+  
   RenderBuffers.DeviceContext->Unmap(shader->m_lightBuffer, 0);
 
   bufferNumber = 0;
