@@ -19,13 +19,13 @@ struct PixelInputType
 {
 	float4 position: SV_POSITION;
 	float2 tex: TEXCOORD0;
-	float3 normal: TEXCOORD1; 
+	float3 normal: NORMAL; 
 };
 
 cbuffer HemiConstants
 {
-	float3 AmbientDown; 
- 	float3 AmbientUp; 
+    float4 AmbientDown;
+    float4 AmbientUp;
 };
 
 PixelInputType LightVertexShader(VertexInputType input)
@@ -50,7 +50,7 @@ float4 CalcAmbient(float3 normal, float3 color)
 {
 	float up = normal.y * 0.5 + 0.5;
 
-	float3 Ambient = AmbientDown + up * AmbientUp;
+	float3 Ambient = AmbientDown.xyz + up * AmbientUp.xyz;
 
 	return float4(Ambient * color, 1.f);
 }

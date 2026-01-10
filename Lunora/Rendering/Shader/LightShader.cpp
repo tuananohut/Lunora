@@ -37,7 +37,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* s
 	D3D11_INPUT_PER_VERTEX_DATA, 0 } 
     };
 
-  UINT num_elements = sizeof(input_layout) / sizeof(input_layout)[0];
+  UINT num_elements = sizeof(input_layout) / sizeof(input_layout[0]);
   
   hr = RenderBuffers.Device->CreateInputLayout(input_layout,
 					       num_elements,
@@ -103,8 +103,8 @@ bool Render(RendererContext& RenderBuffers, LightShader* shader,
 	    uint32_t indexCount,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj,
 	    ID3D11ShaderResourceView* texture,
-	    XMFLOAT3 AmbientDown,
-	    XMFLOAT3 AmbientRange)
+	    XMFLOAT4 AmbientDown,
+	    XMFLOAT4 AmbientUp)
 {
   HRESULT hr; 
   D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -143,9 +143,7 @@ bool Render(RendererContext& RenderBuffers, LightShader* shader,
   dataPtr2 = (LightBufferType*)mappedResource.pData;
 
   dataPtr2->AmbientDown = AmbientDown; 
-  dataPtr2->AmbientRange = AmbientRange;
-  dataPtr2->padding1 = 0.f;
-  dataPtr2->padding2 = 0.f;
+  dataPtr2->AmbientUp = AmbientUp;
   
   RenderBuffers.DeviceContext->Unmap(shader->m_lightBuffer, 0);
 
@@ -182,6 +180,5 @@ void ReleaseShaderResources(LightShader* shader)
 	  shader->m_lightBuffer->Release();
 	  shader->m_lightBuffer = nullptr; 
 	}
-
     }
 }

@@ -88,7 +88,6 @@ void HemisphericMeshRender(RendererContext& RenderBuffers, HemisphericMesh* mesh
   RenderBuffers.DeviceContext->RSSetViewports(1, &RenderBuffers.Viewport);
 
   RenderBuffers.DeviceContext->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST ); 
-
 }
 
 void HemisphericMeshRelease(HemisphericMesh* Buffer)
@@ -112,7 +111,6 @@ void HemisphericMeshRelease(HemisphericMesh* Buffer)
 
   Buffer->vertexCount = 0;
   Buffer->indexCount = 0;
-
 }
 
 bool HemisphericMeshLoadFromFile(HemisphericMesh* Buffer)
@@ -122,7 +120,6 @@ bool HemisphericMeshLoadFromFile(HemisphericMesh* Buffer)
   
   FILE* file = fopen(filename, "r");
   if (!file)
-    
     return false;
 
   XMFLOAT3 positions[1024];
@@ -141,19 +138,18 @@ bool HemisphericMeshLoadFromFile(HemisphericMesh* Buffer)
 	  sscanf(line, "v %f %f %f", &x, &y, &z);
 	  positions[posCount++] = XMFLOAT3(x, y, z);
 	}
+      else if (line[0] == 'v' && line[1] == 'n')
+	{
+	  float nx, ny, nz;	  
+	  sscanf(line, "vn %f %f %f", &nx, &ny, &nz);
+	  normal[normalCount++] = XMFLOAT3(nx, ny, nz);
+	}
       else if (line[0] == 'v' && line[1] == 't')
 	{
 	  float u, v;
 	  sscanf(line, "vt %f %f", &u, &v);
 	  texCoords[texCount++] = XMFLOAT2(u, v);
 	}
-      else if (line[0] == 'v' && line[1] == 't')
-	{
-	  float nx, ny, nz;	  
-	  sscanf(line, "vn %f %f", &nx, &ny, &nz);
-	  normal[normalCount++] = XMFLOAT3(nx, ny, nz);
-	}
-
       else if (line[0] == 'i' && line[1] == ' ')
 	{
 	  uint32_t a, b, c;

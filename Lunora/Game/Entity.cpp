@@ -15,6 +15,7 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
     }
   assert(Entity[1]->texture.m_textureView != nullptr);
   */
+  
   for (size_t i = 0; i < entity_num; i++)
     {
       Entity[i]->transform.position = {0.f + (i * 5.f), 0.f, -5.f};
@@ -41,7 +42,12 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
 	}
       */
 
-      HemisphericMeshInitialize(RenderBuffers.Device, &Entity[i]->hemisphericMesh);
+      running = HemisphericMeshInitialize(RenderBuffers.Device, &Entity[i]->hemisphericMesh);
+      if (!running)
+	{
+	  return false; 
+	}
+      assert(Entity[i]->hemisphericMesh.filename != nullptr);
       
       if (Entity[i]->texture.m_textureView != nullptr) 
 	{ 
@@ -66,8 +72,8 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
 {
   HRESULT result = true;
 
-  XMFLOAT3 AmbientDown = XMFLOAT3(1.f, 2.f, 1.f);
-  XMFLOAT3 AmbientRange = XMFLOAT3(2.f, 4.f, 2.f);
+  XMFLOAT4 AmbientDown = XMFLOAT4(1.f, 2.f, 1.f, 1.f);
+  XMFLOAT4 AmbientRange = XMFLOAT4(2.f, 4.f, 2.f, 1.f);
   
   for (size_t i = 0; i < entity_num; i++)
     {
@@ -77,7 +83,8 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
 
       Entity[i]->worldMatrix = ComputeWorldMatrix(Entity[i]->transform);
 
-      RenderModel(RenderBuffers, &Entity[i]->mesh);	      
+      // RenderModel(RenderBuffers, &Entity[i]->mesh);
+      HemisphericMeshRender(RenderBuffers, &Entity[i]->hemisphericMesh);
 
       if (Entity[i]->texture.m_textureView)
 	{      
