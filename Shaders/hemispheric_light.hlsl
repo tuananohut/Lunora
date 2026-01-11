@@ -19,7 +19,7 @@ struct PixelInputType
 {
 	float4 position: SV_POSITION;
 	float2 tex: TEXCOORD0;
-	float3 normal: NORMAL; 
+	float3 normal: TEXCOORD1; 
 };
 
 cbuffer HemiConstants
@@ -62,7 +62,7 @@ float4 LightPixelShader(PixelInputType input): SV_TARGET
 	float4 textureColor;  
 	float3 ambientColor;
 
-	textureColor = shaderTexture.Sample(SampleType, input.tex); 
+	textureColor = shaderTexture.Sample(SampleType, input.tex);
 	textureColor *= textureColor; 
 
 	ambientColor = CalcAmbient(input.normal, textureColor.xyz);

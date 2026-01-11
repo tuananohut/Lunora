@@ -1,13 +1,13 @@
-#include "LightShader.h"
+#include "AmbientLightShader.h"
 
-HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* shader)
+HRESULT InitializeShaderResources(RendererContext& RenderBuffers, AmbientLightShader* shader)
 {
   HRESULT hr; 
   ID3DBlob *vsBlob = nullptr;
   ID3DBlob *psBlob = nullptr;
   ID3DBlob *errorMessage = nullptr;
   
-  D3DCompileFromFile(L"c:/dev/Lunora/Shaders/hemispheric_light.hlsl", 0, 0, "LightVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
+  D3DCompileFromFile(L"c:/dev/Lunora/Shaders/ambient_light.hlsl", 0, 0, "LightVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
   hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &shader->baseShader.m_vertexShader);
   if (FAILED(hr))
     {
@@ -20,7 +20,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* s
       return false;
     }
   
-  D3DCompileFromFile(L"c:/dev/Lunora/Shaders/hemispheric_light.hlsl", 0, 0, "LightPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
+  D3DCompileFromFile(L"c:/dev/Lunora/Shaders/ambient_light.hlsl", 0, 0, "LightPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
   hr = RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &shader->baseShader.m_pixelShader);
   if (FAILED(hr))
     {
@@ -84,7 +84,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* s
   
   D3D11_BUFFER_DESC lightBufferDesc;
   lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-  lightBufferDesc.ByteWidth = sizeof(LightBufferType);
+  lightBufferDesc.ByteWidth = sizeof(AmbientLightBufferType);
   lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
   lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
   lightBufferDesc.MiscFlags = 0;
@@ -99,17 +99,16 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* s
   return true;
 }
 
-bool Render(RendererContext& RenderBuffers, LightShader* shader,
+bool Render(RendererContext& RenderBuffers, AmbientLightShader* shader,
 	    uint32_t indexCount,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj,
 	    ID3D11ShaderResourceView* texture,
-	    XMFLOAT4 AmbientDown,
-	    XMFLOAT4 AmbientUp)
+	    XMFLOAT4 ambientColor, XMFLOAT4 diffuseColor, XMFLOAT3 lightDirection)
 {
   HRESULT hr; 
   D3D11_MAPPED_SUBRESOURCE mappedResource;
   MatrixBufferType* dataPtr;
-  LightBufferType* dataPtr2; 
+  AmbientLightBufferType* dataPtr2; 
   unsigned int bufferNumber;
   
   world = XMMatrixTranspose(world);
@@ -140,10 +139,12 @@ bool Render(RendererContext& RenderBuffers, LightShader* shader,
   if (FAILED(hr))
     return false;
 
-  dataPtr2 = (LightBufferType*)mappedResource.pData;
+  dataPtr2 = (AmbientLightBufferType*)mappedResource.pData;
 
-  dataPtr2->AmbientDown = AmbientDown; 
-  dataPtr2->AmbientUp = AmbientUp;
+  dataPtr2->ambientColor = ambientColor;
+  dataPtr2->diffuseColor = diffuseColor;
+  dataPtr2->lightDirection = lightDirection;
+  dataPtr2->padding = 0.0f;
   
   RenderBuffers.DeviceContext->Unmap(shader->m_lightBuffer, 0);
 
@@ -163,7 +164,7 @@ bool Render(RendererContext& RenderBuffers, LightShader* shader,
   return true;
 }
 
-void ReleaseShaderResources(LightShader* shader)
+void ReleaseShaderResources(AmbientLightShader* shader)
 {
   if (shader)
     {

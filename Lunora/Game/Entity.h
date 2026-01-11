@@ -7,6 +7,7 @@
 #include "../Rendering/HemisphericMesh.h"
 #include "../Rendering/Shader/Shader.h"
 #include "../Rendering/Shader/LightShader.h"
+#include "../Rendering/Shader/AmbientLightShader.h"
 #include "../Rendering/Shader/TextureShader.h"
 #include "../Rendering/Shader/ColorShader.h"
 #include "../Rendering/Texture.h"
@@ -25,7 +26,8 @@ struct Entity
   HemisphericMesh hemisphericMesh; 
   ColorShader color_shader;
   TextureShader texture_shader;
-  LightShader light_shader; 
+  LightShader light_shader;
+  AmbientLightShader ambient_light_shader;
   Texture texture; 
   Transform transform;
   

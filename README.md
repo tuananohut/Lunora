@@ -14,7 +14,11 @@ Lunora is a lightweight graphics engine developed for my graphics research exper
 
 - 24-bit and 32-bit TGA file support
 
-- Texture rendering 
+- Texture rendering
+
+- Hemispheric Ambient Lighting
+
+- Ambient Lighting 
 
 This module intentionally includes only essential functionality. Techniques such as shadow mapping, PBR, post-processing, or GPU-driven pipelines will be implemented as separate, dedicated research tasks and added modularly.
 
@@ -33,6 +37,8 @@ Lunora focuses on clarity and simplicity. Instead of embedding every rendering f
 - Game Engine Architecture
 
 - Real Time Rendering
+
+- HLSL Development Cookbook
 
 - https://www.rastertek.com/tutdx11win10.html
 
