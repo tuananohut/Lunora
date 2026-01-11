@@ -24,8 +24,10 @@ struct PixelInputType
 
 cbuffer HemiConstants
 {
-    float4 AmbientDown;
-    float4 AmbientUp;
+    float3 AmbientDown;
+    float pad0; 
+    float3 AmbientRange;
+    float pad1; 
 };
 
 PixelInputType LightVertexShader(VertexInputType input)
@@ -46,26 +48,24 @@ PixelInputType LightVertexShader(VertexInputType input)
 	return output; 
 }
 
-float4 CalcAmbient(float3 normal, float3 color)
+float3 CalcAmbient(float3 normal, float3 color)
 {
 	float up = normal.y * 0.5 + 0.5;
 
-	float3 Ambient = AmbientDown.xyz + up * AmbientUp.xyz;
+	float3 ambient = AmbientDown.xyz + up * AmbientRange.xyz;
 
-	return float4(Ambient * color, 1.f);
+	return ambient * color;
 }
 
 float4 LightPixelShader(PixelInputType input): SV_TARGET
 {
-	float4 textureColor; 
-	float3 color; 
-	float4 ambientColor;
+	float4 textureColor;  
+	float3 ambientColor;
 
 	textureColor = shaderTexture.Sample(SampleType, input.tex); 
+	textureColor *= textureColor; 
 
-	color = float3(1.f, 1.f, 1.f);
+	ambientColor = CalcAmbient(input.normal, textureColor.xyz);
 
-	ambientColor = float4(CalcAmbient(input.normal, color));
-
-	return ambientColor * textureColor; 
+	return float4(ambientColor, 1.0); 
 }

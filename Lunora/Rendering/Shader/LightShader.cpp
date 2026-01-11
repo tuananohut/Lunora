@@ -157,9 +157,9 @@ bool Render(RendererContext& RenderBuffers, LightShader* shader,
   RenderBuffers.DeviceContext->PSSetShader(shader->baseShader.m_pixelShader, NULL, 0);
   	
   RenderBuffers.DeviceContext->PSSetSamplers(0, 1, &shader->m_sampleState);
-  	
+
   RenderBuffers.DeviceContext->DrawIndexed(indexCount, 0, 0);
-    
+  
   return true;
 }
 

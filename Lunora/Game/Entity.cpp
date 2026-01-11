@@ -47,7 +47,7 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
 	{
 	  return false; 
 	}
-      assert(Entity[i]->hemisphericMesh.filename != nullptr);
+      assert(Entity[i]->hemisphericMesh.vertices != nullptr);
       
       if (Entity[i]->texture.m_textureView != nullptr) 
 	{ 
@@ -89,7 +89,7 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
       if (Entity[i]->texture.m_textureView)
 	{      
 	  result = Render(RenderBuffers, &Entity[i]->light_shader,
-			  Entity[i]->hemisphericMesh.indexCount, Entity[i]->worldMatrix,
+			  Entity[i]->hemisphericMesh.vertexCount, Entity[i]->worldMatrix,
 			  matrix.view, matrix.proj, Entity[i]->texture.m_textureView,
 			  AmbientDown, AmbientRange);
 	  if (FAILED(result))

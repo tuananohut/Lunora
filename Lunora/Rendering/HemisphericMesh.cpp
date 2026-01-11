@@ -113,6 +113,7 @@ void HemisphericMeshRelease(HemisphericMesh* Buffer)
   Buffer->indexCount = 0;
 }
 
+/*
 bool HemisphericMeshLoadFromFile(HemisphericMesh* Buffer)
 {
   char* filename = Buffer->filename;
@@ -171,11 +172,19 @@ bool HemisphericMeshLoadFromFile(HemisphericMesh* Buffer)
 
   for (int i = 0; i < vertexCount; ++i)
     {
-      (Buffer->vertices)[i].position = positions[i];
-      (Buffer->vertices)[i].texture = texCoords[i % texCount];
-      (Buffer->vertices)[i].normal = normal[i]; 
+      Buffer->vertices[i].position = positions[i];
+
+      if (i < normalCount)
+        Buffer->vertices[i].normal = normal[i];
+      else
+        Buffer->vertices[i].normal = XMFLOAT3(0,1,0);
+
+      if (texCount > 0)
+        Buffer->vertices[i].texture = texCoords[i % texCount];
+      else
+        Buffer->vertices[i].texture = XMFLOAT2(0,0);
     }
-  
+
   Buffer->indices = new uint32_t[idxCount];
   if (!Buffer->indices)
     return false;
@@ -186,4 +195,69 @@ bool HemisphericMeshLoadFromFile(HemisphericMesh* Buffer)
   Buffer->indexCount = idxCount;
   
   return true;
+}
+*/
+
+bool HemisphericMeshLoadFromFile(HemisphericMesh* Buffer)
+{
+    assert(Buffer && Buffer->filename);
+
+    FILE* file = fopen(Buffer->filename, "r");
+    if (!file)
+        return false;
+
+    XMFLOAT3 positions[256];
+    XMFLOAT3 normals[256];
+    XMFLOAT2 texcoords[16];
+
+    int posCount = 0;
+    int normalCount = 0;
+    int texCount = 0;
+
+    char line[256];
+
+    while (fgets(line, sizeof(line), file))
+    {
+        if (line[0] == 'v' && line[1] == ' ')
+        {
+            sscanf(line, "v %f %f %f %f %f %f",
+                   &positions[posCount].x,
+                   &positions[posCount].y,
+                   &positions[posCount].z,
+		   &normals[normalCount].x,
+		   &normals[normalCount].y,
+		   &normals[normalCount].z);
+            posCount++;
+	    normalCount++; 
+        }
+        else if (line[0] == 'v' && line[1] == 't')
+        {
+            sscanf(line, "vt %f %f",
+                   &texcoords[texCount].x,
+                   &texcoords[texCount].y);
+            texCount++;
+        }
+    }
+
+    fclose(file);
+
+    if (posCount == 0 || posCount != normalCount)
+        return false;
+
+    Buffer->vertexCount = posCount;
+    Buffer->indexCount  = posCount;
+
+    Buffer->vertices = new HemisphericVertex[posCount];
+    Buffer->indices  = new uint32_t[posCount];
+
+    for (int i = 0; i < posCount; ++i)
+    {
+        Buffer->vertices[i].position = positions[i];
+        Buffer->vertices[i].normal   = normals[i];
+        Buffer->vertices[i].texture  = texcoords[i % texCount];
+
+        Buffer->indices[i] = i;
+    }
+
+    return true;
 }
