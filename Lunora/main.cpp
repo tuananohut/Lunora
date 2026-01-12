@@ -113,9 +113,9 @@ int WINAPI WinMain(HINSTANCE Instance,
 	    }
 
 	  Camera *mCamera = new Camera;
-	  mCamera->SetPosition(5.0f, 0.0f, -15.0f);
+	  mCamera->SetPosition(0.f, 0.0f, -10.f);
 
-	  const size_t entity_num = 3; 
+	  const size_t entity_num = 2; 
 	  Entity *entities[entity_num];	   
 
 	  for (size_t i = 0; i < entity_num; ++i)
@@ -207,7 +207,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 		}
   
 	      matrix.proj  = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
-	      
+
 	      Running = RenderEntity(*Renderer, entities, entity_num, matrix, total_time);
 	      if (!Running)
 		{

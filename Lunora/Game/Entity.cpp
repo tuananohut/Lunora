@@ -1,6 +1,7 @@
 #include "Entity.h"
 
-bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& RenderBuffers)
+bool InitializeEntity(Entity* Entity[], size_t entity_num,
+		      RendererContext& RenderBuffers)
 {
   bool running;
   HRESULT hr;
@@ -8,12 +9,18 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
   const char* texture_file = "c:/dev/Lunora/Assets/Textures/lemons.tga";  
   
   for (size_t i = 0; i < entity_num; i++)
-    {
-      Entity[i]->transform.position = {0.f + (i * 5.f), 0.f, -5.f};
-      Entity[i]->transform.rotation = {0.f, 10.f, 0.f};
-      Entity[i]->transform.scale = {1.5f, 1.5f, 1.5f};
+    {      
       Entity[i]->mesh.filename = "../Assets/Models/cube_trial.txt";
-      Entity[i]->hemisphericMesh.filename = "c:/dev/Lunora/Assets/Models/sphere.txt";
+      // Entity[i]->hemisphericMesh.filename = "c:/dev/Lunora/Assets/Models/monkey.txt";
+      Entity[i]->hemisphericMesh.filename = "c:/dev/Lunora/Assets/Models/cube_with_normal.txt";
+   
+      Entity[0]->transform.position = { 3.f, 0.f, 0.f };
+      Entity[0]->transform.rotation = { 0.f, 45.f, 0.f };
+      Entity[0]->transform.scale    = { 1.5f, 1.5f, 1.5f };
+
+      Entity[1]->transform.position = { -3.f, 0.f, 0.f };
+      Entity[1]->transform.rotation = { 0.f, 20.f, 0.f };
+      Entity[1]->transform.scale    = { 1.5f, 1.5f, 1.5f };
 
       texture_file = "c:/dev/Lunora/Assets/Textures/white.tga";
       running = InitializeTexture(RenderBuffers.Device,
@@ -31,15 +38,15 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& Rend
 	  return false; 
 	}
       assert(Entity[i]->hemisphericMesh.vertices != nullptr);
-       
-      if (i % 2 != 0 && Entity[i]->texture.m_textureView)
+      
+      if (Entity[i]->texture.m_textureView)
 	{ 
 	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->light_shader);
 	  if (FAILED(hr))
 	    return false;
 	}
       
-      if (i % 2 == 0 && Entity[i]->texture.m_textureView)
+      if (Entity[i]->texture.m_textureView)
 	{ 
 	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->ambient_light_shader);
 	  if (FAILED(hr))
@@ -54,27 +61,23 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
 {
   HRESULT result = true;
 
-  XMFLOAT4 AmbientDown = XMFLOAT4(0.1f, 0.05f, 0.0f, 1.f);
-  XMFLOAT4 AmbientRange = XMFLOAT4(0.2f, 0.4f, 1.f, 1.f);
-
-  XMFLOAT4 ambientColor = XMFLOAT4 (0.15f, 0.15f, 0.15f, 1.f);
-  XMFLOAT4 diffuseColor = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+  XMFLOAT4 AmbientDown  = XMFLOAT4(0.14f, 0.16f, 0.19f, 1.f);
+  XMFLOAT4 AmbientRange = XMFLOAT4(0.26f, 0.30f, 0.35f, 1.f);
+  
+  XMFLOAT4 ambientColor = XMFLOAT4(0.13f, 0.15f, 0.17f, 1.f);
+  XMFLOAT4 diffuseColor = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.f);
   XMFLOAT3 lightDirection = XMFLOAT3(1.f, 1.f, 1.f);
-
-  AmbientDown  = XMFLOAT4(0.05f, 0.05f, 0.06f, 1.f);
-  AmbientRange = XMFLOAT4(0.35f, 0.35f, 0.32f, 1.f);
-		 
-  // AmbientDown  = XMFLOAT4(0.02f, 0.02f, 0.02f, 1.f);
-  // AmbientRange = XMFLOAT4(0.20f, 0.20f, 0.18f, 1.f);
+   
+  for (size_t i = 0; i < entity_num; i++)
+    {
+      Entity[i]->transform.rotation.y = 1.f * total_time;
+      Entity[i]->worldMatrix = ComputeWorldMatrix(Entity[i]->transform);
+    }
   
   for (size_t i = 0; i < entity_num; i++)
     {
-      Entity[i]->transform.rotation = {0.f, 1.f * total_time, 0.f};
-
-      Entity[i]->worldMatrix = ComputeWorldMatrix(Entity[i]->transform);
-
       HemisphericMeshRender(RenderBuffers, &Entity[i]->hemisphericMesh);
-      if (i % 2 != 0 && Entity[i]->texture.m_textureView)
+      if (Entity[i]->texture.m_textureView)
 	{      
 	  result = Render(RenderBuffers, &Entity[i]->light_shader,
 			  Entity[i]->hemisphericMesh.indexCount, Entity[i]->worldMatrix,
@@ -85,19 +88,21 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
 	      return false; 
 	    }
 	}
-      if (i % 2 == 0 && Entity[i]->texture.m_textureView)
+      
+      if (Entity[1]->texture.m_textureView)
 	{      
-	  result = Render(RenderBuffers, &Entity[i]->ambient_light_shader,
-			  Entity[i]->hemisphericMesh.indexCount, Entity[i]->worldMatrix,
-			  matrix.view, matrix.proj, Entity[i]->texture.m_textureView,
+	  result = Render(RenderBuffers, &Entity[1]->ambient_light_shader,
+			  Entity[1]->hemisphericMesh.indexCount, Entity[1]->worldMatrix,
+			  matrix.view, matrix.proj, Entity[1]->texture.m_textureView,
 			  ambientColor, diffuseColor, lightDirection);
 	  if (FAILED(result))
 	    {
 	      return false; 
 	    }
 	}
+
     }
-  
+
   return true;
 }
 

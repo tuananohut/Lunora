@@ -63,7 +63,6 @@ float4 LightPixelShader(PixelInputType input): SV_TARGET
 	float3 ambientColor;
 
 	textureColor = shaderTexture.Sample(SampleType, input.tex);
-	textureColor *= textureColor; 
 
 	ambientColor = CalcAmbient(input.normal, textureColor.xyz);
 
