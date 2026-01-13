@@ -20,18 +20,28 @@ struct Transform
   XMFLOAT3 scale;
 };
 
-struct Entity
+struct MeshManager
 {
   Mesh mesh;
   HemisphericMesh hemisphericMesh; 
+};
+
+struct MaterialManager
+{
   ColorShader color_shader;
   TextureShader texture_shader;
   LightShader light_shader;
   AmbientLightShader ambient_light_shader;
   Texture texture; 
-  Transform transform;
-  
-  XMMATRIX worldMatrix; 
+};
+
+struct Entity
+{
+  Transform transform; 
+  XMMATRIX worldMatrix;
+
+  MeshManager meshes;
+  MaterialManager materials; 
 };
 
 bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& RenderBuffers);

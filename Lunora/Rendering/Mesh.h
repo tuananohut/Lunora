@@ -2,47 +2,30 @@
 #define MESH_H
 
 #include <d3d11.h>
-#include <DirectXMath.h>
-#include <stdio.h>
+#include <cstdint>
 
-#include "../Engine/src/Renderer.h"
-#include "../Rendering/Texture.h"
-
-using namespace DirectX;
-using namespace LunoraEngine; 
-
-struct Vertex
+struct Mesh
 {
-  XMFLOAT3 position;
-  XMFLOAT4 color;
-  XMFLOAT2 texture; 
-};
- 
-struct Mesh 
-{  
-  ID3D11Buffer *vertexBuffer = nullptr;
-  ID3D11Buffer *indexBuffer = nullptr;
-  uint32_t vertexCount = 0;
-  uint32_t indexCount = 0;
-  uint32_t stride = sizeof(Vertex);
-  uint32_t offset = 0;
-  Vertex* vertices = nullptr;
-  uint32_t* indices = nullptr;
-  char *filename;
+    ID3D11Buffer* vertexBuffer = nullptr;
+    ID3D11Buffer* indexBuffer  = nullptr;
+
+    uint32_t vertexCount = 0;
+    uint32_t indexCount  = 0;
+
+    uint32_t stride = 0;
+    uint32_t offset = 0;
 };
 
-bool MeshInitialize(Mesh* Mesh,
-		    ID3D11Device *device);
+bool CreateMesh(
+    ID3D11Device* device,
+    Mesh& mesh,
+    const void* vertexData,
+    uint32_t vertexCount,
+    uint32_t stride,
+    const uint32_t* indexData,
+    uint32_t indexCount);
 
-HRESULT CreateVertexBuffer(ID3D11Device *Device, Mesh* Mesh);
-HRESULT CreateIndexBuffer(ID3D11Device *Device, Mesh* Mesh);
-
-bool InitializeModel(ID3D11Device *Device, Mesh* Buffer); 
-
-void RenderModel(RendererContext& context, Mesh* Buffer); 
-
-void ReleaseModel(Mesh* Buffer); 
-
-bool LoadModelFromFile(Mesh* Buffer);
+void RenderMesh(ID3D11DeviceContext* context, const Mesh& mesh);
+void ReleaseMesh(Mesh& mesh);
 
 #endif

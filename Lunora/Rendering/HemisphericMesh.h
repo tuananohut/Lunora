@@ -6,40 +6,15 @@
 #include <stdio.h>
 
 #include "../Engine/src/Renderer.h"
-#include "../Rendering/Texture.h"
 
 using namespace DirectX;
 using namespace LunoraEngine; 
 
-struct HemisphericVertex
+struct VertexHemispheric
 {
   XMFLOAT3 position;
   XMFLOAT2 texture;
   XMFLOAT3 normal; 
 };
-
-struct HemisphericMesh
-{
-  ID3D11Buffer *vertexBuffer = nullptr;
-  ID3D11Buffer *indexBuffer = nullptr;
-  uint32_t vertexCount = 0;
-  uint32_t indexCount = 0;
-  uint32_t stride = sizeof(HemisphericVertex);
-  uint32_t offset = 0;
-  HemisphericVertex* vertices = nullptr;
-  uint32_t* indices = nullptr;
-  char *filename;
-};
-
-bool HemisphericMeshInitialize(ID3D11Device* device, HemisphericMesh* mesh); 
-
-bool HemisphericMeshCreateVertexBuffer(ID3D11Device* device, HemisphericMesh* mesh);
-bool HemisphericMeshCreateIndexBuffer(ID3D11Device* device, HemisphericMesh* mesh);
-
-void HemisphericMeshRender(RendererContext& RenderBuffers, HemisphericMesh* mesh);
-    
-void HemisphericMeshRelease(HemisphericMesh* mesh);
-bool HemisphericMeshLoadFromFile(HemisphericMesh* mesh);
-
 
 #endif
