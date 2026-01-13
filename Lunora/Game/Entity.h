@@ -40,8 +40,14 @@ struct Entity
   Transform transform; 
   XMMATRIX worldMatrix;
 
-  MeshManager meshes;
-  MaterialManager materials; 
+  Mesh mesh;
+  HemisphericMesh hemisphericMesh; 
+  
+  ColorShader color_shader;
+  TextureShader texture_shader;
+  LightShader light_shader;
+  AmbientLightShader ambient_light_shader;
+  Texture texture; 
 };
 
 bool InitializeEntity(Entity* Entity[], size_t entity_num, RendererContext& RenderBuffers);

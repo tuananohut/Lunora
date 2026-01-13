@@ -1,6 +1,6 @@
 #include "ModelLoader.h"
 #include <cstdio>
-
+/*
 bool LoadHemisphericModel(const char* filename,
 			  std::vector<VertexHemispheric>& outVertices,
 			  std::vector<uint32_t>& outIndices)
@@ -34,3 +34,4 @@ bool LoadHemisphericModel(const char* filename,
   fclose(file);
   return !outVertices.empty();
 }
+*/
