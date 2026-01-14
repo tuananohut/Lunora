@@ -1,6 +1,6 @@
 # Lunora
 
-![Logo](images/logo.png)
+![Logo](images/lunora.png)
 
 Lunora is a lightweight graphics engine developed for rendering research and experimental graphics studies.
 It provides a minimal yet complete rendering pipeline designed to explore real-time rendering techniques without the architectural complexity of large-scale production engines.
