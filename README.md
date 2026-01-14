@@ -1,32 +1,41 @@
 # Lunora
 
-Lunora is a lightweight graphics engine developed for my graphics research experiments. Its purpose is to provide a clean, minimal core for testing rendering techniques without the complexity of a full engine.
+![Logo](images/logo.png)
 
-### Current Features
+Lunora is a lightweight graphics engine developed for rendering research and experimental graphics studies.
+It provides a minimal yet complete rendering pipeline designed to explore real-time rendering techniques without the architectural complexity of large-scale production engines.
 
-- 3D mesh loading and rendering
+### Research Experiments
 
-- Basic color and lighting shaders
+#### Hemispheric Ambient Lighting vs. Standard Ambient Lighting
 
-- Window resizing and viewport updates
+A comparative study examining visual and physical differences between hemispheric ambient lighting and standard ambient lighting across different geometries.
 
-- Logging
+![Comparison of Hemispheric Ambient Lighting and Standard Ambient Lighting](images/hal_vs_al.gif)
+
+https://youtu.be/mM5tJjGJvMU
+
+#### Water Rendering (Waves, Storm Dynamics, BRDF)
+
+(Not completed ...)
+
+### Core Engine Features 
+
+- Real-time 3D mesh loading and rendering
+
+- Modular shader system 
+
+- Dynamic window resizing and viewport updates
+
+- Basic lighting models 
 
 - 24-bit and 32-bit TGA file support
 
-- Texture rendering
+- Texture mapping and sampling
 
-- Hemispheric Ambient Lighting
+### References and Acknowledgements
 
-- Ambient Lighting 
-
-This module intentionally includes only essential functionality. Techniques such as shadow mapping, PBR, post-processing, or GPU-driven pipelines will be implemented as separate, dedicated research tasks and added modularly.
-
-### Design Philosophy
-
-Lunora focuses on clarity and simplicity. Instead of embedding every rendering feature into a monolithic system, it provides a small, manageable foundation. New rendering techniques can be attached as independent modules, allowing iterative experimentation without overcomplicating the core.
-
-### Acknowledgements:
+#### Engine Architecture and DirectX Foundations
 
 - Real-Time 3D Rendering with DirectX and HLSL 
 
@@ -38,9 +47,16 @@ Lunora focuses on clarity and simplicity. Instead of embedding every rendering f
 
 - Real Time Rendering
 
-- HLSL Development Cookbook
-
 - https://www.rastertek.com/tutdx11win10.html
 
 - https://www.youtube.com/watch?v=l9e8PJskYnI&list=PLv8Ddw9K0JPg1BEO-RS-0MYs423cvLVtj&index=11 
 
+#### Hemishperic Ambient Light 
+
+- HLSL Development Cookbook
+
+#### Water Rendering (Wave, Storms, BRDF)
+
+- https://developer.nvidia.com/gpugems/gpugems/part-i-natural-effects/chapter-1-effective-water-simulation-physical-models
+
+- https://en.wikipedia.org/wiki/Trochoidal_wave
