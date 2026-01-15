@@ -24,11 +24,20 @@ struct PixelInputType
 
 cbuffer Wave
 {
-	float amplitude; // A 
-	float2 direction; // k
 	float time;
-	float speed; // w 
 };
+
+
+float Wave(
+    float2 dir,
+    float freq,
+    float speed,
+    float amp,
+    float2 pos,
+    float time)
+{
+    return amp * sin(dot(dir, pos) * freq + speed * time);
+}
 
 PixelInputType WaterVertexShader(VertexInputType input)
 {
@@ -40,9 +49,20 @@ PixelInputType WaterVertexShader(VertexInputType input)
 
 	float2 surface = output.position.xz; 
 
-	float phase = dot(direction, surface) + speed * time;
-	
-	float height = amplitude * sin(phase);	
+	float height = 0.f;
+
+	float t = time;
+
+	height += Wave(normalize(float2( 1.0,  0.2)), 0.8, 1.5, 0.15, surface, t);
+	height += Wave(normalize(float2(-0.7,  1.0)), 1.6, 2.2, 0.08, surface, t);
+	height += Wave(normalize(float2( 0.3, -1.0)), 3.2, 3.0, 0.04, surface, t);
+	height += Wave(normalize(float2(-1.0, -0.4)), 6.4, 4.5, 0.02, surface, t);
+	height += Wave(normalize(float2( -1.0,-0.2)), 0.4, 3.5, 0.18, surface, t);
+	height += Wave(normalize(float2( 0.7, -1.0)), 2.6, 4.2, 0.08, surface, t);
+	height += Wave(normalize(float2(-0.3,  1.0)), 3.2, 3.0, 0.04, surface, t);
+	height += Wave(normalize(float2( 1.0,  0.4)), 6.4, 4.5, 0.02, surface, t);
+
+	output.position.y += height;
 
 	output.position.y += height; 
 

@@ -103,8 +103,9 @@ bool Render(RendererContext& RenderBuffers, LightShader* shader,
 	    uint32_t indexCount,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj,
 	    ID3D11ShaderResourceView* texture,
-	    XMFLOAT4 AmbientDown,
-	    XMFLOAT4 AmbientUp)
+	    XMFLOAT3 AmbientDown,
+	    XMFLOAT3 AmbientUp,
+	    float time)
 {
   HRESULT hr; 
   D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -143,12 +144,16 @@ bool Render(RendererContext& RenderBuffers, LightShader* shader,
   dataPtr2 = (LightBufferType*)mappedResource.pData;
 
   dataPtr2->AmbientDown = AmbientDown; 
+  dataPtr2->pad0 = 0.f; 
   dataPtr2->AmbientUp = AmbientUp;
+  dataPtr2->time = time; 
   
   RenderBuffers.DeviceContext->Unmap(shader->m_lightBuffer, 0);
 
-  bufferNumber = 0;
+  bufferNumber = 1;
 
+  RenderBuffers.DeviceContext->VSSetConstantBuffers(bufferNumber, 1, &shader->m_lightBuffer); /*For test*/
+  
   RenderBuffers.DeviceContext->PSSetConstantBuffers(bufferNumber, 1, &shader->m_lightBuffer); 
   
   RenderBuffers.DeviceContext->IASetInputLayout(shader->baseShader.m_layout);

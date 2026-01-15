@@ -61,8 +61,8 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
 {
   HRESULT result = true;
 
-  XMFLOAT4 AmbientDown  = XMFLOAT4(0.14f, 0.16f, 0.19f, 1.f);
-  XMFLOAT4 AmbientRange = XMFLOAT4(0.26f, 0.30f, 0.35f, 1.f);
+  XMFLOAT3 AmbientDown  = XMFLOAT3(0.14f, 0.16f, 0.19f);
+  XMFLOAT3 AmbientRange = XMFLOAT3(0.26f, 0.30f, 0.35f);
   
   XMFLOAT4 ambientColor = XMFLOAT4(0.13f, 0.15f, 0.17f, 1.f);
   XMFLOAT4 diffuseColor = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.f);
@@ -70,7 +70,7 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
    
   for (size_t i = 0; i < entity_num; i++)
     {
-      Entity[i]->transform.rotation.y = 1.f * total_time;
+      // Entity[i]->transform.rotation.y = 1.f * total_time;
       Entity[i]->worldMatrix = ComputeWorldMatrix(Entity[i]->transform);
     }
   
@@ -79,10 +79,10 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
       HemisphericMeshRender(RenderBuffers, &Entity[i]->hemisphericMesh);
       if (Entity[i]->texture.m_textureView)
 	{      
-	  result = Render(RenderBuffers, &Entity[i]->light_shader,
-			  Entity[i]->hemisphericMesh.indexCount, Entity[i]->worldMatrix,
-			  matrix.view, matrix.proj, Entity[i]->texture.m_textureView,
-			  AmbientDown, AmbientRange);
+	  result = Render(RenderBuffers, &Entity[0]->light_shader,
+			  Entity[0]->hemisphericMesh.indexCount, Entity[0]->worldMatrix,
+			  matrix.view, matrix.proj, Entity[0]->texture.m_textureView,
+			  AmbientDown, AmbientRange, total_time);
 	  if (FAILED(result))
 	    {
 	      return false; 
