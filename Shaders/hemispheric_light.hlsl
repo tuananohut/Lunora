@@ -60,7 +60,7 @@ PixelInputType LightVertexShader(VertexInputType input)
 
 	float t = time;
 
-	height += Wave(normalize(float2( 1.0,  0.2)), 0.8, 1.5, 0.15, surface, t);
+	height += Wave(normalize(float2( 1.0,  0.2)), 0.8, 0.5, 0.15, surface, t);
 	height += Wave(normalize(float2(-0.7,  1.0)), 1.6, 2.2, 0.08, surface, t);
 	height += Wave(normalize(float2( 0.3, -1.0)), 3.2, 3.0, 0.04, surface, t);
 	height += Wave(normalize(float2(-1.0, -0.4)), 6.4, 4.5, 0.02, surface, t);
@@ -68,7 +68,6 @@ PixelInputType LightVertexShader(VertexInputType input)
 	height += Wave(normalize(float2( 0.7, -1.0)), 2.6, 4.2, 0.08, surface, t);
 	height += Wave(normalize(float2(-0.3,  1.0)), 3.2, 3.0, 0.04, surface, t);
 	height += Wave(normalize(float2( 1.0,  0.4)), 6.4, 4.5, 0.02, surface, t);
-
 
 	output.position.y += height;
 	

@@ -12,13 +12,13 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num,
     {      
       Entity[i]->mesh.filename = "../Assets/Models/cube_trial.txt";
       // Entity[i]->hemisphericMesh.filename = "c:/dev/Lunora/Assets/Models/monkey.txt";
-      Entity[i]->hemisphericMesh.filename = "c:/dev/Lunora/Assets/Models/cube_with_normal.txt";
-   
-      Entity[0]->transform.position = { 3.f, 0.f, 0.f };
+      Entity[i]->hemisphericMesh.filename = "c:/dev/Lunora/Assets/Models/plane.txt";
+
+      Entity[0]->transform.position = { 3.f, 3.f, 0.f };
       Entity[0]->transform.rotation = { 0.f, 45.f, 0.f };
       Entity[0]->transform.scale    = { 1.5f, 1.5f, 1.5f };
 
-      Entity[1]->transform.position = { -3.f, 0.f, 0.f };
+      Entity[1]->transform.position = { -3.f + 6.f, 0.f, 0.f };
       Entity[1]->transform.rotation = { 0.f, 20.f, 0.f };
       Entity[1]->transform.scale    = { 1.5f, 1.5f, 1.5f };
 
@@ -61,11 +61,11 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
 {
   HRESULT result = true;
 
-  XMFLOAT3 AmbientDown  = XMFLOAT3(0.14f, 0.16f, 0.19f);
-  XMFLOAT3 AmbientRange = XMFLOAT3(0.26f, 0.30f, 0.35f);
+  XMFLOAT3 AmbientDown  = XMFLOAT3(0.12f, 0.15f, 0.18f);
+  XMFLOAT3 AmbientRange = XMFLOAT3(0.22f, 0.28f, 0.34f);
   
-  XMFLOAT4 ambientColor = XMFLOAT4(0.13f, 0.15f, 0.17f, 1.f);
-  XMFLOAT4 diffuseColor = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.f);
+  XMFLOAT4 ambientColor = XMFLOAT4(0.11f, 0.14f, 0.18f, 1.f);
+  XMFLOAT4 diffuseColor = XMFLOAT4(0.88f, 0.90f, 0.92f, 1.f);
   XMFLOAT3 lightDirection = XMFLOAT3(1.f, 1.f, 1.f);
    
   for (size_t i = 0; i < entity_num; i++)
