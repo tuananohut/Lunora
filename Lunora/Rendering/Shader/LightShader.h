@@ -15,7 +15,7 @@ struct LightBufferType
   XMFLOAT3 AmbientDown;
   float pad0; 
   XMFLOAT3 AmbientUp;
-  float time;
+  float pad1;
 };
 
 HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* shader);
@@ -23,7 +23,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* s
 bool Render(RendererContext& RenderBuffers, LightShader* shader, uint32_t indexCount,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj,
 	    ID3D11ShaderResourceView* texture,
-	    XMFLOAT3 AmbientDown, XMFLOAT3 AmbientRange, float time);
+	    XMFLOAT3 AmbientDown, XMFLOAT3 AmbientRange);
 
 void ReleaseShaderResources(LightShader* shader);
 

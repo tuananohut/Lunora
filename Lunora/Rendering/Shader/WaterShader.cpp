@@ -1,13 +1,13 @@
-#include "LightShader.h"
+#include "WaterShader.h"
 
-HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* shader)
+HRESULT InitializeShaderResources(RendererContext& RenderBuffers, WaterShader* shader)
 {
   HRESULT hr; 
   ID3DBlob *vsBlob = nullptr;
   ID3DBlob *psBlob = nullptr;
   ID3DBlob *errorMessage = nullptr;
   
-  D3DCompileFromFile(L"c:/dev/Lunora/Shaders/hemispheric_light.hlsl", 0, 0, "LightVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
+  D3DCompileFromFile(L"c:/dev/Lunora/Shaders/water_shader.hlsl", 0, 0, "WaterVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &vsBlob, &errorMessage);
   hr = RenderBuffers.Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), 0, &shader->baseShader.m_vertexShader);
   if (FAILED(hr))
     {
@@ -20,7 +20,7 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* s
       return false;
     }
   
-  D3DCompileFromFile(L"c:/dev/Lunora/Shaders/hemispheric_light.hlsl", 0, 0, "LightPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
+  D3DCompileFromFile(L"c:/dev/Lunora/Shaders/water_shader.hlsl", 0, 0, "WaterPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, &psBlob, 0);
   hr = RenderBuffers.Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), 0, &shader->baseShader.m_pixelShader);
   if (FAILED(hr))
     {
@@ -82,15 +82,15 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* s
       return false; 
     }
   
-  D3D11_BUFFER_DESC lightBufferDesc;
-  lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-  lightBufferDesc.ByteWidth = sizeof(LightBufferType);
-  lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-  lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-  lightBufferDesc.MiscFlags = 0;
-  lightBufferDesc.StructureByteStride = 0;
+  D3D11_BUFFER_DESC waveBufferDesc;
+  waveBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+  waveBufferDesc.ByteWidth = sizeof(WaveBufferType);
+  waveBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+  waveBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  waveBufferDesc.MiscFlags = 0;
+  waveBufferDesc.StructureByteStride = 0;
 
-  hr = RenderBuffers.Device->CreateBuffer(&lightBufferDesc, NULL, &shader->m_lightBuffer);
+  hr = RenderBuffers.Device->CreateBuffer(&waveBufferDesc, NULL, &shader->m_waveBuffer);
   if(FAILED(hr))
     {
       return false;
@@ -99,17 +99,17 @@ HRESULT InitializeShaderResources(RendererContext& RenderBuffers, LightShader* s
   return true;
 }
 
-bool Render(RendererContext& RenderBuffers, LightShader* shader,
+bool Render(RendererContext& RenderBuffers, WaterShader* shader,
 	    uint32_t indexCount,
 	    XMMATRIX world, XMMATRIX view, XMMATRIX proj,
 	    ID3D11ShaderResourceView* texture,
-	    XMFLOAT3 AmbientDown,
-	    XMFLOAT3 AmbientUp)
+	    float time,
+	    XMFLOAT3 cameraPosition)
 {
   HRESULT hr; 
   D3D11_MAPPED_SUBRESOURCE mappedResource;
   MatrixBufferType* dataPtr;
-  LightBufferType* dataPtr2; 
+  WaveBufferType* dataPtr2; 
   unsigned int bufferNumber;
   
   world = XMMatrixTranspose(world);
@@ -136,22 +136,22 @@ bool Render(RendererContext& RenderBuffers, LightShader* shader,
 
   RenderBuffers.DeviceContext->PSSetShaderResources(0, 1, &texture);
 
-  hr = RenderBuffers.DeviceContext->Map(shader->m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+  hr = RenderBuffers.DeviceContext->Map(shader->m_waveBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
   if (FAILED(hr))
     return false;
 
-  dataPtr2 = (LightBufferType*)mappedResource.pData;
+  dataPtr2 = (WaveBufferType*)mappedResource.pData;
 
-  dataPtr2->AmbientDown = AmbientDown; 
-  dataPtr2->pad0 = 0.f; 
-  dataPtr2->AmbientUp = AmbientUp;
-  dataPtr2->pad1 = 1.f; 
+  dataPtr2->time = time; 
+  dataPtr2->cameraPosition = cameraPosition; 
   
-  RenderBuffers.DeviceContext->Unmap(shader->m_lightBuffer, 0);
+  RenderBuffers.DeviceContext->Unmap(shader->m_waveBuffer, 0);
 
   bufferNumber = 1;
 
-  RenderBuffers.DeviceContext->PSSetConstantBuffers(bufferNumber, 1, &shader->m_lightBuffer); 
+  RenderBuffers.DeviceContext->VSSetConstantBuffers(bufferNumber, 1, &shader->m_waveBuffer); 
+  
+  RenderBuffers.DeviceContext->PSSetConstantBuffers(bufferNumber, 1, &shader->m_waveBuffer); 
   
   RenderBuffers.DeviceContext->IASetInputLayout(shader->baseShader.m_layout);
   		
@@ -165,7 +165,7 @@ bool Render(RendererContext& RenderBuffers, LightShader* shader,
   return true;
 }
 
-void ReleaseShaderResources(LightShader* shader)
+void ReleaseShaderResources(WaterShader* shader)
 {
   if (shader)
     {
@@ -177,10 +177,10 @@ void ReleaseShaderResources(LightShader* shader)
 	  shader->m_sampleState = nullptr; 
 	}
 
-      if (shader->m_lightBuffer)
+      if (shader->m_waveBuffer)
 	{
-	  shader->m_lightBuffer->Release();
-	  shader->m_lightBuffer = nullptr; 
+	  shader->m_waveBuffer->Release();
+	  shader->m_waveBuffer = nullptr; 
 	}
     }
 }

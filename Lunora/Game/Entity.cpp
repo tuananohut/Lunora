@@ -82,7 +82,7 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
 	  result = Render(RenderBuffers, &Entity[0]->light_shader,
 			  Entity[0]->hemisphericMesh.indexCount, Entity[0]->worldMatrix,
 			  matrix.view, matrix.proj, Entity[0]->texture.m_textureView,
-			  AmbientDown, AmbientRange, total_time);
+			  AmbientDown, AmbientRange);
 	  if (FAILED(result))
 	    {
 	      return false; 
