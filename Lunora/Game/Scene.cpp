@@ -69,9 +69,9 @@ void CleanScene(Scene *scene)
       scene->mCamera = nullptr; 
     }
   */
-  for (int i = 0; i < scene->entity_num; i++)
+  /*for (int i = 0; i < scene->entity_num; i++)
     {
-      if (scene->entities[i]->mesh.vertexBuffer)
+      if (scene->entities[i]->hemisphericMesh.vertexBuffer)
 	ReleaseModel(&scene->entities[i]->mesh);
 			  
       if (scene->entities[i]->color_shader.baseShader.m_vertexShader)
@@ -85,5 +85,5 @@ void CleanScene(Scene *scene)
 			  
       delete scene->entities[i];
       scene->entities[i] = nullptr;
-    }
+      }*/
 }

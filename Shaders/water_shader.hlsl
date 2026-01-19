@@ -29,12 +29,15 @@ cbuffer Wave: register(b1)
     	float time; 
 };
 
+
+/*
 cbuffer WaveLightReflection: register(b2)
 {
 	float3 lightDirection;
 	float specularPower;
 	float4 specularColor; 
-}
+};
+*/
 
 float Wave(
     float2 dir,
@@ -95,23 +98,27 @@ PixelInputType WaterVertexShader(VertexInputType input)
 
 float4 WaterPixelShader(PixelInputType input): SV_TARGET
 {
-	float specularPower;
-    	float4 specularColor;
-	float3 reflection;
-	float4 specular;
-	float4 textureColor;
-	float lightIntensity;
-	
-	lightIntensity = saturate(dot(input.normal, lightDir));
-
+	// float specularPower;
+    	// float4 specularColor;
+	// float3 reflection;
+	// float4 specular;
+	// float4 textureColor;
+	// float lightIntensity;
+	// 
+	// lightIntensity = saturate(dot(input.normal, lightDir));
+	// 
 	textureColor = shaderTexture.Sample(SampleType, input.tex); 
-
-	if (lightIntensity > 0.f)
-	{
+	// 
+	// if (lightIntensity > 0.f)
+	// {
+	// 
+	// }
 	
-	}
 	
+	return textureColor; 
 }
+
+
 
 
 

@@ -150,17 +150,11 @@ int WINAPI WinMain(HINSTANCE Instance,
 		      
 			for (int i = 0; i < entity_num; i++)
 			  {
-			    if (entities[i]->mesh.vertexBuffer)
-			      ReleaseModel(&entities[i]->mesh);
+			    if (entities[i]->hemisphericMesh.vertexBuffer)
+			      HemisphericMeshRelease(&entities[i]->hemisphericMesh);
 			  
-			    if (entities[i]->color_shader.baseShader.m_vertexShader)
-			      ReleaseShaderResources(&entities[i]->color_shader);
-			    else if (entities[i]->texture_shader.baseShader.m_vertexShader)
-			      ReleaseShaderResources(&entities[i]->light_shader);
-
-			    if (entities[i]->texture.m_textureView)
-			      ReleaseTexture(&entities[i]->texture);
-
+			    if (entities[i]->water_shader.baseShader.m_vertexShader)
+			      ReleaseShaderResources(&entities[i]->water_shader);
 			  
 			    delete entities[i];
 			    entities[i] = nullptr;

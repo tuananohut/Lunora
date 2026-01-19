@@ -60,3 +60,9 @@ https://youtu.be/mM5tJjGJvMU
 - https://developer.nvidia.com/gpugems/gpugems/part-i-natural-effects/chapter-1-effective-water-simulation-physical-models
 
 - https://en.wikipedia.org/wiki/Trochoidal_wave
+
+- https://www.youtube.com/watch?v=PH9q0HNBjT4
+
+- http://filmicworlds.com/blog/everything-has-fresnel/
+
+- https://boksajak.github.io/files/CrashCourseBRDF.pdf

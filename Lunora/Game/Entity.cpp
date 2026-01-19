@@ -10,17 +10,12 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num,
   
   for (size_t i = 0; i < entity_num; i++)
     {      
-      Entity[i]->mesh.filename = "../Assets/Models/cube_trial.txt";
       // Entity[i]->hemisphericMesh.filename = "c:/dev/Lunora/Assets/Models/monkey.txt";
       Entity[i]->hemisphericMesh.filename = "c:/dev/Lunora/Assets/Models/plane.txt";
 
-      Entity[0]->transform.position = { 3.f, 3.f, 0.f };
-      Entity[0]->transform.rotation = { 0.f, 45.f, 0.f };
-      Entity[0]->transform.scale    = { 1.5f, 1.5f, 1.5f };
-
-      Entity[1]->transform.position = { -3.f + 6.f, 0.f, 0.f };
-      Entity[1]->transform.rotation = { 0.f, 20.f, 0.f };
-      Entity[1]->transform.scale    = { 1.5f, 1.5f, 1.5f };
+      Entity[i]->transform.position = { 3.f, 3.f, 0.f };
+      Entity[i]->transform.rotation = { 0.f, 45.f, 0.f };
+      Entity[i]->transform.scale    = { 1.5f, 1.5f, 1.5f };
 
       texture_file = "c:/dev/Lunora/Assets/Textures/white.tga";
       running = InitializeTexture(RenderBuffers.Device,
@@ -41,14 +36,7 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num,
       
       if (Entity[i]->texture.m_textureView)
 	{ 
-	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->light_shader);
-	  if (FAILED(hr))
-	    return false;
-	}
-      
-      if (Entity[i]->texture.m_textureView)
-	{ 
-	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->ambient_light_shader);
+	  hr = InitializeShaderResources(RenderBuffers, &Entity[i]->water_shader);
 	  if (FAILED(hr))
 	    return false;
 	}
@@ -67,6 +55,8 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
   XMFLOAT4 ambientColor = XMFLOAT4(0.11f, 0.14f, 0.18f, 1.f);
   XMFLOAT4 diffuseColor = XMFLOAT4(0.88f, 0.90f, 0.92f, 1.f);
   XMFLOAT3 lightDirection = XMFLOAT3(1.f, 1.f, 1.f);
+
+  XMFLOAT3 cameraPosition = XMFLOAT3(0.f, 5.0f, -10.f); 
    
   for (size_t i = 0; i < entity_num; i++)
     {
@@ -79,28 +69,15 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
       HemisphericMeshRender(RenderBuffers, &Entity[i]->hemisphericMesh);
       if (Entity[i]->texture.m_textureView)
 	{      
-	  result = Render(RenderBuffers, &Entity[0]->light_shader,
-			  Entity[0]->hemisphericMesh.indexCount, Entity[0]->worldMatrix,
-			  matrix.view, matrix.proj, Entity[0]->texture.m_textureView,
-			  AmbientDown, AmbientRange);
+	  result = Render(RenderBuffers, &Entity[i]->water_shader,
+			  Entity[i]->hemisphericMesh.indexCount, Entity[i]->worldMatrix,
+			  matrix.view, matrix.proj, Entity[i]->texture.m_textureView,
+			  total_time, cameraPosition);
 	  if (FAILED(result))
 	    {
 	      return false; 
 	    }
 	}
-      
-      if (Entity[1]->texture.m_textureView)
-	{      
-	  result = Render(RenderBuffers, &Entity[1]->ambient_light_shader,
-			  Entity[1]->hemisphericMesh.indexCount, Entity[1]->worldMatrix,
-			  matrix.view, matrix.proj, Entity[1]->texture.m_textureView,
-			  ambientColor, diffuseColor, lightDirection);
-	  if (FAILED(result))
-	    {
-	      return false; 
-	    }
-	}
-
     }
 
   return true;

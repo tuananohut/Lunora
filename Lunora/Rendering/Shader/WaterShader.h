@@ -19,8 +19,11 @@ struct WaveBufferType
 HRESULT InitializeShaderResources(RendererContext& RenderBuffers, WaterShader* shader);
 
 bool Render(RendererContext& RenderBuffers, WaterShader* shader, uint32_t indexCount,
-	    XMMATRIX world, XMMATRIX view, XMMATRIX proj, float time, XMFLOAT3 cameraPosition);
+	    XMMATRIX world, XMMATRIX view, XMMATRIX proj,
+	    ID3D11ShaderResourceView* texture,
+	    float time, XMFLOAT3 cameraPosition);
 
 void ReleaseShaderResources(WaterShader* shader);
 
 #endif 
+
