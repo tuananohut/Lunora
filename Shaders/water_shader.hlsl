@@ -29,10 +29,11 @@ cbuffer Wave: register(b1)
     	float time; 
 };
 
-
 /*
 cbuffer WaveLightReflection: register(b2)
 {
+	float4 ambientColor;
+	float4 diffuseColor;
 	float3 lightDirection;
 	float specularPower;
 	float4 specularColor; 
@@ -49,6 +50,23 @@ float Wave(
 {
 	float constant = speed * freq; 
 	return amp * sin(dot(dir, pos) * freq + constant * time);
+}
+
+float2 WaveDeriv(
+    float2 dir,
+    float freq,
+    float speed,
+    float amp,
+    float2 pos,
+    float time)
+{
+    float phase = dot(dir, pos) * freq + speed * freq * time;
+    float c = amp * cos(phase) * freq;
+
+    return float2(
+        c * dir.x, 
+        c * dir.y  
+    );
 }
 
 PixelInputType WaterVertexShader(VertexInputType input)
@@ -73,10 +91,6 @@ PixelInputType WaterVertexShader(VertexInputType input)
 	height += Wave(normalize(float2(-0.7,  1.0)), 1.6, 2.2, 0.08, surface, t);
 	height += Wave(normalize(float2( 0.3, -1.0)), 3.2, 3.0, 0.04, surface, t);
 	height += Wave(normalize(float2(-1.0, -0.4)), 6.4, 4.5, 0.02, surface, t);
-	height += Wave(normalize(float2( -1.0,-0.2)), 0.4, 3.5, 0.18, surface, t);
-	height += Wave(normalize(float2( 0.7, -1.0)), 2.6, 4.2, 0.08, surface, t);
-	height += Wave(normalize(float2(-0.3,  1.0)), 3.2, 3.0, 0.04, surface, t);
-	height += Wave(normalize(float2( 1.0,  0.4)), 6.4, 4.5, 0.02, surface, t);
 
 	output.position.y += height;
 
@@ -85,11 +99,27 @@ PixelInputType WaterVertexShader(VertexInputType input)
 	
 	output.tex = input.tex;
 
-	output.normal = mul(input.normal, (float3x3)worldMatrix);
+	float2 grad = float2(0.0f, 0.0f);
+
+        grad += WaveDeriv(normalize(float2( 1.0,  0.2)), 0.8, 1.5, 0.15, surface, t);
+        grad += WaveDeriv(normalize(float2(-0.7,  1.0)), 1.6, 2.2, 0.08, surface, t);
+        grad += WaveDeriv(normalize(float2( 0.3, -1.0)), 3.2, 3.0, 0.04, surface, t);
+        grad += WaveDeriv(normalize(float2(-1.0, -0.4)), 6.4, 4.5, 0.02, surface, t);
+        grad += WaveDeriv(normalize(float2(-1.0, -0.2)), 0.4, 3.5, 0.18, surface, t);
+
+	float3 normal;
+	
+	normal.x = -grad.x;
+	normal.y = 1.0f;
+	normal.z = -grad.y;
+
+	normal = normalize(normal);
+
+	output.normal = mul(normal, (float3x3)worldMatrix);
 	output.normal = normalize(output.normal);
 
 	worldPosition = mul(input.position, worldMatrix);
-
+	 
 	output.view = cameraPosition.xyz - worldPosition.xyz;
 	output.view = normalize(output.view);
 
@@ -98,29 +128,53 @@ PixelInputType WaterVertexShader(VertexInputType input)
 
 float4 WaterPixelShader(PixelInputType input): SV_TARGET
 {
-	// float specularPower;
-    	// float4 specularColor;
-	// float3 reflection;
-	// float4 specular;
-	// float4 textureColor;
-	// float lightIntensity;
-	// 
-	// lightIntensity = saturate(dot(input.normal, lightDir));
-	// 
-	textureColor = shaderTexture.Sample(SampleType, input.tex); 
-	// 
-	// if (lightIntensity > 0.f)
-	// {
-	// 
-	// }
+	float4 ambientColor = float4(0.15f, 0.15f, 0.15f, 1.f);
+	float4 diffuseColor = float4(0.11f, 0.302f, 0.553f, 1.f);
+	float3 lightDirection = float3(1.f, 0.f, 1.f);
+	float4 specularColor = float4(1.f, 1.f, 1.f, 1.f); 
+	float specularPower = 32.f; 
+
+	diffuseColor *= 0.3f;
+
+	float4 textureColor;
+	float3 lightDir; 
+	float lightIntensity;
+	float4 color;
+	float3 reflection;
+	float4 specular;
+
+	float3 N = normalize(input.normal);
+	float3 V = normalize(input.view);
+
+	float NdotV = saturate(dot(N, V));
+	float F0 = 0.02f;
+	float fresnel = F0 + (1.0f - F0) * pow(1.0f - NdotV, 5.0f);
 	
-	
-	return textureColor; 
+	textureColor = shaderTexture.Sample(SampleType, input.tex);
+
+	color = ambientColor; 
+
+	specular = float4(0.f, 0.f, 0.f, 0.f);
+
+	lightDir = normalize(-lightDirection); 
+
+	lightIntensity = saturate(dot(input.normal, lightDir));
+
+	if (lightIntensity > 0.f)
+	{
+		color += (diffuseColor * lightIntensity);
+
+		color = saturate(color);
+
+		reflection = normalize(2.f * lightIntensity * input.normal - lightDir);
+
+		specular = pow(saturate(dot(reflection, input.view)), specularPower);
+	}
+
+	color = color * textureColor;
+
+	color.rgb *= (1.0f - fresnel);
+	color.rgb += specularColor.rgb * specular * fresnel;
+
+	return color; 
 }
-
-
-
-
-
-
-

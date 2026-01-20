@@ -12,9 +12,18 @@ struct WaterShader
 
 struct WaveBufferType
 {
-  float time;
   XMFLOAT3 cameraPosition; 
-}; 
+  float time;
+};
+
+struct WaveLightBufferType
+{
+  XMFLOAT4 ambientColor;
+  XMFLOAT4 diffuseColor;
+  XMFLOAT3 lightDirection;
+  float specularPower;
+  XMFLOAT4 specularColor; 
+};
 
 HRESULT InitializeShaderResources(RendererContext& RenderBuffers, WaterShader* shader);
 
