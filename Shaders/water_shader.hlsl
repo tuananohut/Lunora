@@ -78,7 +78,8 @@ PixelInputType WaterVertexShader(VertexInputType input)
 
 	output.position = mul(input.position, worldMatrix);
 
-	float2 surface = output.position.xz; 
+	float waveScale = 0.1f; 
+	float2 surface = output.position.xz * waveScale; 
 
 	float height = 0.f;
 
@@ -87,10 +88,10 @@ PixelInputType WaterVertexShader(VertexInputType input)
 	float wavelength = 1.0; 
 	float freq = 2.0 / wavelength; 
 	
-	height += Wave(normalize(float2( 1.0,  0.2)), 0.8, 1.5, 0.15, surface, t);
-	height += Wave(normalize(float2(-0.7,  1.0)), 1.6, 2.2, 0.08, surface, t);
-	height += Wave(normalize(float2( 0.3, -1.0)), 3.2, 3.0, 0.04, surface, t);
-	height += Wave(normalize(float2(-1.0, -0.4)), 6.4, 4.5, 0.02, surface, t);
+	height += Wave(normalize(float2( 1.0,  0.2)), 0.6, 1.2, 0.20, surface, t);
+	height += Wave(normalize(float2(-0.7,  1.0)), 1.2, 1.8, 0.08, surface, t);
+	height += Wave(normalize(float2( 0.3, -1.0)), 2.4, 2.5, 0.03, surface, t);
+	height += Wave(normalize(float2(-1.0, -0.4)), 3.6, 3.0, 0.02, surface, t);
 
 	output.position.y += height;
 
@@ -101,11 +102,11 @@ PixelInputType WaterVertexShader(VertexInputType input)
 
 	float2 grad = float2(0.0f, 0.0f);
 
-        grad += WaveDeriv(normalize(float2( 1.0,  0.2)), 0.8, 1.5, 0.15, surface, t);
-        grad += WaveDeriv(normalize(float2(-0.7,  1.0)), 1.6, 2.2, 0.08, surface, t);
-        grad += WaveDeriv(normalize(float2( 0.3, -1.0)), 3.2, 3.0, 0.04, surface, t);
-        grad += WaveDeriv(normalize(float2(-1.0, -0.4)), 6.4, 4.5, 0.02, surface, t);
-        grad += WaveDeriv(normalize(float2(-1.0, -0.2)), 0.4, 3.5, 0.18, surface, t);
+	grad += WaveDeriv(normalize(float2( 1.0,  0.2)), 0.6, 1.2, 0.20, surface, t) * waveScale;
+	grad += WaveDeriv(normalize(float2(-0.7,  1.0)), 1.2, 1.8, 0.08, surface, t) * waveScale;
+	grad += WaveDeriv(normalize(float2( 0.3, -1.0)), 2.4, 2.5, 0.03, surface, t) * waveScale;
+	grad += WaveDeriv(normalize(float2(-1.0, -0.4)), 3.6, 3.0, 0.02, surface, t) * waveScale;
+
 
 	float3 normal;
 	
@@ -128,13 +129,11 @@ PixelInputType WaterVertexShader(VertexInputType input)
 
 float4 WaterPixelShader(PixelInputType input): SV_TARGET
 {
-	float4 ambientColor = float4(0.15f, 0.15f, 0.15f, 1.f);
+	float4 ambientColor = float4(0.05f, 0.05f, 0.05f, 1.f);
 	float4 diffuseColor = float4(0.11f, 0.302f, 0.553f, 1.f);
 	float3 lightDirection = float3(1.f, 0.f, 1.f);
 	float4 specularColor = float4(1.f, 1.f, 1.f, 1.f); 
-	float specularPower = 32.f; 
-
-	diffuseColor *= 0.3f;
+	float specularPower = 64.f; 
 
 	float4 textureColor;
 	float3 lightDir; 
@@ -158,7 +157,7 @@ float4 WaterPixelShader(PixelInputType input): SV_TARGET
 
 	lightDir = normalize(-lightDirection); 
 
-	lightIntensity = saturate(dot(input.normal, lightDir));
+	lightIntensity = saturate(dot(N, lightDir));
 
 	if (lightIntensity > 0.f)
 	{
@@ -166,7 +165,7 @@ float4 WaterPixelShader(PixelInputType input): SV_TARGET
 
 		color = saturate(color);
 
-		reflection = normalize(2.f * lightIntensity * input.normal - lightDir);
+		reflection = normalize(2.f * lightIntensity * N - lightDir);
 
 		specular = pow(saturate(dot(reflection, input.view)), specularPower);
 	}

@@ -15,7 +15,7 @@ bool InitializeEntity(Entity* Entity[], size_t entity_num,
 
       Entity[i]->transform.position = { 0.f, -2.f, 0.f };
       Entity[i]->transform.rotation = { 0.f, 0.f, 0.f };
-      Entity[i]->transform.scale    = { 3.5f, 1.5f, 3.5f };
+      Entity[i]->transform.scale    = { 3.5f, 3.5f, 3.5f };
 
       texture_file = "c:/dev/Lunora/Assets/Textures/white.tga";
       running = InitializeTexture(RenderBuffers.Device,
@@ -56,7 +56,7 @@ bool RenderEntity(RendererContext& RenderBuffers, Entity* Entity[], size_t entit
   XMFLOAT4 diffuseColor = XMFLOAT4(0.88f, 0.90f, 0.92f, 1.f);
   XMFLOAT3 lightDirection = XMFLOAT3(1.f, 1.f, 1.f);
 
-  XMFLOAT3 cameraPosition = XMFLOAT3(0.f, 0.0f, -10.f); 
+  XMFLOAT3 cameraPosition = XMFLOAT3(0.f, 4.f, -8.f); 
    
   for (size_t i = 0; i < entity_num; i++)
     {
