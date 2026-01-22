@@ -69,6 +69,18 @@ float2 WaveDeriv(
     );
 }
 
+float4 CalcAmbient(float3 normal, float4 color)
+{
+	float4 AmbientDown = float4(0.01f, 0.03f, 0.08f, 1.f);
+	float4 AmbientRange = float4(0.05f, 0.10f, 0.15f, 1.f);
+
+	float up = normal.y * 0.5 + 0.5;
+
+	float4 ambient = AmbientDown + up * AmbientRange;
+
+	return ambient;
+}
+
 PixelInputType WaterVertexShader(VertexInputType input)
 {
 	PixelInputType output;
@@ -78,20 +90,38 @@ PixelInputType WaterVertexShader(VertexInputType input)
 
 	output.position = mul(input.position, worldMatrix);
 
-	float waveScale = 0.1f; 
-	float2 surface = output.position.xz * waveScale; 
+	float2 surface = output.position.xz;
 
 	float height = 0.f;
 
 	float t = time;
 
-	float wavelength = 1.0; 
-	float freq = 2.0 / wavelength; 
-	
-	height += Wave(normalize(float2( 1.0,  0.2)), 0.6, 1.2, 0.20, surface, t);
-	height += Wave(normalize(float2(-0.7,  1.0)), 1.2, 1.8, 0.08, surface, t);
-	height += Wave(normalize(float2( 0.3, -1.0)), 2.4, 2.5, 0.03, surface, t);
-	height += Wave(normalize(float2(-1.0, -0.4)), 3.6, 3.0, 0.02, surface, t);
+	float wavelength = 1.f; 
+	float freq = 2.f / wavelength;
+
+	float baseAmp = 0.08f; 
+	float baseSpeed = 0.6f; 
+
+	float2 dirs[3] =
+	{
+		normalize(float2( 1.0,  0.2)),
+		normalize(float2(-0.7,  0.6)),
+		normalize(float2( 0.3, -1.0))
+	};
+
+	for (int i = 1; i <= 3; i++)
+	{
+		float fi = freq * i;
+		float ai = baseAmp / (i * i);
+		float si = baseSpeed * i;
+		     
+		height += Wave(dirs[i-1], fi, si, ai, surface, t);
+	}
+
+	float dist = length(cameraPosition.xz - output.position.xz);
+	float horizonFade = saturate((dist - 150.0f) / 200.0f);
+
+	height *= (1.0f - horizonFade);
 
 	output.position.y += height;
 
@@ -102,16 +132,20 @@ PixelInputType WaterVertexShader(VertexInputType input)
 
 	float2 grad = float2(0.0f, 0.0f);
 
-	grad += WaveDeriv(normalize(float2( 1.0,  0.2)), 0.6, 1.2, 0.20, surface, t) * waveScale;
-	grad += WaveDeriv(normalize(float2(-0.7,  1.0)), 1.2, 1.8, 0.08, surface, t) * waveScale;
-	grad += WaveDeriv(normalize(float2( 0.3, -1.0)), 2.4, 2.5, 0.03, surface, t) * waveScale;
-	grad += WaveDeriv(normalize(float2(-1.0, -0.4)), 3.6, 3.0, 0.02, surface, t) * waveScale;
+	for (int i = 1; i <= 3; i++)
+	{
+		float fi = freq * i;
+		float ai = baseAmp / (i * i);
+		float si = baseSpeed * i;
+		     
+		grad += WaveDeriv(dirs[i-1], fi, si, ai, surface, t);
 
+	}	
 
 	float3 normal;
 	
 	normal.x = -grad.x;
-	normal.y = 1.0f;
+	normal.y = 1.4f;
 	normal.z = -grad.y;
 
 	normal = normalize(normal);
@@ -130,10 +164,10 @@ PixelInputType WaterVertexShader(VertexInputType input)
 float4 WaterPixelShader(PixelInputType input): SV_TARGET
 {
 	float4 ambientColor = float4(0.05f, 0.05f, 0.05f, 1.f);
-	float4 diffuseColor = float4(0.11f, 0.302f, 0.553f, 1.f);
-	float3 lightDirection = float3(1.f, 0.f, 1.f);
+	float4 diffuseColor = float4(0.02f, 0.06f, 0.15f, 1.f);
+	float3 lightDirection = float3(-0.5f, -1.f, -0.7f);
 	float4 specularColor = float4(1.f, 1.f, 1.f, 1.f); 
-	float specularPower = 64.f; 
+	float specularPower = 8.f; 
 
 	float4 textureColor;
 	float3 lightDir; 
@@ -141,17 +175,28 @@ float4 WaterPixelShader(PixelInputType input): SV_TARGET
 	float4 color;
 	float3 reflection;
 	float4 specular;
+	
+	float dist = length(input.view); 
+	float fadeStart = 200.0f;
+	float fadeEnd   = 350.0f;
+
+	float fog = saturate((dist - fadeStart) / (fadeEnd - fadeStart));
+	float horizonNormalFade = fog; 
 
 	float3 N = normalize(input.normal);
 	float3 V = normalize(input.view);
+
+	N = normalize(lerp(N, float3(0,1,0), horizonNormalFade));
 
 	float NdotV = saturate(dot(N, V));
 	float F0 = 0.02f;
 	float fresnel = F0 + (1.0f - F0) * pow(1.0f - NdotV, 5.0f);
 	
 	textureColor = shaderTexture.Sample(SampleType, input.tex);
+	
+	ambientColor = CalcAmbient(N, textureColor); 
 
-	color = ambientColor; 
+	color = ambientColor * textureColor; 
 
 	specular = float4(0.f, 0.f, 0.f, 0.f);
 
@@ -170,9 +215,11 @@ float4 WaterPixelShader(PixelInputType input): SV_TARGET
 		specular = pow(saturate(dot(reflection, input.view)), specularPower);
 	}
 
-	color = color * textureColor;
-
-	color.rgb *= (1.0f - fresnel);
+	specular *= (1.0f - fog);
+	
+	float3 horizonColor = float3(0.4f, 0.55f, 0.7f); 
+	color.rgb = lerp(color.rgb, horizonColor, fog);
+	color.rgb *= lerp(0.75f, 1.f, fresnel);
 	color.rgb += specularColor.rgb * specular * fresnel;
 
 	return color; 
