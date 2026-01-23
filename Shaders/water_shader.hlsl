@@ -102,14 +102,16 @@ PixelInputType WaterVertexShader(VertexInputType input)
 	float baseAmp = 0.08f; 
 	float baseSpeed = 0.6f; 
 
-	float2 dirs[3] =
+	float2 dirs[5] =
 	{
 		normalize(float2( 1.0,  0.2)),
 		normalize(float2(-0.7,  0.6)),
-		normalize(float2( 0.3, -1.0))
+		normalize(float2( 0.3, -1.0)),
+		normalize(float2( -0.3, 1.0)),
+		normalize(float2( 0.5, 0.3))
 	};
 
-	for (int i = 1; i <= 3; i++)
+	for (int i = 1; i <= 5; i++)
 	{
 		float fi = freq * i;
 		float ai = baseAmp / (i * i);
@@ -132,7 +134,7 @@ PixelInputType WaterVertexShader(VertexInputType input)
 
 	float2 grad = float2(0.0f, 0.0f);
 
-	for (int i = 1; i <= 3; i++)
+	for (int i = 1; i <= 5; i++)
 	{
 		float fi = freq * i;
 		float ai = baseAmp / (i * i);
