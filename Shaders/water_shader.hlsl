@@ -1,6 +1,10 @@
 Texture2D shaderTexture: register(t0);
 SamplerState SampleType: register(s0);
 
+// SKY BOX 
+TextureCube SkyMap : register(t1);
+SamplerState SkySampler : register(s1);
+
 cbuffer MatrixBuffer: register(b0)
 {
 	matrix worldMatrix;
@@ -144,13 +148,8 @@ PixelInputType WaterVertexShader(VertexInputType input)
 
 	}	
 
-	float3 normal;
-	
-	normal.x = -grad.x;
-	normal.y = 1.4f;
-	normal.z = -grad.y;
 
-	normal = normalize(normal);
+	float3 normal = normalize(float3(-grad.x, 1.0f, -grad.y));
 
 	output.normal = mul(normal, (float3x3)worldMatrix);
 	output.normal = normalize(output.normal);
