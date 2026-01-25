@@ -113,7 +113,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	    }
 
 	  Camera *mCamera = new Camera;
-	  mCamera->SetPosition(0.f, 0.0f, -5.f);
+	  mCamera->SetPosition(0.f, 0.0f, -3.f);
 	  mCamera->SetRotation(0.f, 0.f, 0.f);
 	  
 	  const size_t entity_num = 1; 
