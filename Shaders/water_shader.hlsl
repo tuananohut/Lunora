@@ -33,32 +33,6 @@ cbuffer Wave: register(b1)
     	float time; 
 };
 
-/*
-cbuffer WaveLightReflection: register(b2)
-{
-	float4 ambientColor;
-	float4 diffuseColor;
-	float3 lightDirection;
-	float specularPower;
-	float4 specularColor; 
-};
-*/
-
-/*
-float Wave(
-    float2 dir,
-    float freq,
-    float speed,
-    float amp,
-    float2 pos,
-    float time)
-{
-	float constant = speed * freq;
-	float xAxis = freq * amp * dir.x * cos(pos.x * freq + constant * time);
-	float yAxis = ; 
-	return amp * sin(dot(dir, pos) * freq + constant * time);
-}
-*/
 
 float4 CalcAmbient(float3 normal, float4 color)
 {
@@ -97,9 +71,9 @@ PixelInputType WaterVertexShader(VertexInputType input)
 
 	float2 dirs[3] =
 	{
-		normalize(float2( 1.0,  0.2)),
+		normalize(float2(-0.9,  0.2)),
 		normalize(float2(-0.7,  0.6)),
-		normalize(float2( 0.3, -1.0))
+		normalize(float2(-0.3, -1.0))
 	};
 
 	/*
