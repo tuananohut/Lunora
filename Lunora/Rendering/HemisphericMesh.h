@@ -41,5 +41,4 @@ void HemisphericMeshRender(RendererContext& RenderBuffers, HemisphericMesh* mesh
 void HemisphericMeshRelease(HemisphericMesh* mesh);
 bool HemisphericMeshLoadFromFile(HemisphericMesh* mesh);
 
-
 #endif

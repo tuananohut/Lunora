@@ -113,8 +113,6 @@ void HemisphericMeshRelease(HemisphericMesh* Buffer)
   Buffer->indexCount = 0;
 }
 
-#include <vector>
-
 bool HemisphericMeshLoadFromFile(HemisphericMesh* Buffer)
 {
   assert(Buffer && Buffer->filename);
