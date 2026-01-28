@@ -6,18 +6,10 @@
 #include <fstream>
 
 #include "../Engine/src/Renderer.h"
-#include "../Rendering/Texture.h"
 
 using namespace LunoraEngine; 
 using namespace DirectX;
 using namespace std;
-
-struct ModelType
-{
-  float x, y, z;
-  float tu, tv;
-  float nx, ny, nz;
-};
 
 struct SkyDomeVertex
 {
