@@ -8,6 +8,8 @@
 #include "../Rendering/Shader/WaterShader.h"
 #include "../Rendering/Texture.h"
 #include "../Engine/src/Renderer.h"
+#include "../Rendering/SkyDome.h"
+#include "../Rendering/Shader/SkyDomeShader.h"
 
 struct Transform
 {

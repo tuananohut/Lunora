@@ -107,8 +107,6 @@ bool Render(RendererContext& RenderBuffers, SkyDomeShader* shader,
 
   RenderBuffers.DeviceContext->VSSetConstantBuffers(bufferNumber, 1, &shader->baseShader.m_matrixBuffer); 
 
-  RenderBuffers.DeviceContext->PSSetShaderResources(0, 1, &texture);
-
   hr = RenderBuffers.DeviceContext->Map(shader->m_colorBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
   if (FAILED(hr))
     return false;
