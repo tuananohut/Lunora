@@ -1,16 +1,14 @@
 Texture2D shaderTexture: register(t0);
 SamplerState SampleType: register(s0);
 
-// SKY BOX 
-TextureCube SkyMap : register(t1);
-SamplerState SkySampler : register(s1);
-
 cbuffer MatrixBuffer: register(b0)
 {
 	matrix worldMatrix;
 	matrix viewMatrix;
 	matrix projectionMatrix; 
 };
+
+#define PI 3.14159265
 
 struct VertexInputType
 {
@@ -24,7 +22,9 @@ struct PixelInputType
 	float4 position: SV_POSITION;
 	float2 tex: TEXCOORD0;
 	float3 normal: TEXCOORD1;
-	float3 view: TEXCOORD2; 
+	float3 view: TEXCOORD2;
+	float3 tangent: TEXCOORD3;
+	float3 binormal: TEXCOORD4; 
 };
 
 cbuffer Wave: register(b1)
@@ -32,7 +32,6 @@ cbuffer Wave: register(b1)
 	float3 cameraPosition;
     	float time; 
 };
-
 
 float4 CalcAmbient(float3 normal, float4 color)
 {
@@ -61,11 +60,14 @@ PixelInputType WaterVertexShader(VertexInputType input)
 
 	float t = time;
 
-	float wavelength = 0.8f; 
+	float viewDist = length(cameraPosition.xz - output.position.xz);
+	float wavelength = 12.f; 
 	float freq = 2.f / wavelength;
 
-	float baseAmp = 0.08f; 
-	float baseSpeed = 0.2f;
+	int waveCount = 3;
+	
+	float baseAmp = 0.25f;
+	float baseSpeed = 1.f; 
 
 	float2 grad = float2(0.0f, 0.0f);
 
@@ -76,38 +78,31 @@ PixelInputType WaterVertexShader(VertexInputType input)
 		normalize(float2(-0.3, -1.0))
 	};
 
-	/*
-	for (int i = 1; i <= 3; i++)
+	for (int i = 0; i < waveCount; i++)
 	{
-		float fi = freq * i;
-		float ai = baseAmp / (i * i);
-		float si = baseSpeed * i;
-		     
-		height += Wave(dirs[i-1], fi, si, ai, surface, t);
-	}
-	*/
+		float k = 2.0f * PI / wavelength;
 
-	for (int i = 0; i < 3; i++)
-	{
-		float fi = freq * (i + 1);
-    		float ai = baseAmp / ((i + 1) * (i + 1));
-    		float si = baseSpeed * (i + 1);
+		float fi = freq;
+
+		float ai = baseAmp * pow(0.6f,  i); 
+    		float si = baseSpeed * (1.f + 0.5f * i);
     		
-    		float phase = dot(dirs[i], surface) * fi + si * fi * time;
+    		float phase = k * dot(dirs[i], surface) - si * time * k; 
     		
     		float s = sin(phase);
     		float c = cos(phase);
     		
     		height += ai * s;
     		
-    		grad.x += ai * c * fi * dirs[i].x;
-    		grad.y += ai * c * fi * dirs[i].y;
+    		grad.x += ai * c * k * dirs[i].x;
+    		grad.y += ai * c * k * dirs[i].y;
 	}
 
 	float dist = length(cameraPosition.xz - output.position.xz);
 	float horizonFade = saturate((dist - 150.0f) / 200.0f);
 
 	height *= (1.0f - horizonFade);
+	grad *= (1.0f - horizonFade);
 
 	output.position.y += height;
 
@@ -116,10 +111,15 @@ PixelInputType WaterVertexShader(VertexInputType input)
 	
 	output.tex = input.tex;
 
-	float3 normal = normalize(float3(-grad.x, 1.0f, -grad.y));
+	float3 N = normalize(float3(-grad.x, 1.0f, -grad.y));
+	float3 T = normalize(float3(1, 0, 0) - N * dot(N, float3(1, 0, 0)));
+	float3 B = normalize(cross(N, T));
 
-	output.normal = mul(normal, (float3x3)worldMatrix);
+	output.normal = mul(N, (float3x3)worldMatrix);
 	output.normal = normalize(output.normal);
+
+	output.tangent  = normalize(mul(T, (float3x3)worldMatrix));
+	output.binormal = normalize(mul(B, (float3x3)worldMatrix));
 
 	worldPosition = mul(input.position, worldMatrix);
 	 
@@ -134,21 +134,13 @@ float4 WaterPixelShader(PixelInputType input): SV_TARGET
 	float4 ambientColor = float4(0.05f, 0.05f, 0.05f, 1.f);
 	float4 diffuseColor = float4(0.f, 0.02f, 0.04f, 1.f);
 	float3 lightDirection = float3(-0.5f, -1.f, -0.7f);
-	float4 specularColor = float4(1.f, 1.f, 1.f, 1.f); 
-	float specularPower = 64.f; 
+	float4 specularColor = float4(1.f, 1.f, 1.f, 1.f);
 
 	float4 textureColor;
 	float lightIntensity;
 	float4 color;
 	float3 reflection;
-	float specular;
-	
-	float dist = length(input.view); 
-	float fadeStart = 200.0f;
-	float fadeEnd   = 350.0f;
-
-	float fog = saturate((dist - fadeStart) / (fadeEnd - fadeStart));
-	float horizonNormalFade = fog; 
+	float4 specular;
 
 	float3 N = normalize(input.normal);
 	float3 V = normalize(input.view);
@@ -157,19 +149,27 @@ float4 WaterPixelShader(PixelInputType input): SV_TARGET
 	float NdotL = saturate(dot(N, L));
 
 	float3 H = normalize(L + V);
-	float specularTerm = pow(saturate(dot(N, H)), specularPower);
-
-	float3 reflectionDir = reflect(-V, N);
-	float t = saturate(reflectionDir.y * 0.5 + 0.5);
-
-	float3 envColor = lerp(float3(0.05, 0.1, 0.2), float3(0.4, 0.6, 0.9), t);
-
-	N = normalize(lerp(N, float3(0,1,0), horizonNormalFade));
 
 	float NdotV = saturate(dot(N, V));
 	float F0 = 0.02f;
 	float fresnel = F0 + (1.0f - F0) * pow(1.0f - NdotV, 5.0f);
-	
+
+	float specularPower = lerp(24.f, 64.f, fresnel);
+
+	float specularTerm = pow(saturate(dot(N, H)), specularPower);
+
+	float anisotropicSpec =
+	    pow(saturate(dot(input.tangent, H)), 32) *
+    	    pow(saturate(dot(input.binormal, H)), 8);
+
+	float3 reflectionDir = reflect(-V, N);
+	float t = saturate(reflectionDir.y * 0.5 + 0.5);
+
+	float horizon = smoothstep(0.45, 0.55, reflectionDir.y);
+	float3 horizonColor = float3(0.8, 0.85, 0.9);
+
+	float3 envColor = lerp(float3(0.05, 0.1, 0.2), float3(0.4, 0.6, 0.9), t);
+		
 	textureColor = shaderTexture.Sample(SampleType, input.tex);
 	
 	ambientColor = CalcAmbient(N, textureColor); 
@@ -182,7 +182,7 @@ float4 WaterPixelShader(PixelInputType input): SV_TARGET
 
 	if (lightIntensity > 0.f)
 	{
-		color += (diffuseColor * lightIntensity);
+		color += diffuseColor * lightIntensity * (1.0f - fresnel) * 0.5f;
 
 		color = saturate(color);
 
@@ -190,14 +190,12 @@ float4 WaterPixelShader(PixelInputType input): SV_TARGET
 
 		// specular = pow(saturate(dot(reflection, input.view)), specularPower);
 	}
-
-	specular *= (1.0f - fog);
-	
-	float3 horizonColor = float3(0.4f, 0.55f, 0.7f); 
-	
+		
 	color.rgb *= (1.0f - fresnel);
-	color.rgb += specularColor.rgb * specularTerm * fresnel;
-	color.rgb += envColor * specularTerm * fresnel;
+
+	color.rgb += specularColor.rgb * specularTerm * anisotropicSpec * fresnel;
+
+	color.rgb += envColor * fresnel;
 
 	return color;
 }

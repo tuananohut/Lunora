@@ -113,8 +113,8 @@ int WINAPI WinMain(HINSTANCE Instance,
 	    }
 
 	  Camera *mCamera = new Camera;
-	  mCamera->SetPosition(0.f, 0.0f, -3.f);
-	  mCamera->SetRotation(0.f, 0.f, 0.f);
+	  mCamera->SetPosition(0.f, 12.0f, -3.f);
+	  mCamera->SetRotation(15.f, 0.f, 0.f);
 	  
 	  const size_t entity_num = 1; 
 	  Entity *entities[entity_num];	   
@@ -178,7 +178,7 @@ int WINAPI WinMain(HINSTANCE Instance,
 	      if (!Running)
 		break;
 	      
-	      RendererBeginScene(*Renderer, 0.f, 0.f, 0.f, 1.f);
+	      RendererBeginScene(*Renderer, 0.45f, 0.6f, 0.75f, 1.f);
 
 	      LARGE_INTEGER currentTime;
 	      QueryPerformanceCounter(&currentTime);
