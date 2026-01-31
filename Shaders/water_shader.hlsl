@@ -1,3 +1,5 @@
+#define PI 3.14159265
+
 Texture2D shaderTexture: register(t0);
 SamplerState SampleType: register(s0);
 
@@ -7,8 +9,6 @@ cbuffer MatrixBuffer: register(b0)
 	matrix viewMatrix;
 	matrix projectionMatrix; 
 };
-
-#define PI 3.14159265
 
 struct VertexInputType
 {
@@ -61,12 +61,12 @@ PixelInputType WaterVertexShader(VertexInputType input)
 	float t = time;
 
 	float viewDist = length(cameraPosition.xz - output.position.xz);
-	float wavelength = 12.f; 
+	float wavelength = 6.f; 
 	float freq = 2.f / wavelength;
 
 	int waveCount = 3;
 	
-	float baseAmp = 0.25f;
+	float baseAmp = 0.6f;
 	float baseSpeed = 1.f; 
 
 	float2 grad = float2(0.0f, 0.0f);
@@ -86,8 +86,9 @@ PixelInputType WaterVertexShader(VertexInputType input)
 
 		float ai = baseAmp * pow(0.6f,  i); 
     		float si = baseSpeed * (1.f + 0.5f * i);
+		float omega = si * k;
     		
-    		float phase = k * dot(dirs[i], surface) - si * time * k; 
+    		float phase = k * dot(dirs[i], surface) - omega * time; 
     		
     		float s = sin(phase);
     		float c = cos(phase);
@@ -101,8 +102,13 @@ PixelInputType WaterVertexShader(VertexInputType input)
 	float dist = length(cameraPosition.xz - output.position.xz);
 	float horizonFade = saturate((dist - 150.0f) / 200.0f);
 
-	height *= (1.0f - horizonFade);
-	grad *= (1.0f - horizonFade);
+	// height *= (1.0f - horizonFade);
+	// grad *= (1.0f - horizonFade);
+
+	float choppy = 0.6f;
+
+	output.position.x += choppy * grad.x;
+	output.position.z += choppy * grad.y;
 
 	output.position.y += height;
 
@@ -134,7 +140,7 @@ float4 WaterPixelShader(PixelInputType input): SV_TARGET
 	float4 ambientColor = float4(0.05f, 0.05f, 0.05f, 1.f);
 	float4 diffuseColor = float4(0.f, 0.02f, 0.04f, 1.f);
 	float3 lightDirection = float3(-0.5f, -1.f, -0.7f);
-	float4 specularColor = float4(1.f, 1.f, 1.f, 1.f);
+	float4 specularColor = float4(0.04f, 0.045f, 0.05f, 1.f);
 
 	float4 textureColor;
 	float lightIntensity;
@@ -152,15 +158,14 @@ float4 WaterPixelShader(PixelInputType input): SV_TARGET
 
 	float NdotV = saturate(dot(N, V));
 	float F0 = 0.02f;
-	float fresnel = F0 + (1.0f - F0) * pow(1.0f - NdotV, 5.0f);
+	float fresnel = F0 + (1.0f - F0) * pow(1.0f - NdotV, 3.0f);
 
-	float specularPower = lerp(24.f, 64.f, fresnel);
+	float specularPower = lerp(4.f, 16.f, fresnel);
 
 	float specularTerm = pow(saturate(dot(N, H)), specularPower);
+	specularTerm *= 0.35f;
 
-	float anisotropicSpec =
-	    pow(saturate(dot(input.tangent, H)), 32) *
-    	    pow(saturate(dot(input.binormal, H)), 8);
+	float anisotropicSpec = 1.f;
 
 	float3 reflectionDir = reflect(-V, N);
 	float t = saturate(reflectionDir.y * 0.5 + 0.5);
@@ -191,7 +196,7 @@ float4 WaterPixelShader(PixelInputType input): SV_TARGET
 		// specular = pow(saturate(dot(reflection, input.view)), specularPower);
 	}
 		
-	color.rgb *= (1.0f - fresnel);
+	color.rgb = lerp(color.rgb, color.rgb * 0.6f, fresnel);
 
 	color.rgb += specularColor.rgb * specularTerm * anisotropicSpec * fresnel;
 
