@@ -61,7 +61,7 @@ PixelInputType WaterVertexShader(VertexInputType input)
 	float t = time;
 
 	float viewDist = length(cameraPosition.xz - output.position.xz);
-	float wavelength = 6.f; 
+	float wavelength = 10.f; 
 	float freq = 2.f / wavelength;
 
 	int waveCount = 3;
@@ -156,9 +156,18 @@ float4 WaterPixelShader(PixelInputType input): SV_TARGET
 
 	float3 H = normalize(L + V);
 
+	float eta = 1.0 / 1.333; 
+	float3 refractDir = refract(-V, N, eta);
+	
 	float NdotV = saturate(dot(N, V));
 	float F0 = 0.02f;
 	float fresnel = F0 + (1.0f - F0) * pow(1.0f - NdotV, 3.0f);
+
+	float depthFactor = saturate(1.0f - NdotV);
+	float3 deepWaterColor = float3(0.0f, 0.15f, 0.25f);
+	float3 shallowWaterColor = float3(0.05f, 0.25f, 0.3f);
+
+	float3 refractColor = lerp(shallowWaterColor, deepWaterColor, depthFactor);
 
 	float specularPower = lerp(4.f, 16.f, fresnel);
 
@@ -195,12 +204,20 @@ float4 WaterPixelShader(PixelInputType input): SV_TARGET
 
 		// specular = pow(saturate(dot(reflection, input.view)), specularPower);
 	}
-		
-	color.rgb = lerp(color.rgb, color.rgb * 0.6f, fresnel);
 
-	color.rgb += specularColor.rgb * specularTerm * anisotropicSpec * fresnel;
+	float3 reflectionColor = envColor + specularColor.rgb * specularTerm;
+	float3 refractionColor = refractColor;
 
-	color.rgb += envColor * fresnel;
+	float3 finalColor = lerp(refractionColor, reflectionColor, fresnel);
+	finalColor *= saturate(NdotL * 0.5 + 0.5);
+
+	color.rgb = finalColor;
+
+	// color.rgb = lerp(color.rgb, color.rgb * 0.6f, fresnel);
+
+	// color.rgb += specularColor.rgb * specularTerm * anisotropicSpec * fresnel;
+
+	// color.rgb += envColor * fresnel;
 
 	return color;
 }
