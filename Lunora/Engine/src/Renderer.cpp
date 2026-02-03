@@ -17,14 +17,14 @@ namespace LunoraEngine {
     DXGI_SWAP_CHAIN_DESC SwapChainDesc;
     D3D_FEATURE_LEVEL featureLevel;
     D3D11_TEXTURE2D_DESC DepthBufferDesc;
-    D3D11_DEPTH_STENCIL_DESC DepthStencilDesc; 
+    D3D11_DEPTH_STENCIL_DESC DepthStencilDesc;
+    D3D11_DEPTH_STENCIL_DESC DepthDisabledStencilDesc; 
     D3D11_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc;
     D3D11_RASTERIZER_DESC rasterDesc; 
     HRESULT result;
     bool vsync_enabled;
     int videoCardMemory;
     char videoCardDescription[128];
-    ID3D11DepthStencilState *DepthStencilState; 
     ID3D11RasterizerState *RasterState;
 
     vsync_enabled = false; 
@@ -233,7 +233,37 @@ namespace LunoraEngine {
       }
 
     context.DeviceContext->OMSetDepthStencilState(DepthStencilState, 1);
-  
+
+    ZeroMemory(&DepthDisabledStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+
+    DepthDisabledStencilDesc.DepthEnable = false;
+    DepthDisabledStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+    DepthDisabledStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+    
+    DepthDisabledStencilDesc.StencilEnable = true;
+    DepthDisabledStencilDesc.StencilReadMask = 0xFF;
+    DepthDisabledStencilDesc.StencilWriteMask = 0xFF;
+
+    DepthDisabledStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    DepthDisabledStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+    DepthDisabledStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    DepthDisabledStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS; 
+
+    DepthDisabledStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    DepthDisabledStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+    DepthDisabledStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    DepthDisabledStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS; 
+
+    result = context.Device->CreateDepthStencilState(&DepthDisabledStencilDesc,
+						     &DepthDisabledStencilState);
+    if (FAILED(result))
+      {
+	MessageBoxA(hwnd, "Disabled Depth Stencil State", "Error", MB_OK | MB_ICONERROR);
+	return false; 
+      }
+
+    context.DeviceContext->OMSetDepthStencilState(DepthDisabledStencilState, 1);
+    
     ZeroMemory(&DepthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
 
     DepthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
