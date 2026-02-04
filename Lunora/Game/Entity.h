@@ -10,6 +10,14 @@
 #include "../Engine/src/Renderer.h"
 #include "../Rendering/SkyDome.h"
 #include "../Rendering/Shader/SkyDomeShader.h"
+#include "Camera/Camera.h"
+
+using namespace LunoraEngine;
+
+const float SCREEN_DEPTH = 1000.f;
+const float SCREEN_NEAR = 0.3f;
+
+static bool Running;
 
 struct Transform
 {

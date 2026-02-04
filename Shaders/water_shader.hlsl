@@ -60,21 +60,21 @@ PixelInputType WaterVertexShader(VertexInputType input)
 
 	float t = time;
 
-	float wavelength = 12.f; 
+	float wavelength = 10.f; 
 	float freq = 2.f / wavelength;
 
 	int waveCount = 3;
 	
-	float baseAmp = 0.8f;
-	float baseSpeed = 1.5f; 
+	float baseAmp = 0.6f;
+	float baseSpeed = 1.f; 
 
 	float2 grad = float2(0.0f, 0.0f);
 
 	float2 dirs[3] =
 	{
-		normalize(float2( 1.0,  0.0)), 
-		normalize(float2( 0.95, 0.3)), 
-		normalize(float2( 0.85,-0.25)) 
+		normalize(float2(-0.9,  0.2)),
+		normalize(float2(-0.7,  0.6)),
+		normalize(float2(-0.3, -1.0))
 	};
 
 	for (int i = 0; i < waveCount; i++)
@@ -98,6 +98,12 @@ PixelInputType WaterVertexShader(VertexInputType input)
     		grad.y += ai * c * k * dirs[i].y;
 	}
 
+	
+	float choppy = 0.6f;
+
+	output.position.x += choppy * grad.x;
+	output.position.z += choppy * grad.y;
+
 	output.position.y += height;
 
 	output.position = mul(output.position, viewMatrix);
@@ -106,9 +112,14 @@ PixelInputType WaterVertexShader(VertexInputType input)
 	output.tex = input.tex;
 
 	float3 N = normalize(float3(-grad.x, 1.0f, -grad.y));
+	float3 T = normalize(float3(1, 0, 0) - N * dot(N, float3(1, 0, 0)));
+	float3 B = normalize(cross(N, T));
 	
 	output.normal = mul(N, (float3x3)worldMatrix);
 	output.normal = normalize(output.normal);
+
+	output.tangent  = normalize(mul(T, (float3x3)worldMatrix));
+	output.binormal = normalize(mul(B, (float3x3)worldMatrix));
 
 	worldPosition = mul(input.position, worldMatrix);
 	 
@@ -118,29 +129,71 @@ PixelInputType WaterVertexShader(VertexInputType input)
 	return output; 
 }
 
-float4 WaterPixelShader(PixelInputType input) : SV_TARGET
+float4 WaterPixelShader(PixelInputType input): SV_TARGET
 {
-	float4 diffuseColor = float4(0.0f, 0.02f, 0.04f, 1.0f);
-	float3 lightDirection = float3(-0.5f, -1.0f, -0.7f);
-
+	float4 ambientColor = float4(0.05f, 0.05f, 0.05f, 1.f);
+	float4 diffuseColor = float4(0.f, 0.02f, 0.04f, 1.f);
+	float3 lightDirection = float3(-0.5f, -1.f, -0.7f);
+	float4 specularColor = float4(0.04f, 0.045f, 0.05f, 1.f);
+	
 	float4 textureColor;
-	float4 color;
+	float4 color = float4(0, 0, 0, 1);
 	float lightIntensity;
+	float3 reflection;
+	float specular;
 
 	float3 N = normalize(input.normal);
+	float3 V = normalize(input.view);	
 	float3 L = normalize(-lightDirection);
+
+	float NdotL = saturate(dot(N, L));
+
+	lightIntensity = NdotL; 
+
+	float3 H = normalize(L + V);
+	
+	float NdotV = saturate(dot(N, V));
+	float F0 = 0.02f;
+	float fresnel = F0 + (1.0f - F0) * pow(1.0f - NdotV, 3.0f);
+
+	float depthFactor = saturate(1.0f - NdotV);
+	float3 deepWaterColor = float3(0.0f, 0.15f, 0.25f);
+	float3 shallowWaterColor = float3(0.05f, 0.25f, 0.3f);
+
+	float3 refractColor = lerp(shallowWaterColor, deepWaterColor, depthFactor);
+
+	float specularPower = lerp(4.f, 16.f, fresnel);
+
+	float specularTerm = pow(saturate(dot(N, H)), specularPower);
+	specularTerm *= 0.35f;
+
+	float3 reflectionDir = reflect(-V, N);
+	float t = saturate(reflectionDir.y * 0.5 + 0.5);
+
+	float3 envColor = lerp(float3(0.05, 0.1, 0.2), float3(0.4, 0.6, 0.9), t);	
 
 	textureColor = shaderTexture.Sample(SampleType, input.tex);
 
-	float4 ambientColor = CalcAmbient(N, textureColor);
+	ambientColor = CalcAmbient(N, textureColor); 
 
-	lightIntensity = saturate(dot(N, L));
-	float4 diffuse = diffuseColor * lightIntensity;
+	if (lightIntensity > 0.f)
+	{
+		color += diffuseColor * lightIntensity * (1.0f - fresnel) * 0.5f;
 
-	color = ambientColor * textureColor;
-	color += diffuse * textureColor;
+		color = saturate(color);
 
-	color = saturate(color);
+		reflection = reflect(-L, N);
+
+		specular = pow(saturate(dot(reflection, input.view)), specularPower);
+	}
+
+	float3 reflectionColor = envColor + specularColor.rgb * specularTerm;
+	float3 refractionColor = refractColor;
+
+	float3 finalColor = lerp(refractionColor, reflectionColor, fresnel);
+	finalColor *= saturate(NdotL * 0.5 + 0.5);
+
+	color.rgb = finalColor;
 
 	return color;
 }

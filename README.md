@@ -15,9 +15,9 @@ A comparative study examining visual and physical differences between hemispheri
 
 https://youtu.be/mM5tJjGJvMU
 
-#### Water Rendering (Waves, Storm Dynamics, BRDF)
+#### Sea Simulation (Waves, BRDF)
 
-(Not completed ...)
+![water.png](images/water.png)
 
 ### Core Engine Features 
 
@@ -55,7 +55,7 @@ https://youtu.be/mM5tJjGJvMU
 
 - HLSL Development Cookbook
 
-#### Water Rendering (Wave, Storms, BRDF)
+#### Sea Simulation (Wave, BRDF)
 
 - https://developer.nvidia.com/gpugems/gpugems/part-i-natural-effects/chapter-1-effective-water-simulation-physical-models
 

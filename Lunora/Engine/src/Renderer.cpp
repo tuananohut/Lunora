@@ -225,15 +225,15 @@ namespace LunoraEngine {
     DepthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS; 
 
     result = context.Device->CreateDepthStencilState(&DepthStencilDesc,
-						     &DepthStencilState);
+						     &context.DepthStencilState);
     if (FAILED(result))
       {
 	MessageBoxA(hwnd, "Create Depth Stencil State", "Error", MB_OK | MB_ICONERROR);
 	return false; 
       }
 
-    context.DeviceContext->OMSetDepthStencilState(DepthStencilState, 1);
-
+    context.DeviceContext->OMSetDepthStencilState(context.DepthStencilState, 1);
+    /*
     ZeroMemory(&DepthDisabledStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
 
     DepthDisabledStencilDesc.DepthEnable = false;
@@ -255,15 +255,15 @@ namespace LunoraEngine {
     DepthDisabledStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS; 
 
     result = context.Device->CreateDepthStencilState(&DepthDisabledStencilDesc,
-						     &DepthDisabledStencilState);
+						     &context.DepthDisabledStencilState);
     if (FAILED(result))
       {
 	MessageBoxA(hwnd, "Disabled Depth Stencil State", "Error", MB_OK | MB_ICONERROR);
 	return false; 
       }
 
-    context.DeviceContext->OMSetDepthStencilState(DepthDisabledStencilState, 1);
-    
+   context.DeviceContext->OMSetDepthStencilState(context.DepthDisabledStencilState, 1);
+    */  
     ZeroMemory(&DepthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
 
     DepthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;

@@ -2,7 +2,7 @@
 
 #include "resource.h"
 
-#include "../Lunora/Game/Scene.h"
+#include "../Lunora/Game/Entity.h"
 
 LRESULT CALLBACK WindowProc(HWND Window, 
                             UINT Message, 
